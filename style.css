@@ -9,7 +9,7 @@
 
   a { 
     text-decoration: none !important; 
-    color: inherit !important;
+    color: inherit !important; 
     outline: none !important;
     border: none !important;
   }
@@ -942,10 +942,6 @@
       font-size: 14px;
     }
 
-    .photographers-index {
-      padding: 16px;
-    }
-
     .alphabet-letter {
       font-size: 24px;
       margin-bottom: 12px;
@@ -979,15 +975,46 @@
     align-items: center;
     justify-content: center;
   }
-    .photographer-grid {
+  
+  /* 2 column photographer grid on mobile */
+  .photographer-grid {
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 12px;
+    gap: 8px 12px;
   }
   
   /* Hide fullscreen toggle on mobile */
   .fullscreen-toggle {
     display: none !important;
   }
+  
+  /* Remove box styling from index pages on mobile */
+  .photographers-index {
+    background: transparent !important;
+    border: none !important;
+    padding: 16px 0 !important;
+  }
+  
+  .photographers-index > div:first-child {
+    padding: 0 16px;
+  }
+  
+  #photographerList,
+  #stickerGrid,
+  #articleGrid,
+  #objectGrid {
+    padding: 0 16px;
+  }
+  
+  .alphabet-section {
+    margin-bottom: 24px;
+  }
+  
+  .alphabet-letter {
+    font-size: 20px;
+    margin-bottom: 8px;
+    padding: 0 16px;
+  }
+  
   /* Hide sidebar by default on mobile */
   .left-sidebar {
     position: fixed;
@@ -1010,17 +1037,17 @@
   }
   
   /* Overlay when menu is open */
-body.menu-open::before {
-  content: '';
-  position: fixed;
-  top: 70px;
-  left: 280px;  /* START OVERLAY AFTER THE SIDEBAR WIDTH */
-  width: calc(100% - 280px);  /* ONLY COVER THE RIGHT SIDE */
-  height: calc(100vh - 70px);
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 1004;
-  animation: fadeIn 0.3s ease;
-}
+  body.menu-open::before {
+    content: '';
+    position: fixed;
+    top: 70px;
+    left: 280px;
+    width: calc(100% - 280px);
+    height: calc(100vh - 70px);
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1004;
+    animation: fadeIn 0.3s ease;
+  }
   
   /* Prevent scrolling when menu is open */
   body.menu-open {
