@@ -3,7 +3,9 @@ const sheetURL2 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcOtzV-2ZVl1
 const sheetURL3 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR4UTNOg8d2LIrCU8A9ebfkYOMV2V3E7egroQgliVc4v6mp7Xi9fdmPaxN3k3YUmeW123C8UvwdiNmy/pub?output=csv";
 const sheetURL4 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4QAkAIideMvvWDNWq2Aj_Nx6m4QG9snhFkpqqOGX8gU09X6uUQdkfuOj9yLIybn0iPIFoZbK-/pub?output=csv";
 const sheetURL5 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRPknkbhkxJidsCcMnFmvdB2gKx4miqtuECGc5udX7hEAY9IQeTCpNDGMkh31uGuSS1NcODADU_jcRT/pub?output=csv";
+const sheetURL6 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQgrPlpxYaFJdMcgf_-UT0hA4u-uzsbXlgOwVaI2ox9S44XPXySHiNogkYfkno84Ur5V0oCMet0thHp/pub?output=csv";
 
+let jordanPosts = [];
 let objectsIndex = [];
 let allPosts = [];
 let photographers = [];
@@ -64,7 +66,9 @@ function getCollectionIcon(collection) {
     'collection1': 'newspaper',
     'collection2': 'pencil',
     'collection4': 'sticker',
-    'photographer': 'users'
+    'photographer': 'users',
+    'objects': 'box',
+    'jordan': 'bold'   // THIS IS THE “J” ICON
   };
   return icons[collection] || 'file';
 }
@@ -270,6 +274,23 @@ const posts5 = parsed5
     text: o.Text
   }));
 
+// === JORDAN POSTS CSV ===
+const res6 = await fetch(sheetURL6);
+const text6 = await res6.text();
+const parsed6 = Papa.parse(text6, { header: true }).data;
+
+jordanPosts = parsed6
+  .filter(r => r.date && (r.image || r.src) && r.title)
+  .map(p => ({
+    collection: "jordan",
+    collectionName: "Jordan Posts",
+    title: p.title,
+    date: normalizeDate(p.date),
+    url: p.src || p.image,
+    image: p.image || p.src,
+    text: p.text || ""
+  }));
+
     
     const posts4 = parsed4.filter(r => r.src && r.date && r.location_card && r.medium).map(p => ({
       ...p,
@@ -284,7 +305,7 @@ const posts5 = parsed5
       artist: p.artist
     }));
 
-    allPosts = [...posts1, ...posts2, ...posts4, ...posts5];
+allPosts = [ ...posts1, ...posts2, ...posts4, ...posts5, ...jordanPosts ];
     
     document.getElementById('countAll').textContent = allPosts.length;
     document.getElementById('count1').textContent = posts1.length;
