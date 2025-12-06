@@ -1105,11 +1105,6 @@
     overflow-x: hidden;
   }
   
-  .photographers-index h2 {
-    padding: 0 16px;
-    margin-bottom: 16px;
-  }
-  
   .alphabet-section {
     margin-bottom: 24px;
     padding: 0;
@@ -1118,15 +1113,12 @@
   .alphabet-letter {
     font-size: 20px;
     margin-bottom: 8px;
-    padding: 0 16px;
   }
   
   .photographer-grid {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 8px 16px;
-    padding: 0 16px;
     width: 100%;
-    box-sizing: border-box;
   }
   
   .photographer-link {
@@ -1138,8 +1130,6 @@
   
   .index-search,
   .index-search-wrapper {
-    padding: 0 16px;
-    margin-bottom: 16px;
   }
   
   .random-btn {
