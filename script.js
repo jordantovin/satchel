@@ -316,7 +316,6 @@ async function loadAllData() {
     document.getElementById('countArticlesIndex').textContent = articlesIndex.length;
     document.getElementById("countObjects").textContent = posts5.length;
     document.getElementById("countObjectsIndex").textContent = objectsIndex.length;
-    document.getElementById("countJordan").textContent = jordanPosts.length;
 
     updateHistory();
     document.getElementById('countSaved').textContent = savedPosts.length;
