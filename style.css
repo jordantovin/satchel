@@ -922,7 +922,6 @@
 
 .main-container {
   padding: 0;
-  padding-top: 70px;  /* REMOVE calc() */
   gap: 0;
   grid-template-columns: 1fr;
 }
