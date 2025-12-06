@@ -885,10 +885,6 @@
       display: none;
     }
 
-      .satchel-cover {
-    display: none;
-  }
-
   .header {
     margin-top: 0;
     position: fixed;
@@ -923,6 +919,7 @@
 .main-container {
   padding: 0;
   gap: 0;
+  top: -100px;
   grid-template-columns: 1fr;
 }
 
