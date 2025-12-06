@@ -68,7 +68,7 @@ function getCollectionIcon(collection) {
     'collection4': 'sticker',
     'photographer': 'users',
     'objects': 'box',
-    'jordan': 'bold'   // THIS IS THE “J” ICON
+    'jordan': 'bold'
   };
   return icons[collection] || 'file';
 }
@@ -173,7 +173,6 @@ function openObjectFullscreen(item) {
   document.body.style.overflow = 'hidden';
 }
 
-
 function closeStickerFullscreen(event) {
   if (event) {
     event.stopPropagation();
@@ -184,18 +183,22 @@ function closeStickerFullscreen(event) {
 
 async function loadAllData() {
   try {
-    const [res1, res2, res3, res4] = await Promise.all([
+    const [res1, res2, res3, res4, res5, res6] = await Promise.all([
       fetch(sheetURL1),
       fetch(sheetURL2),
       fetch(sheetURL3),
-      fetch(sheetURL4)
+      fetch(sheetURL4),
+      fetch(sheetURL5),
+      fetch(sheetURL6)
     ]);
     
-    const [text1, text2, text3, text4] = await Promise.all([
+    const [text1, text2, text3, text4, text5, text6] = await Promise.all([
       res1.text(),
       res2.text(),
       res3.text(),
-      res4.text()
+      res4.text(),
+      res5.text(),
+      res6.text()
     ]);
     
     const parsed1 = Papa.parse(text1, { header: true }).data;
@@ -247,57 +250,48 @@ async function loadAllData() {
       artist: p.artist || 'Unknown'
     }));
 
-// === OBJECTS CSV ===
-const res5 = await fetch(sheetURL5);
-const text5 = await res5.text();
-const parsed5 = Papa.parse(text5, { header: true }).data;
+    // Objects CSV
+    const parsed5 = Papa.parse(text5, { header: true }).data;
 
-// Index objects
-objectsIndex = parsed5
-  .filter(r => r.Date && r.Text && r.Image)
-  .map(o => ({
-    date: normalizeDate(o.Date),
-    text: o.Text,
-    image: o.Image
-  }));
+    objectsIndex = parsed5
+      .filter(r => r.Date && r.Text && r.Image)
+      .map(o => ({
+        date: normalizeDate(o.Date),
+        text: o.Text,
+        image: o.Image
+      }));
 
-// Posts for feed
-const posts5 = parsed5
-  .filter(r => r.Date && r.Text && r.Image)
-  .map(o => ({
-    collection: "objects",
-    collectionName: "Objects",
-    title: o.Text,
-    date: normalizeDate(o.Date),
-    url: o.Image,  // clicking opens fullscreen
-    image: o.Image,
-    text: o.Text
-  }));
+    const posts5 = parsed5
+      .filter(r => r.Date && r.Text && r.Image)
+      .map(o => ({
+        collection: "objects",
+        collectionName: "Objects",
+        title: o.Text,
+        date: normalizeDate(o.Date),
+        url: o.Image,
+        image: o.Image,
+        text: o.Text
+      }));
 
-// === JORDAN POSTS CSV ===
-const res6 = await fetch(sheetURL6);
-const text6 = await res6.text();
-const parsed6 = Papa.parse(text6, { header: true }).data;
+    // Jordan Posts CSV
+    const parsed6 = Papa.parse(text6, { header: true }).data;
 
-jordanPosts = parsed6
-  .filter(r => r.Date && r.Title)
-  .map(p => {
-    const hasImage = p.Image && p.Image.trim() !== "";
+    jordanPosts = parsed6
+      .filter(r => r.Date && r.Title)
+      .map(p => {
+        const hasImage = p.Image && p.Image.trim() !== "";
 
-    return {
-      collection: "jordan",
-      collectionName: "Jordan Posts",
-      title: p.Title,
-      date: normalizeDate(p.Date),
-      text: p.Text || "",
-      image: hasImage ? p.Image : "",
-      
-      // NEW: gives posts without images a valid internal URL
-      url: hasImage ? p.Image : `jordan-${p.Date.replace(/\//g,'-')}-${p.Title.replace(/\s+/g,'_')}`
-    };
-  });
+        return {
+          collection: "jordan",
+          collectionName: "Jordan Posts",
+          title: p.Title,
+          date: normalizeDate(p.Date),
+          text: p.Text || "",
+          image: hasImage ? p.Image : "",
+          url: hasImage ? p.Image : `jordan-${p.Date.replace(/\//g,'-')}-${p.Title.replace(/\s+/g,'_')}`
+        };
+      });
 
-    
     const posts4 = parsed4.filter(r => r.src && r.date && r.location_card && r.medium).map(p => ({
       ...p,
       collection: "collection4",
@@ -311,7 +305,7 @@ jordanPosts = parsed6
       artist: p.artist
     }));
 
-allPosts = [ ...posts1, ...posts2, ...posts4, ...posts5, ...jordanPosts ];
+    allPosts = [ ...posts1, ...posts2, ...posts4, ...posts5, ...jordanPosts ];
     
     document.getElementById('countAll').textContent = allPosts.length;
     document.getElementById('count1').textContent = posts1.length;
@@ -324,14 +318,11 @@ allPosts = [ ...posts1, ...posts2, ...posts4, ...posts5, ...jordanPosts ];
     document.getElementById("countObjectsIndex").textContent = objectsIndex.length;
     document.getElementById("countJordan").textContent = jordanPosts.length;
 
+    updateHistory();
+    document.getElementById('countSaved').textContent = savedPosts.length;
 
-    
-updateHistory();
-document.getElementById('countSaved').textContent = savedPosts.length;
-
-lucide.createIcons();   // move this up
-
-render();               // move this DOWN so it runs last
+    lucide.createIcons();
+    render();
   } catch (error) {
     console.error("Error loading data:", error);
   }
@@ -537,7 +528,6 @@ function renderPhotographersIndex() {
   
   renderPhotographerList(sortedPhotographers, listContainer);
   
-  // Sort button handlers
   document.querySelectorAll('.photographers-index .sort-btn').forEach(btn => {
     btn.addEventListener('click', function() {
       document.querySelectorAll('.photographers-index .sort-btn').forEach(b => b.classList.remove('active'));
@@ -666,7 +656,6 @@ function renderStickersIndex() {
   
   renderStickerGrid(sortedStickers, gridContainer);
   
-  // Sort button handlers
   document.querySelectorAll('.photographers-index .sort-btn').forEach(btn => {
     btn.addEventListener('click', function() {
       document.querySelectorAll('.photographers-index .sort-btn').forEach(b => b.classList.remove('active'));
@@ -751,7 +740,6 @@ function renderArticlesIndex() {
   
   renderArticleGrid(sortedArticles, gridContainer);
   
-  // Sort button handlers
   document.querySelectorAll('.photographers-index .sort-btn').forEach(btn => {
     btn.addEventListener('click', function() {
       document.querySelectorAll('.photographers-index .sort-btn').forEach(b => b.classList.remove('active'));
@@ -940,15 +928,14 @@ function render() {
     const icon = getCollectionIcon(post.collection);
     const isSaved = savedPosts.includes(post.url);
     
-const isSticker = post.collection === 'collection4';
-const isObject = post.collection === 'objects';
-const isJordan = post.collection === 'jordan';
+    const isSticker = post.collection === 'collection4';
+    const isObject = post.collection === 'objects';
+    const isJordan = post.collection === 'jordan';
 
-const fullscreenData = (isSticker || isObject || isJordan) ? JSON.stringify(post) : '';
+    const fullscreenData = (isSticker || isObject || isJordan) ? JSON.stringify(post) : '';
 
     item.innerHTML = `
-      <a href="${post.url}" target="_blank" style="display: block; color: inherit;" data-article-link='${JSON.stringify({url: post.url, title: post.title, image: post.image || ''})}' data-fullscreen-data='${fullscreenData}'
-data-type='${post.collection}'>
+      <a href="${post.url}" target="_blank" style="display: block; color: inherit;" data-article-link='${JSON.stringify({url: post.url, title: post.title, image: post.image || ''})}' data-fullscreen-data='${fullscreenData}' data-type='${post.collection}'>
         <div class="post-header">
           <div class="post-avatar">
             <i data-lucide="${icon}" style="width: 18px; height: 18px;"></i>
@@ -958,16 +945,14 @@ data-type='${post.collection}'>
             <div class="post-date">${post.date}</div>
           </div>
         </div>
-${(!post.image || post.image.trim() === "") 
-   ? "" 
-   : `<img class="post-image" src="${post.image}" alt="${post.title}" loading="lazy">`}
-<div class="post-content">
-  <div class="post-title">${post.title}</div>
-
-  ${post.text ? `<div class="post-excerpt">${post.text}</div>` : ''}
-
-  ${post.medium ? `<div class="post-excerpt"><strong>Medium:</strong> ${post.medium}</div>` : ''}
-</div>
+        ${(!post.image || post.image.trim() === "") 
+           ? "" 
+           : `<img class="post-image" src="${post.image}" alt="${post.title}" loading="lazy">`}
+        <div class="post-content">
+          <div class="post-title">${post.title}</div>
+          ${post.text ? `<div class="post-excerpt">${post.text}</div>` : ''}
+          ${post.medium ? `<div class="post-excerpt"><strong>Medium:</strong> ${post.medium}</div>` : ''}
+        </div>
       </a>
       <div class="post-footer">
         <span class="post-action" data-read='${JSON.stringify({url: post.url, title: post.title, image: post.image || ''})}'>
@@ -995,86 +980,62 @@ ${(!post.image || post.image.trim() === "")
   }
 
   requestAnimationFrame(() => {
-    document.querySelectorAll('[data-article-link]').forEach(link => {
-document.querySelectorAll('[data-fullscreen-data]').forEach(link => {
-  const data = link.dataset.fullscreenData;
-  const type = link.dataset.type;
+    document.querySelectorAll('[data-fullscreen-data]').forEach(link => {
+      const data = link.dataset.fullscreenData;
+      const type = link.dataset.type;
 
-// Handle Jordan posts (text-only allowed)
-if (type === "jordan") {
-  const item = JSON.parse(data);
+      if (type === "jordan") {
+        const item = JSON.parse(data);
 
-  // If NO IMAGE → open link normally (no fullscreen)
-  if (!item.image || item.image.trim() === "") {
-    link.onclick = (e) => {
-      e.preventDefault();
-      const d = JSON.parse(link.dataset.articleLink);
-      addToHistory(d);
-      window.open(d.url || "#", "_blank");
-    };
-    return;
-  }
+        if (!item.image || item.image.trim() === "") {
+          link.onclick = (e) => {
+            e.preventDefault();
+            const d = JSON.parse(link.dataset.articleLink);
+            addToHistory(d);
+            window.open(d.url || "#", "_blank");
+          };
+          return;
+        }
 
-  // If there IS an image → fullscreen but WITHOUT metadata
-  link.onclick = (e) => {
-    e.preventDefault();
-    document.getElementById('stickerFullscreenImage').src = item.image;
-
-    // CLEAR ALL METADATA
-    document.getElementById('stickerFullscreenDate').textContent = "";
-    document.getElementById('stickerFullscreenLocation').textContent = "";
-    document.getElementById('stickerFullscreenMedium').textContent = "";
-    document.getElementById('stickerFullscreenArtist').textContent = "";
-
-    document.getElementById('stickerFullscreen').classList.add('active');
-    document.body.style.overflow = 'hidden';
-
-    addToHistory({ url: item.url, title: item.title, image: item.image });
-  };
-  return;
-}
-
-  // If an image exists → open fullscreen like objects/stickers
-  link.onclick = (e) => {
-    e.preventDefault();
-    openObjectFullscreen(item);
-    addToHistory({ url: item.url, title: item.title, image: item.image });
-  };
-  return;
-}
-
-  
-  if (data && type === "collection4") {
-    link.onclick = (e) => {
-      e.preventDefault();
-      const item = JSON.parse(data);
-      openStickerFullscreen(item);
-      addToHistory({ url: item.url, title: item.title, image: item.image });
-    };
-  }
-
-  if (data && type === "objects") {
-    link.onclick = (e) => {
-      e.preventDefault();
-      const item = JSON.parse(data);
-      openObjectFullscreen(item);
-      addToHistory({ url: item.url, title: item.text, image: item.image });
-    };
-  }
-});
-
-      
-      if (stickerData) {
         link.onclick = (e) => {
           e.preventDefault();
-          const item = JSON.parse(stickerData);
-          openStickerFullscreen(item);
-          addToHistory({url: item.url, title: item.title, image: item.image});
+          document.getElementById('stickerFullscreenImage').src = item.image;
+
+          document.getElementById('stickerFullscreenDate').textContent = "";
+          document.getElementById('stickerFullscreenLocation').textContent = "";
+          document.getElementById('stickerFullscreenMedium').textContent = "";
+          document.getElementById('stickerFullscreenArtist').textContent = "";
+
+          document.getElementById('stickerFullscreen').classList.add('active');
+          document.body.style.overflow = 'hidden';
+
+          addToHistory({ url: item.url, title: item.title, image: item.image });
         };
-      } else {
+        return;
+      }
+
+      if (data && type === "collection4") {
         link.onclick = (e) => {
-          const data = JSON.parse(link.dataset.articleLink);
-          addToHistory(data);
+          e.preventDefault();
+          const item = JSON.parse(data);
+          openStickerFullscreen(item);
+          addToHistory({ url: item.url, title: item.title, image: item.image });
+        };
+      }
+
+      if (data && type === "objects") {
+        link.onclick = (e) => {
+          e.preventDefault();
+          const item = JSON.parse(data);
+          openObjectFullscreen(item);
+          addToHistory({ url: item.url, title: item.text, image: item.image });
+        };
+      }
+
+      if (!data) {
+        link.onclick = (e) => {
+          const articleData = JSON.parse(link.dataset.articleLink);
+          addToHistory(articleData);
         };
       }
     });
@@ -1173,76 +1134,63 @@ window.addEventListener('scroll', () => {
   }
 });
 
-// Keyboard Shortcuts
 document.addEventListener('keydown', (e) => {
-  // Don't trigger shortcuts when typing in input fields
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
     return;
   }
   
-  // Don't trigger if modifier keys are pressed (except for specific combos)
   if (e.ctrlKey || e.metaKey || e.altKey) {
     return;
   }
   
   switch(e.key.toLowerCase()) {
     case '/':
-      // Focus search box
       e.preventDefault();
       document.getElementById('searchBox').focus();
       break;
       
     case 'h':
-      // Go to home/all posts
       e.preventDefault();
       goToAllPosts();
       break;
       
     case '1':
-      // Go to Articles
       e.preventDefault();
       document.querySelector('.nav-item[data-filter="collection1"]').click();
       break;
       
     case '2':
-      // Go to Field Notes
       e.preventDefault();
       document.querySelector('.nav-item[data-filter="collection2"]').click();
       break;
       
     case '3':
-      // Go to Stickers
       e.preventDefault();
       document.querySelector('.nav-item[data-filter="collection4"]').click();
       break;
       
     case '4':
     case 's':
-      // Go to Saved
       e.preventDefault();
       document.querySelector('.nav-item[data-filter="saved"]').click();
       break;
       
     case 'a':
-      // Go to Articles Index
       e.preventDefault();
       document.querySelector('.nav-item[data-view="articles-index"]').click();
       break;
       
     case 'p':
-      // Go to Photographers Index
       e.preventDefault();
       document.querySelector('.nav-item[data-view="photographers-index"]').click();
       break;
       
     case 'i':
-      // Go to Stickers Index
       e.preventDefault();
       document.querySelector('.nav-item[data-view="stickers-index"]').click();
       break;
       
     case 'r':
-      // Random photographer (if on photographers page)
       e.preventDefault();
       if (currentView === 'photographers-index') {
         randomPhotographer();
@@ -1250,13 +1198,11 @@ document.addEventListener('keydown', (e) => {
       break;
       
     case 'x':
-      // Shuffle/Random sort
       e.preventDefault();
       document.querySelector('.sort-btn[data-sort="shuffle"]').click();
       break;
       
     case 'f':
-      // Toggle fullscreen (only on index pages)
       if (currentView.includes('-index')) {
         e.preventDefault();
         toggleFullscreen();
@@ -1264,13 +1210,11 @@ document.addEventListener('keydown', (e) => {
       break;
       
     case '?':
-      // Show keyboard shortcuts help
       e.preventDefault();
       showKeyboardShortcuts();
       break;
       
     case 'escape':
-      // Close modals/fullscreen
       if (document.getElementById('stickerFullscreen').classList.contains('active')) {
         closeStickerFullscreen(e);
       }
@@ -1282,7 +1226,6 @@ document.addEventListener('keydown', (e) => {
 });
 
 function showKeyboardShortcuts() {
-  // Remove existing modal if present
   const existing = document.getElementById('keyboardShortcutsModal');
   if (existing) {
     existing.remove();
