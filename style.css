@@ -946,11 +946,6 @@
       padding: 16px;
     }
 
-    .photographer-grid {
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-
     .alphabet-letter {
       font-size: 24px;
       margin-bottom: 12px;
@@ -984,7 +979,15 @@
     align-items: center;
     justify-content: center;
   }
+    .photographer-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px;
+  }
   
+  /* Hide fullscreen toggle on mobile */
+  .fullscreen-toggle {
+    display: none !important;
+  }
   /* Hide sidebar by default on mobile */
   .left-sidebar {
     position: fixed;
