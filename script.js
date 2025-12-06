@@ -2,7 +2,9 @@ const sheetURL1 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTo8ua4UreD9M
 const sheetURL2 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcOtzV-2ZVl1aaRXhnlXEDNmJ8y1pUArx3qjhV3AR66kKSMtR17702FGlrBdppy0YPI084PxrMu9uL/pub?output=csv";
 const sheetURL3 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR4UTNOg8d2LIrCU8A9ebfkYOMV2V3E7egroQgliVc4v6mp7Xi9fdmPaxN3k3YUmeW123C8UvwdiNmy/pub?output=csv";
 const sheetURL4 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4QAkAIideMvvWDNWq2Aj_Nx6m4QG9snhFkpqqOGX8gU09X6uUQdkfuOj9yLIybn0iPIFoZbK-/pub?output=csv";
+const sheetURL5 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRPknkbhkxJidsCcMnFmvdB2gKx4miqtuECGc5udX7hEAY9IQeTCpNDGMkh31uGuSS1NcODADU_jcRT/pub?output=csv";
 
+let objectsIndex = [];
 let allPosts = [];
 let photographers = [];
 let stickersIndex = [];
@@ -156,6 +158,18 @@ function openStickerFullscreen(item) {
   document.body.style.overflow = 'hidden';
 }
 
+function openObjectFullscreen(item) {
+  document.getElementById('stickerFullscreenImage').src = item.image;
+  document.getElementById('stickerFullscreenDate').textContent = item.date;
+  document.getElementById('stickerFullscreenLocation').textContent = item.text;
+  document.getElementById('stickerFullscreenMedium').textContent = "";
+  document.getElementById('stickerFullscreenArtist').textContent = "";
+  
+  document.getElementById('stickerFullscreen').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+
 function closeStickerFullscreen(event) {
   if (event) {
     event.stopPropagation();
@@ -228,6 +242,34 @@ async function loadAllData() {
       medium: p.medium,
       artist: p.artist || 'Unknown'
     }));
+
+// === OBJECTS CSV ===
+const res5 = await fetch(sheetURL5);
+const text5 = await res5.text();
+const parsed5 = Papa.parse(text5, { header: true }).data;
+
+// Index objects
+objectsIndex = parsed5
+  .filter(r => r.Date && r.Text && r.Image)
+  .map(o => ({
+    date: normalizeDate(o.Date),
+    text: o.Text,
+    image: o.Image
+  }));
+
+// Posts for feed
+const posts5 = parsed5
+  .filter(r => r.Date && r.Text && r.Image)
+  .map(o => ({
+    collection: "objects",
+    collectionName: "Objects",
+    title: o.Text,
+    date: normalizeDate(o.Date),
+    url: o.Image,  // clicking opens fullscreen
+    image: o.Image,
+    text: o.Text
+  }));
+
     
     const posts4 = parsed4.filter(r => r.src && r.date && r.location_card && r.medium).map(p => ({
       ...p,
@@ -242,7 +284,7 @@ async function loadAllData() {
       artist: p.artist
     }));
 
-    allPosts = [...posts1, ...posts2, ...posts4];
+    allPosts = [...posts1, ...posts2, ...posts4, ...posts5];
     
     document.getElementById('countAll').textContent = allPosts.length;
     document.getElementById('count1').textContent = posts1.length;
@@ -251,6 +293,9 @@ async function loadAllData() {
     document.getElementById('count4').textContent = posts4.length;
     document.getElementById('countStickersIndex').textContent = stickersIndex.length;
     document.getElementById('countArticlesIndex').textContent = articlesIndex.length;
+    document.getElementById("countObjects").textContent = posts5.length;
+    document.getElementById("countObjectsIndex").textContent = objectsIndex.length;
+
     
     updateHistory();
     document.getElementById('countSaved').textContent = savedPosts.length;
@@ -865,11 +910,14 @@ function render() {
     const icon = getCollectionIcon(post.collection);
     const isSaved = savedPosts.includes(post.url);
     
-    const isFullscreenable = post.collection === 'collection4';
-    const fullscreenData = isFullscreenable ? JSON.stringify(post) : '';
+const isSticker = post.collection === 'collection4';
+const isObject = post.collection === 'objects';
+const fullscreenData = (isSticker || isObject) ? JSON.stringify(post) : '';
+
 
     item.innerHTML = `
-      <a href="${post.url}" target="_blank" style="display: block; color: inherit;" data-article-link='${JSON.stringify({url: post.url, title: post.title, image: post.image || ''})}' data-sticker-data='${fullscreenData}'>
+      <a href="${post.url}" target="_blank" style="display: block; color: inherit;" data-article-link='${JSON.stringify({url: post.url, title: post.title, image: post.image || ''})}' data-fullscreen-data='${fullscreenData}'
+data-type='${post.collection}'>
         <div class="post-header">
           <div class="post-avatar">
             <i data-lucide="${icon}" style="width: 18px; height: 18px;"></i>
@@ -912,7 +960,29 @@ function render() {
 
   requestAnimationFrame(() => {
     document.querySelectorAll('[data-article-link]').forEach(link => {
-      const stickerData = link.dataset.stickerData;
+document.querySelectorAll('[data-fullscreen-data]').forEach(link => {
+  const data = link.dataset.fullscreenData;
+  const type = link.dataset.type;
+
+  if (data && type === "collection4") {
+    link.onclick = (e) => {
+      e.preventDefault();
+      const item = JSON.parse(data);
+      openStickerFullscreen(item);
+      addToHistory({ url: item.url, title: item.title, image: item.image });
+    };
+  }
+
+  if (data && type === "objects") {
+    link.onclick = (e) => {
+      e.preventDefault();
+      const item = JSON.parse(data);
+      openObjectFullscreen(item);
+      addToHistory({ url: item.url, title: item.text, image: item.image });
+    };
+  }
+});
+
       
       if (stickerData) {
         link.onclick = (e) => {
