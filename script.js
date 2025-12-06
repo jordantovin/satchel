@@ -280,17 +280,16 @@ const text6 = await res6.text();
 const parsed6 = Papa.parse(text6, { header: true }).data;
 
 jordanPosts = parsed6
-  .filter(r => r.date && (r.image || r.src) && r.title)
+  .filter(r => r.date && r.title)   // <-- NO IMAGE REQUIRED
   .map(p => ({
     collection: "jordan",
     collectionName: "Jordan Posts",
     title: p.title,
     date: normalizeDate(p.date),
-    url: p.src || p.image,
-    image: p.image || p.src,
+    url: p.src || p.image || "",   // may be empty
+    image: p.image || p.src || "", // may be empty
     text: p.text || ""
   }));
-
     
     const posts4 = parsed4.filter(r => r.src && r.date && r.location_card && r.medium).map(p => ({
       ...p,
@@ -933,8 +932,9 @@ function render() {
     
 const isSticker = post.collection === 'collection4';
 const isObject = post.collection === 'objects';
-const fullscreenData = (isSticker || isObject) ? JSON.stringify(post) : '';
+const isJordan = post.collection === 'jordan';
 
+const fullscreenData = (isSticker || isObject || isJordan) ? JSON.stringify(post) : '';
 
     item.innerHTML = `
       <a href="${post.url}" target="_blank" style="display: block; color: inherit;" data-article-link='${JSON.stringify({url: post.url, title: post.title, image: post.image || ''})}' data-fullscreen-data='${fullscreenData}'
@@ -948,7 +948,9 @@ data-type='${post.collection}'>
             <div class="post-date">${post.date}</div>
           </div>
         </div>
-        ${post.noImage ? '' : `<img class="post-image" src="${post.image}" alt="${post.title}" loading="lazy">`}
+${(!post.image || post.image.trim() === "") 
+   ? "" 
+   : `<img class="post-image" src="${post.image}" alt="${post.title}" loading="lazy">`}
         <div class="post-content">
           <div class="post-title">${post.title}</div>
           ${post.medium ? `<div class="post-excerpt"><strong>Medium:</strong> ${post.medium}</div>` : ''}
@@ -985,6 +987,31 @@ document.querySelectorAll('[data-fullscreen-data]').forEach(link => {
   const data = link.dataset.fullscreenData;
   const type = link.dataset.type;
 
+// Handle Jordan posts (text-only allowed)
+if (type === "jordan") {
+  const item = JSON.parse(data);
+
+  // If NO IMAGE → open normally (no fullscreen)
+  if (!item.image || item.image.trim() === "") {
+    link.onclick = (e) => {
+      e.preventDefault();
+      const d = JSON.parse(link.dataset.articleLink);
+      addToHistory(d);
+      window.open(d.url || "#", "_blank");
+    };
+    return; // STOP — prevents fullscreen handler from running
+  }
+
+  // If an image exists → open fullscreen like objects/stickers
+  link.onclick = (e) => {
+    e.preventDefault();
+    openObjectFullscreen(item);
+    addToHistory({ url: item.url, title: item.title, image: item.image });
+  };
+  return;
+}
+
+  
   if (data && type === "collection4") {
     link.onclick = (e) => {
       e.preventDefault();
