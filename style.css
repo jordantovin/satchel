@@ -885,6 +885,10 @@
       display: none;
     }
 
+      .satchel-cover {
+    display: none;
+  }
+
   .header {
     margin-top: 0;
     position: fixed;
