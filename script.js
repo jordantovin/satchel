@@ -68,7 +68,7 @@ function getCollectionIcon(collection) {
     'collection4': 'sticker',
     'photographer': 'users',
     'objects': 'box',
-    'jordan': 'bold'
+    'jordan': 'camera'
   };
   return icons[collection] || 'file';
 }
@@ -280,6 +280,7 @@ async function loadAllData() {
       .filter(r => r.Date && r.Title)
       .map(p => {
         const hasImage = p.Image && p.Image.trim() !== "";
+        const hasLink = p.Link && p.Link.trim() !== "";
 
         return {
           collection: "jordan",
@@ -288,7 +289,7 @@ async function loadAllData() {
           date: normalizeDate(p.Date),
           text: p.Text || "",
           image: hasImage ? p.Image : "",
-          url: hasImage ? p.Image : `jordan-${p.Date.replace(/\//g,'-')}-${p.Title.replace(/\s+/g,'_')}`
+          url: hasLink ? p.Link : (hasImage ? p.Image : "#")
         };
       });
 
@@ -1131,29 +1132,39 @@ function render() {
       if (type === "jordan") {
         const item = JSON.parse(data);
 
-        if (!item.image || item.image.trim() === "") {
+        // If has image, show fullscreen
+        if (item.image && item.image.trim() !== "") {
           link.onclick = (e) => {
             e.preventDefault();
-            const d = JSON.parse(link.dataset.articleLink);
-            addToHistory(d);
-            window.open(d.url || "#", "_blank");
+            document.getElementById('stickerFullscreenImage').src = item.image;
+
+            document.getElementById('stickerFullscreenDate').textContent = "";
+            document.getElementById('stickerFullscreenLocation').textContent = "";
+            document.getElementById('stickerFullscreenMedium').textContent = "";
+            document.getElementById('stickerFullscreenArtist').textContent = "";
+
+            document.getElementById('stickerFullscreen').classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            addToHistory({ url: item.url, title: item.title, image: item.image });
           };
           return;
         }
 
+        // If has link but no image, open link
+        if (item.url && item.url !== "#") {
+          link.onclick = (e) => {
+            e.preventDefault();
+            const d = JSON.parse(link.dataset.articleLink);
+            addToHistory(d);
+            window.open(item.url, "_blank");
+          };
+          return;
+        }
+
+        // If no link and no image, do nothing (prevent default)
         link.onclick = (e) => {
           e.preventDefault();
-          document.getElementById('stickerFullscreenImage').src = item.image;
-
-          document.getElementById('stickerFullscreenDate').textContent = "";
-          document.getElementById('stickerFullscreenLocation').textContent = "";
-          document.getElementById('stickerFullscreenMedium').textContent = "";
-          document.getElementById('stickerFullscreenArtist').textContent = "";
-
-          document.getElementById('stickerFullscreen').classList.add('active');
-          document.body.style.overflow = 'hidden';
-
-          addToHistory({ url: item.url, title: item.title, image: item.image });
         };
         return;
       }
