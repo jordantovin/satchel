@@ -758,12 +758,12 @@
     .right-sidebar { display: none; }
   }
 
-  @media (max-width: 900px) {
-    .main-container {
-      grid-template-columns: 1fr;
-    }
-    .left-sidebar { position: static; }
+@media (max-width: 900px) {
+  .main-container {
+    grid-template-columns: 1fr;
   }
+  /* Left sidebar positioning handled by mobile menu styles below */
+}
   
   @keyframes fadeIn {
     from {
