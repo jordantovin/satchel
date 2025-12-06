@@ -280,16 +280,23 @@ const text6 = await res6.text();
 const parsed6 = Papa.parse(text6, { header: true }).data;
 
 jordanPosts = parsed6
-  .filter(r => r.Date && r.Title)   // MATCHES EXACT COLUMN NAMES
-  .map(p => ({
-    collection: "jordan",
-    collectionName: "Jordan Posts",
-    title: p.Title,
-    date: normalizeDate(p.Date),
-    url: p.Image || "",         // safe if no image
-    image: p.Image || "",
-    text: p.Text || ""
-  }));
+  .filter(r => r.Date && r.Title)
+  .map(p => {
+    const hasImage = p.Image && p.Image.trim() !== "";
+
+    return {
+      collection: "jordan",
+      collectionName: "Jordan Posts",
+      title: p.Title,
+      date: normalizeDate(p.Date),
+      text: p.Text || "",
+      image: hasImage ? p.Image : "",
+      
+      // NEW: gives posts without images a valid internal URL
+      url: hasImage ? p.Image : `jordan-${p.Date.replace(/\//g,'-')}-${p.Title.replace(/\s+/g,'_')}`
+    };
+  });
+
     
     const posts4 = parsed4.filter(r => r.src && r.date && r.location_card && r.medium).map(p => ({
       ...p,
