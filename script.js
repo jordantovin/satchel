@@ -33,9 +33,6 @@ function closeMobileMenuOnClick() {
 }
 
 function normalizeDate(dateStr) {
-  // ... rest of your code continues
-
-function normalizeDate(dateStr) {
   if (!dateStr) return '';
   dateStr = dateStr.trim();
   
