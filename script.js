@@ -1576,3 +1576,15 @@ if (document.readyState === 'loading') {
 } else {
   loadAllData();
 }
+
+document.addEventListener('click', (e) => {
+  const sidebar = document.querySelector('.left-sidebar');
+  const menuButton = document.querySelector('.mobile-menu-toggle');
+  
+  if (sidebar && menuButton && 
+      sidebar.classList.contains('mobile-open') && 
+      !sidebar.contains(e.target) && 
+      !menuButton.contains(e.target)) {
+    toggleMobileMenu();
+  }
+});
