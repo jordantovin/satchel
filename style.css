@@ -34,7 +34,7 @@
 
   .satchel-cover {
     position: fixed;
-    top: -100px;
+    top: -120px;
     left: 0;
     width: 100vw;
     height: calc(100vh + 100px);
