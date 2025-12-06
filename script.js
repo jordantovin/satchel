@@ -995,89 +995,66 @@ ${(!post.image || post.image.trim() === "")
   }
 
   requestAnimationFrame(() => {
-    document.querySelectorAll('[data-article-link]').forEach(link => {
+// Handle fullscreen + click behaviour for all posts
 document.querySelectorAll('[data-fullscreen-data]').forEach(link => {
   const data = link.dataset.fullscreenData;
   const type = link.dataset.type;
-
-// Handle Jordan posts (text-only allowed)
-if (type === "jordan") {
+  if (!data) return;
+  
   const item = JSON.parse(data);
 
-  // If NO IMAGE → open link normally (no fullscreen)
-  if (!item.image || item.image.trim() === "") {
+  // JORDAN POSTS
+  if (type === "jordan") {
+
+    // No image → open normally
+    if (!item.image || item.image.trim() === "") {
+      link.onclick = (e) => {
+        e.preventDefault();
+        const d = JSON.parse(link.dataset.articleLink);
+        addToHistory(d);
+        window.open(d.url || "#", "_blank");
+      };
+      return;
+    }
+
+    // Has image → fullscreen with NO metadata
     link.onclick = (e) => {
       e.preventDefault();
-      const d = JSON.parse(link.dataset.articleLink);
-      addToHistory(d);
-      window.open(d.url || "#", "_blank");
+      document.getElementById('stickerFullscreenImage').src = item.image;
+      document.getElementById('stickerFullscreenDate').textContent = "";
+      document.getElementById('stickerFullscreenLocation').textContent = "";
+      document.getElementById('stickerFullscreenMedium').textContent = "";
+      document.getElementById('stickerFullscreenArtist').textContent = "";
+      
+      document.getElementById('stickerFullscreen').classList.add('active');
+      document.body.style.overflow = 'hidden';
+
+      addToHistory({ url: item.url, title: item.title, image: item.image });
     };
     return;
   }
 
-  // If there IS an image → fullscreen but WITHOUT metadata
-  link.onclick = (e) => {
-    e.preventDefault();
-    document.getElementById('stickerFullscreenImage').src = item.image;
-
-    // CLEAR ALL METADATA
-    document.getElementById('stickerFullscreenDate').textContent = "";
-    document.getElementById('stickerFullscreenLocation').textContent = "";
-    document.getElementById('stickerFullscreenMedium').textContent = "";
-    document.getElementById('stickerFullscreenArtist').textContent = "";
-
-    document.getElementById('stickerFullscreen').classList.add('active');
-    document.body.style.overflow = 'hidden';
-
-    addToHistory({ url: item.url, title: item.title, image: item.image });
-  };
-  return;
-}
-
-  // If an image exists → open fullscreen like objects/stickers
-  link.onclick = (e) => {
-    e.preventDefault();
-    openObjectFullscreen(item);
-    addToHistory({ url: item.url, title: item.title, image: item.image });
-  };
-  return;
-}
-
-  
-  if (data && type === "collection4") {
+  // STICKERS
+  if (type === "collection4") {
     link.onclick = (e) => {
       e.preventDefault();
-      const item = JSON.parse(data);
       openStickerFullscreen(item);
       addToHistory({ url: item.url, title: item.title, image: item.image });
     };
+    return;
   }
 
-  if (data && type === "objects") {
+  // OBJECTS
+  if (type === "objects") {
     link.onclick = (e) => {
       e.preventDefault();
-      const item = JSON.parse(data);
       openObjectFullscreen(item);
       addToHistory({ url: item.url, title: item.text, image: item.image });
     };
+    return;
   }
 });
 
-      
-      if (stickerData) {
-        link.onclick = (e) => {
-          e.preventDefault();
-          const item = JSON.parse(stickerData);
-          openStickerFullscreen(item);
-          addToHistory({url: item.url, title: item.title, image: item.image});
-        };
-      } else {
-        link.onclick = (e) => {
-          const data = JSON.parse(link.dataset.articleLink);
-          addToHistory(data);
-        };
-      }
-    });
 
     document.querySelectorAll('[data-read]').forEach(btn => {
       btn.onclick = (e) => {
