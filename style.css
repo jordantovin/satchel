@@ -885,10 +885,6 @@
       display: none;
     }
 
- .satchel-cover {
-    display: none;
-  }
-
   .header {
     margin-top: 0;
     position: fixed;
@@ -920,23 +916,24 @@
       padding: 10px 16px 10px 40px;
     }
 
-    .main-container {
-      padding: 0;
-      padding-top: calc(70px);
-      gap: 0;
-      grid-template-columns: 1fr;
-    }
+.main-container {
+  padding: 0;
+  padding-top: 70px;  /* REMOVE calc() */
+  gap: 0;
+  grid-template-columns: 1fr;
+}
 
     .sidebar-card {
       margin-bottom: 12px;
       border-radius: 12px;
     }
 
-    .center-feed {
-      padding: 16px;
-      background: white;
-      min-height: calc(100vh - 70px);
-    }
+.center-feed {
+  padding: 16px;
+  padding-top: 0;  /* ADD THIS LINE */
+  background: white;
+  min-height: calc(100vh - 70px);
+}
 
     .sort-bar {
       border-radius: 12px;
