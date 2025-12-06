@@ -280,13 +280,13 @@ const text6 = await res6.text();
 const parsed6 = Papa.parse(text6, { header: true }).data;
 
 jordanPosts = parsed6
-  .filter(r => r.Date && r.Title)
+  .filter(r => r.Date && r.Title)   // MATCHES EXACT COLUMN NAMES
   .map(p => ({
     collection: "jordan",
     collectionName: "Jordan Posts",
     title: p.Title,
     date: normalizeDate(p.Date),
-    url: p.Image || "",    // clicking opens nothing unless you add a link
+    url: p.Image || "",         // safe if no image
     image: p.Image || "",
     text: p.Text || ""
   }));
