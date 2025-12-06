@@ -19,6 +19,22 @@ let searchQuery = "";
 let viewHistory = JSON.parse(localStorage.getItem('satchelHistory') || '[]');
 let currentView = "feed";
 
+// ADD THESE TWO FUNCTIONS HERE:
+function toggleMobileMenu() {
+  document.querySelector('.left-sidebar').classList.toggle('mobile-open');
+  document.body.classList.toggle('menu-open');
+}
+
+function closeMobileMenuOnClick() {
+  if (window.innerWidth <= 768) {
+    document.querySelector('.left-sidebar').classList.remove('mobile-open');
+    document.body.classList.remove('menu-open');
+  }
+}
+
+function normalizeDate(dateStr) {
+  // ... rest of your code continues
+
 function normalizeDate(dateStr) {
   if (!dateStr) return '';
   dateStr = dateStr.trim();
