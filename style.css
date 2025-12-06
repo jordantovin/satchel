@@ -1138,17 +1138,17 @@
   }
   
   /* Overlay when menu is open */
-  body.menu-open::before {
-    content: '';
-    position: fixed;
-    top: 70px;
-    left: 0;
-    width: 100%;
-    height: calc(100vh - 70px);
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 1004;
-    animation: fadeIn 0.3s ease;
-  }
+body.menu-open::before {
+  content: '';
+  position: fixed;
+  top: 70px;
+  left: 280px;  /* START OVERLAY AFTER THE SIDEBAR WIDTH */
+  width: calc(100% - 280px);  /* ONLY COVER THE RIGHT SIDE */
+  height: calc(100vh - 70px);
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1004;
+  animation: fadeIn 0.3s ease;
+}
   
   /* Prevent scrolling when menu is open */
   body.menu-open {
