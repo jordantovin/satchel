@@ -885,14 +885,18 @@
       display: none;
     }
 
-    .header {
-      margin-top: 0;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1010;
-    }
+ .satchel-cover {
+    display: none;
+  }
+
+  .header {
+    margin-top: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1010;
+  }
 
     .header-content {
       padding: 16px;
