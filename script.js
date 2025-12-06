@@ -280,15 +280,15 @@ const text6 = await res6.text();
 const parsed6 = Papa.parse(text6, { header: true }).data;
 
 jordanPosts = parsed6
-  .filter(r => r.date && r.title)   // <-- NO IMAGE REQUIRED
+  .filter(r => r.Date && r.Title)
   .map(p => ({
     collection: "jordan",
     collectionName: "Jordan Posts",
-    title: p.title,
-    date: normalizeDate(p.date),
-    url: p.src || p.image || "",   // may be empty
-    image: p.image || p.src || "", // may be empty
-    text: p.text || ""
+    title: p.Title,
+    date: normalizeDate(p.Date),
+    url: p.Image || "",    // clicking opens nothing unless you add a link
+    image: p.Image || "",
+    text: p.Text || ""
   }));
     
     const posts4 = parsed4.filter(r => r.src && r.date && r.location_card && r.medium).map(p => ({
