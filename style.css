@@ -1,4 +1,4 @@
- * { box-sizing: border-box; }
+* { box-sizing: border-box; }
   
   body { 
     margin: 0; 
@@ -7,7 +7,17 @@
     background: #f6f7f8;
   }
 
-  a { text-decoration: none !important; color: inherit !important; }
+  a { 
+    text-decoration: none !important; 
+    color: inherit !important;
+    outline: none !important;
+    border: none !important;
+  }
+
+  a:focus {
+    outline: none !important;
+    border: none !important;
+  }
 
   .satchel-cover {
     position: fixed;
@@ -243,30 +253,6 @@
     flex-shrink: 0;
   }
 
-.post-card {
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  margin-bottom: 16px;
-  overflow: hidden;
-  transition: box-shadow 0.2s;
-}
-
-.post-card:hover {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  border-color: #898989;
-}
-
-.post-card a {
-  outline: none !important;
-  text-decoration: none !important;
-  border: none !important;
-}
-
-.post-card a:focus {
-  outline: none !important;
-  border: none !important;
-}
   .post-meta { flex: 1; min-width: 0; }
 
   .post-source {
