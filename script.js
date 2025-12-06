@@ -402,10 +402,21 @@ function clearHistory() {
 function sortPosts(arr) {
   let sorted = [...arr];
   
+  // Helper function to parse MM/DD/YYYY dates correctly
+  const parseDate = (dateStr) => {
+    if (!dateStr) return new Date(0);
+    const parts = dateStr.split('/');
+    if (parts.length === 3) {
+      // Parse as MM/DD/YYYY
+      return new Date(parts[2], parts[0] - 1, parts[1]);
+    }
+    return new Date(dateStr);
+  };
+  
   if (currentSort === "date-oldest") {
-    sorted.sort((a, b) => new Date(a.date) - new Date(b.date));
+    sorted.sort((a, b) => parseDate(a.date) - parseDate(b.date));
   } else if (currentSort === "date-newest") {
-    sorted.sort((a, b) => new Date(b.date) - new Date(a.date));
+    sorted.sort((a, b) => parseDate(b.date) - parseDate(a.date));
   } else if (currentSort === "title-az") {
     sorted.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
   } else if (currentSort === "title-za") {
