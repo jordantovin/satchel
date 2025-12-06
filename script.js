@@ -284,7 +284,7 @@ async function loadAllData() {
 
         return {
           collection: "jordan",
-          collectionName: "Jordan Posts",
+          collectionName: "Jordan",
           title: p.Title,
           date: normalizeDate(p.Date),
           text: p.Text || "",
