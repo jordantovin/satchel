@@ -712,7 +712,7 @@
     line-height: 1.3;
     background: white;
     z-index: 1021;
-    max-width: 500px;
+    max-width: 400px;
   }
 
   .sticker-fullscreen-info div { margin-bottom: 8px; }
