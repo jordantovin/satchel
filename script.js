@@ -314,8 +314,6 @@ async function loadAllData() {
     document.getElementById('count4').textContent = posts4.length;
     document.getElementById('countStickersIndex').textContent = stickersIndex.length;
     document.getElementById('countArticlesIndex').textContent = articlesIndex.length;
-    document.getElementById("countObjects").textContent = posts5.length;
-    document.getElementById("countObjectsIndex").textContent = objectsIndex.length;
     document.getElementById("countJordan").textContent = jordanPosts.length;
 
     updateHistory();
