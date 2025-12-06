@@ -322,13 +322,16 @@ allPosts = [ ...posts1, ...posts2, ...posts4, ...posts5, ...jordanPosts ];
     document.getElementById('countArticlesIndex').textContent = articlesIndex.length;
     document.getElementById("countObjects").textContent = posts5.length;
     document.getElementById("countObjectsIndex").textContent = objectsIndex.length;
+    document.getElementById("countJordan").textContent = jordanPosts.length;
+
 
     
-    updateHistory();
-    document.getElementById('countSaved').textContent = savedPosts.length;
-    render();
-    
-    lucide.createIcons();
+updateHistory();
+document.getElementById('countSaved').textContent = savedPosts.length;
+
+lucide.createIcons();   // move this up
+
+render();               // move this DOWN so it runs last
   } catch (error) {
     console.error("Error loading data:", error);
   }
@@ -958,10 +961,13 @@ data-type='${post.collection}'>
 ${(!post.image || post.image.trim() === "") 
    ? "" 
    : `<img class="post-image" src="${post.image}" alt="${post.title}" loading="lazy">`}
-        <div class="post-content">
-          <div class="post-title">${post.title}</div>
-          ${post.medium ? `<div class="post-excerpt"><strong>Medium:</strong> ${post.medium}</div>` : ''}
-        </div>
+<div class="post-content">
+  <div class="post-title">${post.title}</div>
+
+  ${post.text ? `<div class="post-excerpt">${post.text}</div>` : ''}
+
+  ${post.medium ? `<div class="post-excerpt"><strong>Medium:</strong> ${post.medium}</div>` : ''}
+</div>
       </a>
       <div class="post-footer">
         <span class="post-action" data-read='${JSON.stringify({url: post.url, title: post.title, image: post.image || ''})}'>
@@ -998,7 +1004,7 @@ document.querySelectorAll('[data-fullscreen-data]').forEach(link => {
 if (type === "jordan") {
   const item = JSON.parse(data);
 
-  // If NO IMAGE → open normally (no fullscreen)
+  // If NO IMAGE → open link normally (no fullscreen)
   if (!item.image || item.image.trim() === "") {
     link.onclick = (e) => {
       e.preventDefault();
@@ -1006,8 +1012,27 @@ if (type === "jordan") {
       addToHistory(d);
       window.open(d.url || "#", "_blank");
     };
-    return; // STOP — prevents fullscreen handler from running
+    return;
   }
+
+  // If there IS an image → fullscreen but WITHOUT metadata
+  link.onclick = (e) => {
+    e.preventDefault();
+    document.getElementById('stickerFullscreenImage').src = item.image;
+
+    // CLEAR ALL METADATA
+    document.getElementById('stickerFullscreenDate').textContent = "";
+    document.getElementById('stickerFullscreenLocation').textContent = "";
+    document.getElementById('stickerFullscreenMedium').textContent = "";
+    document.getElementById('stickerFullscreenArtist').textContent = "";
+
+    document.getElementById('stickerFullscreen').classList.add('active');
+    document.body.style.overflow = 'hidden';
+
+    addToHistory({ url: item.url, title: item.title, image: item.image });
+  };
+  return;
+}
 
   // If an image exists → open fullscreen like objects/stickers
   link.onclick = (e) => {
