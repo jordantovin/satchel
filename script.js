@@ -150,6 +150,7 @@ function goToAllPosts() {
   searchQuery = "";
   document.getElementById('searchBox').value = "";
   displayLimit = 10;
+  closeMobileMenuOnClick();
   render();
 }
 
@@ -1249,6 +1250,7 @@ document.querySelectorAll('.nav-item[data-filter]').forEach(item => {
     currentFilter = this.dataset.filter;
     currentView = "feed";
     displayLimit = 10;
+    closeMobileMenuOnClick();
     render();
   });
 });
@@ -1258,6 +1260,7 @@ document.querySelectorAll('.nav-item[data-view]').forEach(item => {
     document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
     this.classList.add('active');
     currentView = this.dataset.view;
+    closeMobileMenuOnClick();
     render();
   });
 });
