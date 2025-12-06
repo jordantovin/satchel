@@ -405,11 +405,17 @@ function sortPosts(arr) {
   // Helper function to parse MM/DD/YYYY dates correctly
   const parseDate = (dateStr) => {
     if (!dateStr) return new Date(0);
-    const parts = dateStr.split('/');
-    if (parts.length === 3) {
-      // Parse as MM/DD/YYYY
-      return new Date(parts[2], parts[0] - 1, parts[1]);
+    
+    // Handle MM/DD/YYYY format
+    const slashMatch = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (slashMatch) {
+      const month = parseInt(slashMatch[1], 10) - 1; // 0-indexed
+      const day = parseInt(slashMatch[2], 10);
+      const year = parseInt(slashMatch[3], 10);
+      return new Date(year, month, day);
     }
+    
+    // Fallback to default parsing
     return new Date(dateStr);
   };
   
