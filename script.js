@@ -255,14 +255,23 @@ async function loadAllData() {
     }));
 
     const parsed4 = Papa.parse(text4, { header: true }).data;
-    stickersIndex = parsed4.filter(r => r.src && r.date && r.location_card && r.medium).map(p => ({
-      ...p,
-      image: p.src,
-      date: normalizeDate(p.date),
-      location: p.location_card,
-      medium: p.medium,
-      artist: p.artist || 'Unknown'
-    }));
+stickersIndex = parsed4
+  .filter(r => 
+    r.src &&
+    r.date &&
+    r.location_card &&
+    r.medium &&
+    r.feed &&
+    r.feed.trim().toLowerCase() === "yes"
+  )
+  .map(p => ({
+    ...p,
+    image: p.src,
+    date: normalizeDate(p.date),
+    location: p.location_card,
+    medium: p.medium,
+    artist: p.artist || 'Unknown'
+  }));
 
     // Objects CSV
     const parsed5 = Papa.parse(text5, { header: true }).data;
@@ -307,18 +316,27 @@ async function loadAllData() {
         };
       });
 
-    const posts4 = parsed4.filter(r => r.src && r.date && r.location_card && r.medium).map(p => ({
-      ...p,
-      collection: "collection4",
-      collectionName: "Stickers",
-      title: p.location_card || 'Sticker',
-      date: normalizeDate(p.date),
-      url: p.src,
-      image: p.src,
-      medium: p.medium,
-      location: p.location_card,
-      artist: p.artist
-    }));
+    const posts4 = parsed4
+  .filter(r => 
+    r.src &&
+    r.date &&
+    r.location_card &&
+    r.medium &&
+    r.feed &&
+    r.feed.trim().toLowerCase() === "yes"
+  )
+  .map(p => ({
+    ...p,
+    collection: "collection4",
+    collectionName: "Stickers",
+    title: p.location_card || 'Sticker',
+    date: normalizeDate(p.date),
+    url: p.src,
+    image: p.src,
+    medium: p.medium,
+    location: p.location_card,
+    artist: p.artist
+  }));
 
     allPosts = [ ...posts1, ...posts2, ...posts4, ...posts5, ...jordanPosts ];
     
