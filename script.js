@@ -1346,12 +1346,12 @@ document.addEventListener('keydown', (e) => {
       goToAllPosts();
       break;
       
-    case '1':
+    case '2':
       e.preventDefault();
       document.querySelector('.nav-item[data-filter="collection1"]').click();
       break;
       
-    case '2':
+    case '1':
       e.preventDefault();
       document.querySelector('.nav-item[data-filter="collection2"]').click();
       break;
