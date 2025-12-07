@@ -268,7 +268,7 @@ stickersIndex = parsed4
     ...p,
     image: p.src,
     date: normalizeDate(p.date),
-    location: p.location_card,
+    location: p.location_overlay,
     medium: p.medium,
     artist: p.artist || 'Unknown'
   }));
