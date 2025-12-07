@@ -260,19 +260,18 @@ stickersIndex = parsed4
     r.src &&
     r.date &&
     r.location_overlay &&
-    r.medium &&
-    r.feed &&
-    r.feed.trim().toLowerCase() === "yes"
+    r.medium
   )
   .map(p => ({
     ...p,
     image: p.src,
     date: normalizeDate(p.date),
-    location: p.location_overlay,
-    location_card: p.location_card, 
+    location: p.location_overlay,      // fullscreen uses this
+    location_card: p.location_card,    // hover uses this
     medium: p.medium,
     artist: p.artist || 'Unknown'
   }));
+
 
     // Objects CSV
     const parsed5 = Papa.parse(text5, { header: true }).data;
