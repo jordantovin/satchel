@@ -256,10 +256,10 @@ async function loadAllData() {
 
     const parsed4 = Papa.parse(text4, { header: true }).data;
 stickersIndex = parsed4
-  .filter(r => 
+  .filter(r =>
     r.src &&
     r.date &&
-    r.location_card &&
+    r.location_overlay &&
     r.medium &&
     r.feed &&
     r.feed.trim().toLowerCase() === "yes"
