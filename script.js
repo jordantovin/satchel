@@ -269,6 +269,7 @@ stickersIndex = parsed4
     image: p.src,
     date: normalizeDate(p.date),
     location: p.location_overlay,
+    location_card: p.location_card, 
     medium: p.medium,
     artist: p.artist || 'Unknown'
   }));
@@ -945,15 +946,15 @@ function renderStickerGrid(stickersList, container) {
       });
     };
     
-    item.innerHTML = `
-      <img class="sticker-grid-image" src="${sticker.image}" alt="${sticker.location}">
-      <div class="sticker-grid-overlay">
-        <div><strong>Date:</strong> ${sticker.date}</div>
-        <div><strong>Location:</strong> ${sticker.location}</div>
-        <div><strong>Medium:</strong> ${sticker.medium}</div>
-        <div><strong>Artist:</strong> ${sticker.artist}</div>
-      </div>
-    `;
+item.innerHTML = `
+  <img class="sticker-grid-image" src="${sticker.image}" alt="${sticker.location_card}">
+  <div class="sticker-grid-overlay">
+    <div><strong>Date:</strong> ${sticker.date}</div>
+    <div><strong>Location:</strong> ${sticker.location_card}</div>   <!-- FIXED -->
+    <div><strong>Medium:</strong> ${sticker.medium}</div>
+    <div><strong>Artist:</strong> ${sticker.artist}</div>
+  </div>
+`;
     
     grid.appendChild(item);
   });
