@@ -190,7 +190,7 @@
   .nav-item {
     display: flex;
     align-items: center;
-    /* FIX: Add 16px left padding for all items */
+    /* FIX: Add 16px left padding for all items to align text/icons */
     padding: 10px 0 10px 16px; 
     border-radius: 6px;
     cursor: pointer;
@@ -206,12 +206,13 @@
     background: #1c1c1c; 
     color: white; 
     font-weight: 700;
-    /* FIX: Implement the right margin using width/margin combination */
-    width: calc(100% - 16px);
-    margin-left: 16px; 
-    margin-right: 0 !important;
     
-    /* FIX: Ensure internal content padding is correct */
+    /* FIX: Redefine width and margin to leave 16px on both left and right */
+    width: calc(100% - 32px); /* 100% - (16px left margin + 16px right margin) */
+    margin-left: 16px; /* Creates the 16px left margin */
+    margin-right: 16px !important; /* Forces the 16px right margin */
+    
+    /* Ensure internal content padding is correct */
     padding: 10px 16px 10px 16px; 
   }
 
