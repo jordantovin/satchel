@@ -120,7 +120,8 @@
     top: 70px; 
     height: calc(100vh - 70px);
     overflow-y: auto;
-    padding-top: 0; 
+    /* FIX: Add 16px padding to the left and right of the entire sidebar content area */
+    padding: 0 16px; 
 }
 
   .right-sidebar {
@@ -146,7 +147,7 @@
     border-radius: 0;
     padding: 0;
     margin-bottom: 16px;
-    margin-top: 16px; 
+    /* Removed padding-top here as it's handled by .sidebar-title's margin-top */
 }
 
 .stats-card {
@@ -169,8 +170,10 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: #7c7c7c;
-    padding-left: 16px; 
+    /* FIX: Removed padding-left since .left-sidebar now has 16px padding */
+    padding-left: 0; 
     margin-bottom: 12px;
+    margin-top: 16px; /* Space above the first element */
   }
 
   .stats-title {
@@ -187,8 +190,8 @@
   .nav-item {
     display: flex;
     align-items: center;
-    /* This sets 16px padding on both left and right for all items */
-    padding: 10px 16px; 
+    /* FIX: Removed 16px padding on left/right since the parent handles the margin now */
+    padding: 10px 0; 
     border-radius: 6px;
     cursor: pointer;
     font-size: 14px;
@@ -203,11 +206,11 @@
     background: #1c1c1c; 
     color: white; 
     font-weight: 700;
-    /* FIX: Use margin-left and calc(width) to create the right margin for the background block */
-    margin-left: 16px; 
-    width: calc(100% - 16px);
+    /* Reset margins and width to fill 100% of the padded parent container */
+    margin-left: 0 !important; 
+    width: 100%;
     
-    /* Ensure internal content padding is correct */
+    /* Re-add padding back to the content for text alignment */
     padding: 10px 16px; 
     margin-right: 0 !important;
   }
