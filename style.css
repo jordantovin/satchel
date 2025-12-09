@@ -120,8 +120,8 @@
     top: 70px; 
     height: calc(100vh - 70px);
     overflow-y: auto;
-    /* FIX: Remove left padding from the sidebar itself to meet the requirement */
-    padding: 0 0 0 0; 
+    /* FIX 1: Remove all padding from the sidebar wrapper to make it flush left */
+    padding: 0; 
 }
 
   .right-sidebar {
@@ -170,7 +170,7 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: #7c7c7c;
-    /* FIX: Add 16px padding to titles for alignment */
+    /* FIX 2: Add 16px left padding to titles for alignment */
     padding-left: 16px; 
     margin-bottom: 12px;
     margin-top: 16px; 
@@ -190,8 +190,8 @@
   .nav-item {
     display: flex;
     align-items: center;
-    /* FIX: Add 16px left padding for all items to align text/icons */
-    padding: 10px 0 10px 16px; 
+    /* FIX 3: Use 16px left padding for all items to push content away from the edge */
+    padding: 10px 16px 10px 16px; 
     border-radius: 6px;
     cursor: pointer;
     font-size: 14px;
@@ -207,12 +207,15 @@
     color: white; 
     font-weight: 700;
     
-    /* FIX: Redefine width and margin to leave 16px on both left and right */
-    width: calc(100% - 32px); /* 100% - (16px left margin + 16px right margin) */
-    margin-left: 16px; /* Creates the 16px left margin */
-    margin-right: 16px !important; /* Forces the 16px right margin */
+    /* FIX 4: Use a negative margin-left to pull the background flush left,
+             while maintaining the content's 16px left padding. */
+    margin-left: -16px; 
+    /* The active background will span from -16px to 100% of the original width.
+       The original width includes 16px padding on the right side, which now acts as the margin. */
+    width: calc(100% + 16px);
     
-    /* Ensure internal content padding is correct */
+    /* Ensure internal content padding is correct (keeps content centered, 
+       but the right padding on the content is now what ensures the badge isn't too close) */
     padding: 10px 16px 10px 16px; 
   }
 
@@ -220,17 +223,28 @@
     width: 20px;
     height: 20px;
     margin-right: 10px;
+    /* FIX 5: Use flex-shrink: 0 on the icon to prevent it from condensing */
+    flex-shrink: 0; 
     stroke-width: 2;
   }
+   
+  /* FIX 6: Use flex-shrink: 0 on the text element (assuming it's a sibling of .nav-icon 
+     and not wrapped—if wrapped, we need to apply flex-grow: 1 to the wrapper. 
+     Since we can't change HTML, we rely on flex-shrink:0 on the items and flex-grow on the count) */
+  .nav-item > span:not(.nav-count) {
+      flex-shrink: 0;
+  }
+
 
   .nav-item.active .nav-icon {
     stroke-width: 2.5;
   }
 
   .nav-count {
-    /* FIX: Keeps the badge locked to the right by pushing the content to the left */
+    /* FIX 7: Keeps the badge locked to the right by using auto margin */
     margin-left: auto;
-    flex-shrink: 0; /* Prevents badge from shrinking */
+    /* This ensures the text area has room to grow without being compressed */
+    flex-shrink: 0; 
     
     font-size: 12px;
     color: #7c7c7c;
