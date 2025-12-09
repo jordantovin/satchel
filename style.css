@@ -51,14 +51,14 @@
     z-index: 1010;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     margin-top: -80px;
-    /* FIX 1: Set explicit height to prevent calculation ambiguity */
+    /* FIX: Set explicit height to prevent calculation ambiguity/snapping */
     height: 70px;
   }
 
   .header-content {
     max-width: 1600px;
     margin: 0 auto;
-    /* FIX 2: Reduce vertical padding to account for 1px border and new fixed height */
+    /* Adjusted vertical padding to fit 70px height (16px top + 36px content + 16px bottom + 1px border = 70px) */
     padding: 16px 24px; 
     display: flex;
     align-items: center;
@@ -119,22 +119,24 @@
 .left-sidebar {
     border-right: 1px solid #ccc;
     position: sticky;
-    /* FIX 3: Reset to 70px to match the new fixed header height */
+    /* FIX: Match header height for perfect vertical alignment */
     top: 70px; 
-    /* Adjust height to match new top value */
     height: calc(100vh - 70px);
     overflow-y: auto;
-    padding-top: 16px;
+    /* Removed padding-top: 16px; Card margin will handle spacing */
+    padding-top: 0; 
 }
 
   .right-sidebar {
     position: sticky;
-    /* FIX 3: Reset to 70px to match the new fixed header height */
+    /* FIX: Match header height for perfect vertical alignment */
     top: 70px;
-    /* Adjust height to match new top value */
     height: calc(100vh - 70px);
     overflow-y: auto;
-    padding-top: 16px;
+    /* Removed padding-top: 16px; Card margin will handle spacing */
+    padding-top: 0;
+    /* FIX: Add padding-left to match the visual spacing of the left sidebar content */
+    padding-left: 16px;
   }
 
   .center-feed {
@@ -143,12 +145,16 @@
     padding-top: 16px;
   }
 
+/* --- Sidebar Card Spacing Adjustments --- */
+
 .sidebar-card {
     background: transparent;
     border: none;
     border-radius: 0;
     padding: 0;
     margin-bottom: 16px;
+    /* Added top margin to compensate for removed .left-sidebar padding-top */
+    margin-top: 16px; 
 }
 
 .stats-card {
@@ -157,6 +163,8 @@
     border-radius: 8px;
     padding: 16px;
     margin-bottom: 16px;
+    /* Added top margin to compensate for removed .right-sidebar padding-top */
+    margin-top: 16px; 
 }
 
 .sidebar-card:hover {
@@ -461,6 +469,8 @@
     border-radius: 8px;
     padding: 20px;
     margin-bottom: 16px;
+    /* Added top margin to compensate for removed .right-sidebar padding-top */
+    margin-top: 16px;
   }
 
   .about-title {
@@ -1177,7 +1187,7 @@
     position: fixed;
     top: 70px;
     left: 0;
-    width: 280px;
+    width: 240px;
     height: calc(100vh - 70px);
     background: white;
     z-index: 1005;
