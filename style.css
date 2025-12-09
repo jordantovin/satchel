@@ -1,5 +1,5 @@
 * { box-sizing: border-box; }
-  
+   
   body { 
     margin: 0; 
     padding: 0;
@@ -103,7 +103,8 @@
   .main-container {
     max-width: 1600px;
     margin: 0 auto;
-    padding: 16px 24px 0 24px;
+    /* CHANGE 1: Top padding removed so sidebar border touches top */
+    padding: 0 24px 0 24px;
     display: grid;
     grid-template-columns: 280px 1fr 320px;
     gap: 24px;
@@ -117,10 +118,14 @@
     top: 82px; 
     height: calc(100vh);
     overflow-y: auto;
+    /* CHANGE 2: Padding moved inside the sidebar */
+    padding-top: 16px;
 }
   .center-feed {
     min-height: 100vh;
     position: relative;
+    /* CHANGE 3: Padding added here to keep alignment with sidebar */
+    padding-top: 16px;
   }
 
 .sidebar-card {
@@ -595,7 +600,7 @@
       grid-template-columns: repeat(1, 1fr);
     }
   }
-  
+   
   body.fullscreen-mode .articles-grid {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -769,7 +774,7 @@
     }
     .right-sidebar { display: none; }
   }
-  
+   
   @keyframes fadeIn {
     from {
       opacity: 0;
@@ -868,7 +873,7 @@
     padding: 0;
     padding-top: 0 !important;
   }
-  
+   
   /* Adjust toggle position in fullscreen mode */
   body.fullscreen-mode .fullscreen-toggle {
     top: 0px;
@@ -971,7 +976,7 @@
   .info-button {
     display: none;
   }
-  
+   
   .header {
     margin-top: 0;
     position: fixed;
@@ -980,48 +985,48 @@
     right: 0;
     z-index: 1010;
   }
-  
+   
   .header-content {
     padding: 16px;
     gap: 12px;
   }
-  
+   
   .header-actions {
     margin-left: 0;
     max-width: none;
   }
-  
+   
   h1 {
     width: auto;
     font-size: 20px;
     padding-left: 0;
     font-weight: 800;
   }
-  
+   
   .search-box {
     font-size: 15px;
     padding: 10px 16px 10px 40px;
   }
-  
+   
   .main-container {
     padding: 0;
     gap: 0;
     margin-top: -150px;
     grid-template-columns: 1fr;
   }
-  
+   
   .sidebar-card {
     margin-bottom: 12px;
     border-radius: 12px;
   }
-  
+   
   .center-feed {
     padding: 16px;
     padding-top: 0;
     background: white;
     min-height: calc(100vh - 70px);
   }
-  
+   
   .sort-bar {
     border-radius: 12px;
     padding: 10px 14px;
@@ -1029,85 +1034,85 @@
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
-  
+   
   .sort-buttons-left {
     gap: 6px;
     flex-wrap: nowrap;
     white-space: nowrap;
   }
-  
+   
   .sort-btn {
     padding: 8px 16px;
     font-size: 13px;
     flex-shrink: 0;
   }
-  
+   
   .post-card {
     border-radius: 12px;
     margin-bottom: 12px;
   }
-  
+   
   .post-header {
     padding: 14px 16px;
   }
-  
+   
   .post-content {
     padding: 14px 16px;
   }
-  
+   
   .post-title {
     font-size: 17px;
     line-height: 1.35;
   }
-  
+   
   .post-excerpt {
     font-size: 15px;
     line-height: 1.45;
   }
-  
+   
   .post-image {
     max-height: 400px;
   }
-  
+   
   .right-sidebar {
     display: none;
   }
-  
+   
   .nav-item {
     padding: 12px 14px;
     border-radius: 8px;
     margin-bottom: 6px;
     font-size: 15px;
   }
-  
+   
   .nav-icon {
     width: 22px;
     height: 22px;
     margin-right: 12px;
   }
-  
+   
   .nav-count {
     font-size: 13px;
     padding: 3px 10px;
   }
-  
+   
   .sidebar-title {
     font-size: 11px;
     margin-bottom: 14px;
     letter-spacing: 0.8px;
   }
-  
+   
   .mobile-menu-toggle {
     display: flex;
     align-items: center;
     justify-content: center;
   }
-  
+   
   /* Hide fullscreen toggle on mobile */
   .fullscreen-toggle {
     display: none !important;
   }
-  
+   
   /* Fix photographer index width on mobile */
   .photographers-index {
     background: transparent !important;
@@ -1117,39 +1122,39 @@
     max-width: 100vw;
     overflow-x: hidden;
   }
-  
+   
   .alphabet-section {
     margin-bottom: 24px;
     padding: 0;
   }
-  
+   
   .alphabet-letter {
     font-size: 20px;
     margin-bottom: 8px;
   }
-  
+   
   .photographer-grid {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 8px 16px;
     width: 100%;
   }
-  
+   
   .photographer-link {
     font-size: 15px;
     word-wrap: break-word;
     overflow-wrap: break-word;
     hyphens: auto;
   }
-  
+   
   .index-search,
   .index-search-wrapper {
   }
-  
+   
   .random-btn {
     padding: 10px 20px;
     font-size: 13px;
   }
-  
+   
   /* Hide sidebar by default on mobile */
   .left-sidebar {
     position: fixed;
@@ -1165,12 +1170,12 @@
     overflow-y: auto;
     box-shadow: 2px 0 8px rgba(0,0,0,0.1);
   }
-  
+   
   /* Show sidebar when open */
   .left-sidebar.mobile-open {
     transform: translateX(0);
   }
-  
+   
   /* Overlay when menu is open */
   body.menu-open::before {
     content: '';
@@ -1183,7 +1188,7 @@
     z-index: 1004;
     animation: fadeIn 0.3s ease;
   }
-  
+   
   /* Prevent scrolling when menu is open */
   body.menu-open {
     overflow: hidden;
@@ -1195,7 +1200,7 @@
     top: 65px;
     height: calc(100vh - 65px);
   }
-  
+   
   body.menu-open::before {
     top: 65px;
     height: calc(100vh - 65px);
