@@ -64,7 +64,7 @@
 .nav-item {
     display: flex;
     align-items: center;
-    
+    padding-left: 16px; 
     /* Pushes the entire button block 16px from the left edge (Start of black bar) */
     margin-left: 0px; 
     
@@ -98,7 +98,7 @@
     
     /* Internal padding to position content correctly and give space for the badge */
     padding-left: 0; 
-    padding-right: 16px; 
+    padding-left: 16px; 
 }
 
 /* --- Icon Styling (Desktop) --- */
