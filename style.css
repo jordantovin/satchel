@@ -51,12 +51,15 @@
     z-index: 1010;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     margin-top: -80px;
+    /* FIX 1: Set explicit height to prevent calculation ambiguity */
+    height: 70px;
   }
 
   .header-content {
     max-width: 1600px;
     margin: 0 auto;
-    padding: 17px 24px;
+    /* FIX 2: Reduce vertical padding to account for 1px border and new fixed height */
+    padding: 16px 24px; 
     display: flex;
     align-items: center;
     gap: 16px;
@@ -116,20 +119,20 @@
 .left-sidebar {
     border-right: 1px solid #ccc;
     position: sticky;
-    /* FIX: Changed from 70px to 69px to force overlap and eliminate 1px gap */
-    top: 69px; 
+    /* FIX 3: Reset to 70px to match the new fixed header height */
+    top: 70px; 
     /* Adjust height to match new top value */
-    height: calc(100vh - 69px);
+    height: calc(100vh - 70px);
     overflow-y: auto;
     padding-top: 16px;
 }
 
   .right-sidebar {
     position: sticky;
-    /* FIX: Changed from 70px to 69px to force overlap and eliminate 1px gap */
-    top: 69px;
+    /* FIX 3: Reset to 70px to match the new fixed header height */
+    top: 70px;
     /* Adjust height to match new top value */
-    height: calc(100vh - 69px);
+    height: calc(100vh - 70px);
     overflow-y: auto;
     padding-top: 16px;
   }
@@ -996,6 +999,8 @@
     left: 0;
     right: 0;
     z-index: 1010;
+    /* Maintain 70px height for mobile alignment */
+    height: 70px; 
   }
    
   .header-content {
