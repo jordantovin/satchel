@@ -103,7 +103,6 @@
   .main-container {
     max-width: 1600px;
     margin: 0 auto;
-    /* CHANGE 1: Top padding removed so sidebar border touches top */
     padding: 0 24px 0 24px;
     display: grid;
     grid-template-columns: 280px 1fr 320px;
@@ -115,16 +114,27 @@
 .left-sidebar {
     border-right: 1px solid #ccc;
     position: sticky;
-    top: 82px; 
-    height: calc(100vh);
+    /* FIX: Adjusted top value to prevent layout shift/drop */
+    top: 71px; 
+    /* FIX: Adjusted height calculation for scrollable area */
+    height: calc(100vh - 71px);
     overflow-y: auto;
-    /* CHANGE 2: Padding moved inside the sidebar */
     padding-top: 16px;
 }
+
+  .right-sidebar {
+    position: sticky;
+    /* FIX: Adjusted top value to prevent layout shift/drop */
+    top: 71px;
+    /* FIX: Adjusted height calculation for scrollable area */
+    height: calc(100vh - 71px);
+    overflow-y: auto;
+    padding-top: 16px;
+  }
+
   .center-feed {
     min-height: 100vh;
     position: relative;
-    /* CHANGE 3: Padding added here to keep alignment with sidebar */
     padding-top: 16px;
   }
 
