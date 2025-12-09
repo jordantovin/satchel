@@ -103,7 +103,7 @@
   .main-container {
     max-width: 1600px;
     margin: 0 auto;
-    padding: 16px 24px 0 24px;
+    padding: 0px 24px 0 24px;
     display: grid;
     grid-template-columns: 280px 1fr 320px;
     gap: 24px;
