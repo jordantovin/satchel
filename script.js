@@ -1200,7 +1200,6 @@ function render() {
   };
   return;
 }
-      }
 
       if (data && type === "collection4") {
         link.onclick = (e) => {
