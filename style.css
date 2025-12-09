@@ -107,11 +107,11 @@
   .main-container {
     max-width: 1600px;
     margin: 0 auto;
+    /* This defines the main layout margin (24px) */
     padding: 0 24px 0 24px;
     border-top: none;
     margin-top: 0; 
     display: grid;
-    /* UPDATED: Left sidebar width reduced from 280px to 240px */
     grid-template-columns: 240px 1fr 320px;
     gap: 24px;
     position: relative;
@@ -133,6 +133,8 @@
     height: calc(100vh - 70px);
     overflow-y: auto;
     padding-top: 0;
+    /* Padding-left on right-sidebar content should match the left padding, 
+       but for the right side we rely on the card's internal padding */
     padding-left: 16px;
   }
 
@@ -142,7 +144,7 @@
     padding-top: 16px;
   }
 
-/* --- Sidebar Card Spacing Adjustments --- */
+/* --- Sidebar Card Spacing Adjustments (THE FIX) --- */
 
 .sidebar-card {
     background: transparent;
@@ -151,6 +153,9 @@
     padding: 0;
     margin-bottom: 16px;
     margin-top: 16px; 
+    /* FIX: Add 24px padding to push navigation items inwards, 
+       matching the layout's primary horizontal margin. */
+    padding-left: 24px;
 }
 
 .stats-card {
@@ -189,7 +194,8 @@
   .nav-item {
     display: flex;
     align-items: center;
-    padding: 10px 12px;
+    /* Use padding to set internal spacing */
+    padding: 10px 12px; 
     border-radius: 6px;
     cursor: pointer;
     font-size: 14px;
@@ -199,10 +205,20 @@
   }
 
   .nav-item:hover { background: #f6f7f8; }
+  
   .nav-item.active { 
     background: #1c1c1c; 
     color: white; 
     font-weight: 700;
+    /* FIX: Negative margin to counteract the .sidebar-card padding and start the background flush with the grid boundary */
+    margin-left: -24px; 
+    /* FIX: Increase padding-left to push the text back in by 24px */
+    padding-left: 24px; 
+    /* Ensure the active background spans the full width of the cell */
+    width: calc(100% + 24px); 
+    /* Adjusted padding-right for symmetry */
+    padding-right: 12px !important; 
+    margin-right: 0 !important; 
   }
 
   .nav-icon {
@@ -215,11 +231,6 @@
   .nav-item.active .nav-icon {
     stroke-width: 2.5;
   }
-
-.nav-item.active {
-    padding-right: 20px !important;
-    margin-right: 6px !important; 
-}
 
   .nav-count {
     margin-left: auto;
@@ -789,7 +800,6 @@
 
   @media (max-width: 1200px) {
     .main-container {
-      /* UPDATED: Reduced from 240px 1fr to 200px 1fr */
       grid-template-columns: 200px 1fr;
     }
     .right-sidebar { display: none; }
