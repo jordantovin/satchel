@@ -193,6 +193,11 @@
     stroke-width: 2.5;
   }
 
+.nav-item.active {
+    padding-right: 20px !important;
+    margin-right: 6px !important; 
+}
+
   .nav-count {
     margin-left: auto;
     font-size: 12px;
