@@ -32,6 +32,183 @@
     outline: none !important;
   }
 
+/* ------------------------------------------- */
+/* 🚀 CONSOLIDATED LEFT SIDEBAR CODE START 🚀 */
+/* ------------------------------------------- */
+
+/* --- LEFT SIDEBAR CONTAINER (Desktop) --- */
+.left-sidebar {
+    border-right: 1px solid #ccc;
+    position: sticky;
+    top: 70px; 
+    height: calc(100vh - 70px);
+    overflow-y: auto;
+    /* Flush left, no padding on the container */
+    padding: 0; 
+}
+
+/* --- Sidebar Titles (POSTS / INDEXES) (Desktop) --- */
+.sidebar-title {
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #7c7c7c;
+    /* Pushes title content 16px from the left container edge */
+    padding-left: 16px; 
+    margin-bottom: 12px;
+    margin-top: 16px; 
+}
+
+/* --- Navigation Item (Default / Hover) (Desktop) --- */
+.nav-item {
+    display: flex;
+    align-items: center;
+    
+    /* Pushes the entire button block 16px from the left edge (Start of black bar) */
+    margin-left: 0px; 
+    
+    /* Set width to leave 16px space on the right (16px left margin + 16px right margin = 32px removed from 100% width) */
+    width: calc(100% - 32px); 
+    
+    /* Minimal vertical padding, no horizontal padding */
+    padding: 10px 0; 
+    
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    transition: background 0.2s;
+}
+
+.nav-item:hover { 
+    /* Extends hover background from content start to the right margin */
+    background: #f6f7f8; 
+}
+  
+/* --- Navigation Item (Active) (Desktop) --- */
+.nav-item.active { 
+    background: #1c1c1c; 
+    color: white; 
+    font-weight: 700;
+    
+    /* Ensures the active bar stays contained within the 16px right margin */
+    margin-right: 16px; 
+    
+    /* Internal padding to position content correctly and give space for the badge */
+    padding-left: 0; 
+    padding-right: 16px; 
+}
+
+/* --- Icon Styling (Desktop) --- */
+.nav-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    flex-shrink: 0; 
+    stroke-width: 2;
+}
+
+.nav-item.active .nav-icon {
+    stroke-width: 2.5;
+}
+   
+/* Prevents the text content next to the icon from shrinking */
+.nav-item > span:not(.nav-count) {
+    flex-shrink: 0;
+}
+
+/* --- Count Badge Styling (Desktop) --- */
+.nav-count {
+    /* Pushes the badge to the far right of the button block */
+    margin-left: auto;
+    flex-shrink: 0; 
+    
+    font-size: 12px;
+    color: #7c7c7c;
+    background: #f6f7f8;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.nav-item.active .nav-count {
+    background: rgba(255,255,255,0.2);
+    color: white;
+}
+
+/* --- Mobile Overrides (Applies when screen width is 900px or less) --- */
+@media (max-width: 900px) {
+    
+    /* Left Sidebar Container Mobile */
+    .left-sidebar {
+        position: fixed;
+        top: 70px; /* or 65px for smaller screens */
+        left: 0;
+        width: 280px;
+        height: calc(100vh - 70px); /* or 65px for smaller screens */
+        background: white;
+        z-index: 1005;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        padding: 16px;
+        overflow-y: auto;
+        box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+        border-right: none;
+    }
+    
+    /* Show sidebar when open */
+    .left-sidebar.mobile-open {
+        transform: translateX(0);
+    }
+    
+    /* Sidebar Titles Mobile */
+    .sidebar-title {
+        font-size: 11px;
+        margin-bottom: 14px;
+        letter-spacing: 0.8px;
+        padding-left: 0; /* Align full left on mobile menu */
+    }
+    
+    /* Navigation Item Mobile (Default/Active) */
+    .nav-item {
+        padding: 12px 14px; /* Adjust padding for touch target */
+        border-radius: 8px;
+        margin-bottom: 6px;
+        font-size: 15px;
+        margin-left: 0; /* Align full left on mobile menu */
+        width: 100%; /* Take full width on mobile menu */
+    }
+    
+    .nav-item.active {
+        margin-right: 0; /* Ensures active bar takes full width of the mobile menu */
+    }
+    
+    /* Icon Styling Mobile */
+    .nav-icon {
+        width: 22px;
+        height: 22px;
+        margin-right: 12px;
+    }
+    
+    /* Count Badge Styling Mobile */
+    .nav-count {
+        font-size: 13px;
+        padding: 3px 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .left-sidebar {
+        top: 65px;
+        height: calc(100vh - 65px);
+    }
+}
+
+/* ------------------------------------------- */
+/* 🛑 CONSOLIDATED LEFT SIDEBAR CODE END 🛑 */
+/* ------------------------------------------- */
+
   .satchel-cover {
     position: fixed;
     top: -120px;
@@ -114,16 +291,6 @@
     z-index: 1001;
   }
 
-.left-sidebar {
-    border-right: 1px solid #ccc;
-    position: sticky;
-    top: 70px; 
-    height: calc(100vh - 70px);
-    overflow-y: auto;
-    /* FIX 1: Remove all padding from the sidebar wrapper to make it flush left */
-    padding: 0; 
-}
-
   .right-sidebar {
     position: sticky;
     top: 70px;
@@ -164,18 +331,6 @@
     border: none;
 }
 
-  .sidebar-title, .stats-title {
-    font-weight: 700;
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: #7c7c7c;
-    /* FIX 2: Add 16px left padding to titles for alignment */
-    padding-left: 16px; 
-    margin-bottom: 12px;
-    margin-top: 16px; 
-  }
-
   .stats-title {
     font-size: 16px;
     text-transform: none;
@@ -186,81 +341,7 @@
     align-items: center;
     padding-left: 0; 
   }
-
-  .nav-item {
-    display: flex;
-    align-items: center;
-    /* FIX 3: Set 16px left margin to position the element */
-    margin-left: 16px; 
-    /* Set 0 padding to ensure content doesn't shift */
-    padding: 10px 0; 
-    
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    margin-bottom: 4px;
-    transition: background 0.2s;
-    
-    /* FIX 4: Set width to leave 16px on the right side for the margin/padding */
-    width: calc(100% - 32px); 
-  }
-
-  .nav-item:hover { background: #f6f7f8; }
-  
-  .nav-item.active { 
-    background: #1c1c1c; 
-    color: white; 
-    font-weight: 700;
-    
-    /* FIX 5: Remove the default right margin set by the non-active state hover background */
-    margin-right: 16px; 
-    
-    /* FIX 6: Apply the padding internally to position the text/icon relative to the button */
-    padding-left: 0; /* Keep the content flush with the start of the black bar */
-    padding-right: 16px; /* This padding provides space for the badge */
-  }
-
-  /* This is crucial to ensure the text/icon starts at 16px from the container edge */
-  .nav-item .nav-icon {
-      margin-left: 0; /* Ensures icon is flush with the start of the nav-item box */
-  }
-
-  .nav-icon {
-    width: 20px;
-    height: 20px;
-    margin-right: 10px;
-    flex-shrink: 0; 
-    stroke-width: 2;
-  }
    
-  /* This prevents the text from shrinking */
-  .nav-item > span:not(.nav-count) {
-      flex-shrink: 0;
-  }
-
-
-  .nav-item.active .nav-icon {
-    stroke-width: 2.5;
-  }
-
-  .nav-count {
-    /* Keeps the badge locked to the right by using auto margin */
-    margin-left: auto;
-    flex-shrink: 0; 
-    
-    font-size: 12px;
-    color: #7c7c7c;
-    background: #f6f7f8;
-    padding: 2px 8px;
-    border-radius: 10px;
-  }
-
-  .nav-item.active .nav-count {
-    background: rgba(255,255,255,0.2);
-    color: white;
-  }
-
   .sort-bar {
     background: white;
     border: 1px solid #ccc;
@@ -938,10 +1019,12 @@
       padding-top: 65px;
     }
 
-.left-sidebar {
-    padding: 12px;
-    border-right: 1px solid #ccc; /* <- the clean vertical line */
-}
+    /* .left-sidebar is now managed in the consolidated block above */
+    .left-sidebar {
+        /* This rule must remain here for the 480px break point specific padding */
+        padding: 12px;
+        border-right: 1px solid #ccc; 
+    }
 
     .center-feed {
       padding: 12px;
@@ -1124,29 +1207,8 @@
     display: none;
   }
    
-  .nav-item {
-    padding: 12px 14px;
-    border-radius: 8px;
-    margin-bottom: 6px;
-    font-size: 15px;
-  }
-   
-  .nav-icon {
-    width: 22px;
-    height: 22px;
-    margin-right: 12px;
-  }
-   
-  .nav-count {
-    font-size: 13px;
-    padding: 3px 10px;
-  }
-   
-  .sidebar-title {
-    font-size: 11px;
-    margin-bottom: 14px;
-    letter-spacing: 0.8px;
-  }
+  /* The .nav-item, .nav-icon, .nav-count, and .sidebar-title styles are now 
+     managed within the consolidated block at the top, which includes this media query's overrides. */
    
   .mobile-menu-toggle {
     display: flex;
@@ -1202,20 +1264,7 @@
   }
    
   /* Hide sidebar by default on mobile */
-  .left-sidebar {
-    position: fixed;
-    top: 70px;
-    left: 0;
-    width: 280px;
-    height: calc(100vh - 70px);
-    background: white;
-    z-index: 1005;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-    padding: 16px;
-    overflow-y: auto;
-    box-shadow: 2px 0 8px rgba(0,0,0,0.1);
-  }
+  /* .left-sidebar positioning is managed in the consolidated block above */
    
   /* Show sidebar when open */
   .left-sidebar.mobile-open {
@@ -1242,10 +1291,7 @@
 }
 
 @media (max-width: 480px) {
-  .left-sidebar {
-    top: 65px;
-    height: calc(100vh - 65px);
-  }
+    /* .left-sidebar top/height adjustment is managed in the consolidated block above */
    
   body.menu-open::before {
     top: 65px;
