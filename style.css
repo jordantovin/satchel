@@ -45,7 +45,6 @@
 
   .header {
     background: white;
-    /* FIX: Added border-bottom back to restore the horizontal line */
     border-bottom: 1px solid #ccc;
     position: sticky;
     top: 0;
@@ -105,7 +104,6 @@
     max-width: 1600px;
     margin: 0 auto;
     padding: 0 24px 0 24px;
-    /* REVERTED: Removed border-top and negative margin-top */
     border-top: none;
     margin-top: 0; 
     display: grid;
@@ -118,21 +116,21 @@
 .left-sidebar {
     border-right: 1px solid #ccc;
     position: sticky;
-    /* FIX: Adjusted top and height to align perfectly under the header (~70px tall) */
-    top: 70px; 
-    height: calc(100vh - 70px);
+    /* FIX: Changed from 70px to 69px to force overlap and eliminate 1px gap */
+    top: 69px; 
+    /* Adjust height to match new top value */
+    height: calc(100vh - 69px);
     overflow-y: auto;
-    /* FIX: Adjusted padding back to original */
     padding-top: 16px;
 }
 
   .right-sidebar {
     position: sticky;
-    /* FIX: Adjusted top and height to align perfectly under the header (~70px tall) */
-    top: 70px;
-    height: calc(100vh - 70px);
+    /* FIX: Changed from 70px to 69px to force overlap and eliminate 1px gap */
+    top: 69px;
+    /* Adjust height to match new top value */
+    height: calc(100vh - 69px);
     overflow-y: auto;
-    /* FIX: Adjusted padding back to original */
     padding-top: 16px;
   }
 
