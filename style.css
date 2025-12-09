@@ -107,6 +107,8 @@
     padding: 0 24px 0 24px;
     /* NEW: Added border-top for visual continuity with sidebar border-right */
     border-top: 1px solid #ccc;
+    /* FIX: Pull the container border up 1px to align perfectly with the sticky header */
+    margin-top: -1px;
     display: grid;
     grid-template-columns: 280px 1fr 320px;
     gap: 24px;
@@ -117,22 +119,24 @@
 .left-sidebar {
     border-right: 1px solid #ccc;
     position: sticky;
-    /* CHANGE: Reduced top to 70px */
-    top: 70px; 
+    /* CHANGE: Reduced top to 69px to account for the -1px margin and top border */
+    top: 69px; 
     /* CHANGE: Adjusted height calculation */
-    height: calc(100vh - 70px);
+    height: calc(100vh - 69px);
     overflow-y: auto;
-    padding-top: 16px;
+    /* CHANGE: Adjusted padding to 17px to make the content sit correctly below the new border line */
+    padding-top: 17px;
 }
 
   .right-sidebar {
     position: sticky;
-    /* CHANGE: Reduced top to 70px */
-    top: 70px;
+    /* CHANGE: Reduced top to 69px to account for the -1px margin and top border */
+    top: 69px;
     /* CHANGE: Adjusted height calculation */
-    height: calc(100vh - 70px);
+    height: calc(100vh - 69px);
     overflow-y: auto;
-    padding-top: 16px;
+    /* CHANGE: Adjusted padding to 17px to make the content sit correctly below the new border line */
+    padding-top: 17px;
   }
 
   .center-feed {
