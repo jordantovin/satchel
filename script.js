@@ -1162,26 +1162,44 @@ function render() {
       const type = link.dataset.type;
 
       if (type === "jordan") {
-        const item = JSON.parse(data);
+  const item = JSON.parse(data);
 
-        // If has image, show fullscreen
-        if (item.image && item.image.trim() !== "") {
-          link.onclick = (e) => {
-            e.preventDefault();
-            document.getElementById('stickerFullscreenImage').src = item.image;
+  // FIRST: if the post has a LINK → always open the link (correct behavior)
+  if (item.url && item.url !== "#" && item.url.trim() !== "") {
+    link.onclick = (e) => {
+      e.preventDefault();
+      const d = JSON.parse(link.dataset.articleLink);
+      addToHistory(d);
+      window.open(item.url, "_blank");
+    };
+    return;
+  }
 
-            document.getElementById('stickerFullscreenDate').textContent = "";
-            document.getElementById('stickerFullscreenLocation').textContent = "";
-            document.getElementById('stickerFullscreenMedium').textContent = "";
-            document.getElementById('stickerFullscreenArtist').textContent = "";
+  // SECOND: if no link but HAS an image → open fullscreen
+  if (item.image && item.image.trim() !== "") {
+    link.onclick = (e) => {
+      e.preventDefault();
+      document.getElementById('stickerFullscreenImage').src = item.image;
 
-            document.getElementById('stickerFullscreen').classList.add('active');
-            document.body.style.overflow = 'hidden';
+      document.getElementById('stickerFullscreenDate').textContent = "";
+      document.getElementById('stickerFullscreenLocation').textContent = "";
+      document.getElementById('stickerFullscreenMedium').textContent = "";
+      document.getElementById('stickerFullscreenArtist').textContent = "";
 
-            addToHistory({ url: item.url, title: item.title, image: item.image });
-          };
-          return;
-        }
+      document.getElementById('stickerFullscreen').classList.add('active');
+      document.body.style.overflow = 'hidden';
+
+      addToHistory({ url: item.url, title: item.title, image: item.image });
+    };
+    return;
+  }
+
+  // LAST: no link and no image → do nothing
+  link.onclick = (e) => {
+    e.preventDefault();
+  };
+  return;
+}
 
         // If has link but no image, open link
         if (item.url && item.url !== "#") {
