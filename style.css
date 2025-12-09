@@ -120,8 +120,8 @@
     top: 70px; 
     height: calc(100vh - 70px);
     overflow-y: auto;
-    /* FIX: Add 16px padding to the left and right of the entire sidebar content area */
-    padding: 0 16px; 
+    /* FIX: Remove left padding from the sidebar itself to meet the requirement */
+    padding: 0 0 0 0; 
 }
 
   .right-sidebar {
@@ -147,7 +147,7 @@
     border-radius: 0;
     padding: 0;
     margin-bottom: 16px;
-    /* Removed padding-top here as it's handled by .sidebar-title's margin-top */
+    margin-top: 16px; 
 }
 
 .stats-card {
@@ -170,10 +170,10 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: #7c7c7c;
-    /* FIX: Removed padding-left since .left-sidebar now has 16px padding */
-    padding-left: 0; 
+    /* FIX: Add 16px padding to titles for alignment */
+    padding-left: 16px; 
     margin-bottom: 12px;
-    margin-top: 16px; /* Space above the first element */
+    margin-top: 16px; 
   }
 
   .stats-title {
@@ -190,8 +190,8 @@
   .nav-item {
     display: flex;
     align-items: center;
-    /* FIX: Removed 16px padding on left/right since the parent handles the margin now */
-    padding: 10px 0; 
+    /* FIX: Add 16px left padding for all items */
+    padding: 10px 0 10px 16px; 
     border-radius: 6px;
     cursor: pointer;
     font-size: 14px;
@@ -206,13 +206,13 @@
     background: #1c1c1c; 
     color: white; 
     font-weight: 700;
-    /* Reset margins and width to fill 100% of the padded parent container */
-    margin-left: 0 !important; 
-    width: 100%;
-    
-    /* Re-add padding back to the content for text alignment */
-    padding: 10px 16px; 
+    /* FIX: Implement the right margin using width/margin combination */
+    width: calc(100% - 16px);
+    margin-left: 16px; 
     margin-right: 0 !important;
+    
+    /* FIX: Ensure internal content padding is correct */
+    padding: 10px 16px 10px 16px; 
   }
 
   .nav-icon {
@@ -227,7 +227,10 @@
   }
 
   .nav-count {
+    /* FIX: Keeps the badge locked to the right by pushing the content to the left */
     margin-left: auto;
+    flex-shrink: 0; /* Prevents badge from shrinking */
+    
     font-size: 12px;
     color: #7c7c7c;
     background: #f6f7f8;
