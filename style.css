@@ -51,7 +51,6 @@
     z-index: 1010;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     margin-top: -80px;
-    /* FIX: Set explicit height to prevent calculation ambiguity/snapping */
     height: 70px;
   }
 
@@ -71,9 +70,7 @@
     font-weight: 700;
     cursor: pointer;
     flex-shrink: 0;
-    /* UPDATED: Narrower width to match new grid column */
     width: 240px; 
-    /* UPDATED: Removed padding-left to align flush with main container padding */
     padding-left: 0;
   }
 
@@ -107,7 +104,6 @@
   .main-container {
     max-width: 1600px;
     margin: 0 auto;
-    /* This defines the main layout margin (24px) */
     padding: 0 24px 0 24px;
     border-top: none;
     margin-top: 0; 
@@ -133,8 +129,7 @@
     height: calc(100vh - 70px);
     overflow-y: auto;
     padding-top: 0;
-    /* Padding-left on right-sidebar content should match the left padding, 
-       but for the right side we rely on the card's internal padding */
+    /* FIX: Set 16px padding on the right sidebar */
     padding-left: 16px;
   }
 
@@ -144,18 +139,16 @@
     padding-top: 16px;
   }
 
-/* --- Sidebar Card Spacing Adjustments (THE FIX) --- */
+/* --- Sidebar Card Spacing Adjustments --- */
 
 .sidebar-card {
     background: transparent;
     border: none;
     border-radius: 0;
+    /* FIX: Remove previous padding adjustments */
     padding: 0;
     margin-bottom: 16px;
     margin-top: 16px; 
-    /* FIX: Add 24px padding to push navigation items inwards, 
-       matching the layout's primary horizontal margin. */
-    padding-left: 24px;
 }
 
 .stats-card {
@@ -178,6 +171,8 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: #7c7c7c;
+    /* FIX: Added left padding for symmetry */
+    padding-left: 16px; 
     margin-bottom: 12px;
   }
 
@@ -189,13 +184,15 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    /* Remove padding-left here as .stats-card already has 16px padding */
+    padding-left: 0; 
   }
 
   .nav-item {
     display: flex;
     align-items: center;
-    /* Use padding to set internal spacing */
-    padding: 10px 12px; 
+    /* FIX: Set 16px internal padding for symmetry */
+    padding: 10px 16px; 
     border-radius: 6px;
     cursor: pointer;
     font-size: 14px;
@@ -210,15 +207,12 @@
     background: #1c1c1c; 
     color: white; 
     font-weight: 700;
-    /* FIX: Negative margin to counteract the .sidebar-card padding and start the background flush with the grid boundary */
-    margin-left: -24px; 
-    /* FIX: Increase padding-left to push the text back in by 24px */
-    padding-left: 24px; 
-    /* Ensure the active background spans the full width of the cell */
-    width: calc(100% + 24px); 
-    /* Adjusted padding-right for symmetry */
-    padding-right: 12px !important; 
+    /* FIX: Reset all conflicting properties */
+    margin-left: 0; 
+    padding-left: 16px; 
+    padding-right: 16px !important;
     margin-right: 0 !important; 
+    width: 100%;
   }
 
   .nav-icon {
@@ -402,8 +396,9 @@
 
   .history-item:hover {
     background: #f6f7f8;
-    margin: 0 -8px;
-    padding: 10px 8px;
+    /* FIX: Match margin/padding to right-sidebar's 16px padding */
+    margin: 0 -16px; 
+    padding: 10px 16px; 
     border-radius: 4px;
   }
 
@@ -1014,7 +1009,6 @@
     left: 0;
     right: 0;
     z-index: 1010;
-    /* Maintain 70px height for mobile alignment */
     height: 70px; 
   }
    
