@@ -1200,23 +1200,6 @@ function render() {
   };
   return;
 }
-
-        // If has link but no image, open link
-        if (item.url && item.url !== "#") {
-          link.onclick = (e) => {
-            e.preventDefault();
-            const d = JSON.parse(link.dataset.articleLink);
-            addToHistory(d);
-            window.open(item.url, "_blank");
-          };
-          return;
-        }
-
-        // If no link and no image, do nothing (prevent default)
-        link.onclick = (e) => {
-          e.preventDefault();
-        };
-        return;
       }
 
       if (data && type === "collection4") {
