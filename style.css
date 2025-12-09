@@ -113,8 +113,11 @@
 
 .left-sidebar {
     border-right: 1px solid #ccc;
+    position: sticky;
+    top: 82px; /* THIS makes it actually stick */
+    height: calc(100vh - 82px); /* optional but recommended */
+    overflow-y: auto; /* optional but recommended */
 }
-
   .center-feed {
     min-height: 100vh;
     position: relative;
