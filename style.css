@@ -114,7 +114,7 @@
 .left-sidebar {
     border-right: 1px solid #ccc;
     position: sticky;
-    top: 0; 
+    top: 82px; 
     height: calc(100vh);
     overflow-y: auto;
 }
