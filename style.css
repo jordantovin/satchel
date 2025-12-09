@@ -190,14 +190,20 @@
   .nav-item {
     display: flex;
     align-items: center;
-    /* FIX 3: Use 16px left padding for all items to push content away from the edge */
-    padding: 10px 16px 10px 16px; 
+    /* FIX 3: Set 16px left margin to position the element */
+    margin-left: 16px; 
+    /* Set 0 padding to ensure content doesn't shift */
+    padding: 10px 0; 
+    
     border-radius: 6px;
     cursor: pointer;
     font-size: 14px;
     font-weight: 500;
     margin-bottom: 4px;
     transition: background 0.2s;
+    
+    /* FIX 4: Set width to leave 16px on the right side for the margin/padding */
+    width: calc(100% - 32px); 
   }
 
   .nav-item:hover { background: #f6f7f8; }
@@ -207,30 +213,28 @@
     color: white; 
     font-weight: 700;
     
-    /* FIX 4: Use a negative margin-left to pull the background flush left,
-             while maintaining the content's 16px left padding. */
-    margin-left: -16px; 
-    /* The active background will span from -16px to 100% of the original width.
-       The original width includes 16px padding on the right side, which now acts as the margin. */
-    width: calc(100% + 16px);
+    /* FIX 5: Remove the default right margin set by the non-active state hover background */
+    margin-right: 16px; 
     
-    /* Ensure internal content padding is correct (keeps content centered, 
-       but the right padding on the content is now what ensures the badge isn't too close) */
-    padding: 10px 16px 10px 16px; 
+    /* FIX 6: Apply the padding internally to position the text/icon relative to the button */
+    padding-left: 0; /* Keep the content flush with the start of the black bar */
+    padding-right: 16px; /* This padding provides space for the badge */
+  }
+
+  /* This is crucial to ensure the text/icon starts at 16px from the container edge */
+  .nav-item .nav-icon {
+      margin-left: 0; /* Ensures icon is flush with the start of the nav-item box */
   }
 
   .nav-icon {
     width: 20px;
     height: 20px;
     margin-right: 10px;
-    /* FIX 5: Use flex-shrink: 0 on the icon to prevent it from condensing */
     flex-shrink: 0; 
     stroke-width: 2;
   }
    
-  /* FIX 6: Use flex-shrink: 0 on the text element (assuming it's a sibling of .nav-icon 
-     and not wrapped—if wrapped, we need to apply flex-grow: 1 to the wrapper. 
-     Since we can't change HTML, we rely on flex-shrink:0 on the items and flex-grow on the count) */
+  /* This prevents the text from shrinking */
   .nav-item > span:not(.nav-count) {
       flex-shrink: 0;
   }
@@ -241,9 +245,8 @@
   }
 
   .nav-count {
-    /* FIX 7: Keeps the badge locked to the right by using auto margin */
+    /* Keeps the badge locked to the right by using auto margin */
     margin-left: auto;
-    /* This ensures the text area has room to grow without being compressed */
     flex-shrink: 0; 
     
     font-size: 12px;
