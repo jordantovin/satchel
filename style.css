@@ -45,7 +45,8 @@
 
   .header {
     background: white;
-    border-bottom: 1px solid #ccc;
+    /* CHANGE: Removed border-bottom */
+    border-bottom: none;
     position: sticky;
     top: 0;
     z-index: 1010;
@@ -104,6 +105,8 @@
     max-width: 1600px;
     margin: 0 auto;
     padding: 0 24px 0 24px;
+    /* NEW: Added border-top for visual continuity with sidebar border-right */
+    border-top: 1px solid #ccc;
     display: grid;
     grid-template-columns: 280px 1fr 320px;
     gap: 24px;
@@ -114,20 +117,20 @@
 .left-sidebar {
     border-right: 1px solid #ccc;
     position: sticky;
-    /* FIX: Adjusted top value to prevent layout shift/drop */
-    top: 71px; 
-    /* FIX: Adjusted height calculation for scrollable area */
-    height: calc(100vh - 71px);
+    /* CHANGE: Reduced top to 70px */
+    top: 70px; 
+    /* CHANGE: Adjusted height calculation */
+    height: calc(100vh - 70px);
     overflow-y: auto;
     padding-top: 16px;
 }
 
   .right-sidebar {
     position: sticky;
-    /* FIX: Adjusted top value to prevent layout shift/drop */
-    top: 71px;
-    /* FIX: Adjusted height calculation for scrollable area */
-    height: calc(100vh - 71px);
+    /* CHANGE: Reduced top to 70px */
+    top: 70px;
+    /* CHANGE: Adjusted height calculation */
+    height: calc(100vh - 70px);
     overflow-y: auto;
     padding-top: 16px;
   }
