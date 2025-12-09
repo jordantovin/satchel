@@ -45,8 +45,8 @@
 
   .header {
     background: white;
-    /* CHANGE: Removed border-bottom */
-    border-bottom: none;
+    /* FIX: Added border-bottom back to restore the horizontal line */
+    border-bottom: 1px solid #ccc;
     position: sticky;
     top: 0;
     z-index: 1010;
@@ -105,10 +105,9 @@
     max-width: 1600px;
     margin: 0 auto;
     padding: 0 24px 0 24px;
-    /* NEW: Added border-top for visual continuity with sidebar border-right */
-    border-top: 1px solid #ccc;
-    /* FIX: Pull the container border up 1px to align perfectly with the sticky header */
-    margin-top: -1px;
+    /* REVERTED: Removed border-top and negative margin-top */
+    border-top: none;
+    margin-top: 0; 
     display: grid;
     grid-template-columns: 280px 1fr 320px;
     gap: 24px;
@@ -119,24 +118,22 @@
 .left-sidebar {
     border-right: 1px solid #ccc;
     position: sticky;
-    /* CHANGE: Reduced top to 69px to account for the -1px margin and top border */
-    top: 69px; 
-    /* CHANGE: Adjusted height calculation */
-    height: calc(100vh - 69px);
+    /* FIX: Adjusted top and height to align perfectly under the header (~70px tall) */
+    top: 70px; 
+    height: calc(100vh - 70px);
     overflow-y: auto;
-    /* CHANGE: Adjusted padding to 17px to make the content sit correctly below the new border line */
-    padding-top: 17px;
+    /* FIX: Adjusted padding back to original */
+    padding-top: 16px;
 }
 
   .right-sidebar {
     position: sticky;
-    /* CHANGE: Reduced top to 69px to account for the -1px margin and top border */
-    top: 69px;
-    /* CHANGE: Adjusted height calculation */
-    height: calc(100vh - 69px);
+    /* FIX: Adjusted top and height to align perfectly under the header (~70px tall) */
+    top: 70px;
+    height: calc(100vh - 70px);
     overflow-y: auto;
-    /* CHANGE: Adjusted padding to 17px to make the content sit correctly below the new border line */
-    padding-top: 17px;
+    /* FIX: Adjusted padding back to original */
+    padding-top: 16px;
   }
 
   .center-feed {
