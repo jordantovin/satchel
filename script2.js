@@ -102,6 +102,10 @@ function filterPosts(arr) {
 
 async function loadAllData() {
   try {
+    // Show loading state
+    const feed = document.getElementById("feedItems");
+    feed.innerHTML = '<div style="text-align: center; padding: 60px 20px; color: #7c7c7c;"><div style="font-size: 16px;">Loading posts...</div></div>';
+    
     const [res1, res2, res3, res4, res5, res6, res7] = await Promise.all([
       fetch(sheetURL1),
       fetch(sheetURL2),
@@ -319,9 +323,16 @@ async function loadAllData() {
     updateHistory();
     document.getElementById('countSaved').textContent = savedPosts.length;
 
+    // Initialize icons first
     lucide.createIcons();
-    render();
+    
+    // Force immediate render
+    setTimeout(() => {
+      render();
+    }, 0);
   } catch (error) {
     console.error("Error loading data:", error);
+    const feed = document.getElementById("feedItems");
+    feed.innerHTML = '<div style="text-align: center; padding: 60px 20px; color: #7c7c7c;"><div style="font-size: 16px; color: #d9534f;">Error loading data. Please refresh the page.</div></div>';
   }
 }
