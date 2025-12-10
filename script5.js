@@ -88,6 +88,21 @@ function render() {
     const isPhoto = post.collection === 'photos';
     const fullscreenData = (isSticker || isObject || isJordan || isPhoto) ? JSON.stringify(post) : '';
     
+    // Build post content based on type
+    let postExtraContent = '';
+    if (isPhoto) {
+      // Photos: only show the note text if it exists, no labels
+      if (post.text) {
+        postExtraContent = `<div class="post-excerpt">${post.text}</div>`;
+      }
+    } else {
+      // Other post types: show their usual fields
+      if (post.text) postExtraContent += `<div class="post-excerpt">${post.text}</div>`;
+      if (post.medium) postExtraContent += `<div class="post-excerpt"><strong>Medium:</strong> ${post.medium}</div>`;
+      if (post.location) postExtraContent += `<div class="post-excerpt"><strong>Location:</strong> ${post.location}</div>`;
+      if (post.notes) postExtraContent += `<div class="post-excerpt"><strong>Notes:</strong> ${post.notes}</div>`;
+    }
+    
     item.innerHTML = `
       <a href="${post.url}" target="_blank" style="display: block; color: inherit;" data-article-link='${JSON.stringify({url: post.url, title: post.title, image: post.image || ''})}' data-fullscreen-data='${fullscreenData}' data-type='${post.collection}'>
         <div class="post-header">
@@ -104,10 +119,7 @@ function render() {
            : `<img class="post-image" src="${post.image}" alt="${post.title}" loading="lazy">`}
         <div class="post-content">
           <div class="post-title">${post.title}</div>
-          ${post.text ? `<div class="post-excerpt">${post.text}</div>` : ''}
-          ${post.medium ? `<div class="post-excerpt"><strong>Medium:</strong> ${post.medium}</div>` : ''}
-          ${post.location ? `<div class="post-excerpt"><strong>Location:</strong> ${post.location}</div>` : ''}
-          ${post.notes ? `<div class="post-excerpt"><strong>Notes:</strong> ${post.notes}</div>` : ''}
+          ${postExtraContent}
         </div>
       </a>
       <div class="post-footer">
