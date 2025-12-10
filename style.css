@@ -55,7 +55,7 @@
     letter-spacing: 0.5px;
     color: #7c7c7c;
     /* Pushes title content 16px from the left container edge */
-    padding-left: 16px; 
+    padding-left: 0px; 
     margin-bottom: 12px;
     margin-top: 16px; 
 }
