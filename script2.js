@@ -242,30 +242,37 @@ async function loadAllData() {
         artist: p.artist
       }));
 
-    const parsed7 = Papa.parse(text7, { header: true }).data;
+    const parsed7 = Papa.parse(text7, { header: true, skipEmptyLines: true }).data;
+    
+    console.log('Parsed CSV data:', parsed7);
+    console.log('First row:', parsed7[0]);
     
     // Photos Index - all entries with Link and Photographer
     photosIndex = parsed7
-      .filter(r => r.Link && r.Photographer)
+      .filter(r => r.Link && r.Link.trim() !== '' && r.Photographer && r.Photographer.trim() !== '')
       .map(p => ({
-        link: p.Link,
-        photographer: p.Photographer,
-        note: p.Note || '',
+        link: p.Link.trim(),
+        photographer: p.Photographer.trim(),
+        note: (p.Note || '').trim(),
         date: p.Date ? normalizeDate(p.Date) : ''
       }));
 
+    console.log('Photos Index:', photosIndex);
+
     // Photos for feed - only entries with dates
     const photosPosts = parsed7
-      .filter(r => r.Link && r.Photographer && r.Date)
+      .filter(r => r.Link && r.Link.trim() !== '' && r.Photographer && r.Photographer.trim() !== '' && r.Date && r.Date.trim() !== '')
       .map(p => ({
         collection: "photos",
         collectionName: "Photos",
-        title: p.Photographer,
+        title: p.Photographer.trim(),
         date: normalizeDate(p.Date),
-        url: p.Link,
-        image: p.Link,
-        text: p.Note || ''
+        url: p.Link.trim(),
+        image: p.Link.trim(),
+        text: (p.Note || '').trim()
       }));
+
+    console.log('Photos Posts:', photosPosts);
 
     allPosts = [ ...posts1, ...posts2, ...posts4, ...posts5, ...jordanPosts, ...photosPosts ];
     
