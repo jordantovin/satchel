@@ -5,7 +5,6 @@ const sheetURL4 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4QAkAIi
 const sheetURL5 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRPknkbhkxJidsCcMnFmvdB2gKx4miqtuECGc5udX7hEAY9IQeTCpNDGMkh31uGuSS1NcODADU_jcRT/pub?output=csv";
 const sheetURL6 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQgrPlpxYaFJdMcgf_-UT0hA4u-uzsbXlgOwVaI2ox9S44XPXySHiNogkYfkno84Ur5V0oCMet0thHp/pub?output=csv";
 const sheetURL7 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ5j1OVFnwB19xVA3ZVM46C8tNKvGHimyElwIAgMFDzurSEFA0m_8iHBIvD1_TKbtlfWw2MaDAirm47/pub?output=csv";
-const sheetURL8 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ5j1OVFnwB19xVA3ZVM46C8tNKvGHimyElwIAgMFDzurSEFA0m_8iHBIvD1_TKbtlfWw2MaDAirm47/pub?output=csv"; // Pictures CSV
 
 let jordanPosts = [];
 let objectsIndex = [];
@@ -86,7 +85,7 @@ function getCollectionIcon(collection) {
     'objects': 'box',
     'jordan': 'camera',
     'photos': 'image',
-    'pictures': 'image'
+    'pictures': 'images'
   };
   return icons[collection] || 'file';
 }
@@ -203,17 +202,6 @@ function openPhotoFullscreen(item) {
   document.body.style.overflow = 'hidden';
 }
 
-function openPictureFullscreen(item) {
-  document.getElementById('stickerFullscreenImage').src = item.image;
-  document.getElementById('stickerFullscreenDate').textContent = '';
-  document.getElementById('stickerFullscreenLocation').textContent = item.photographer || '';
-  document.getElementById('stickerFullscreenMedium').textContent = '';
-  document.getElementById('stickerFullscreenArtist').textContent = '';
-  
-  document.getElementById('stickerFullscreen').classList.add('active');
-  document.body.style.overflow = 'hidden';
-}
-
 function closeStickerFullscreen(event) {
   if (event) {
     event.stopPropagation();
@@ -292,106 +280,4 @@ function clearHistory() {
     localStorage.setItem('satchelHistory', JSON.stringify(viewHistory));
     updateHistory();
   }
-}
-
-function sortPosts(arr) {
-  let sorted = [...arr];
-  
-  const parseDate = (dateStr) => {
-    if (!dateStr) return new Date(0);
-    
-    const slashMatch = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-    if (slashMatch) {
-      const month = parseInt(slashMatch[1], 10) - 1;
-      const day = parseInt(slashMatch[2], 10);
-      const year = parseInt(slashMatch[3], 10);
-      return new Date(year, month, day);
-    }
-    
-    return new Date(dateStr);
-  };
-  
-  if (currentSort === "date-oldest") {
-    sorted.sort((a, b) => parseDate(a.date) - parseDate(b.date));
-  } else if (currentSort === "date-newest") {
-    sorted.sort((a, b) => parseDate(b.date) - parseDate(a.date));
-  } else if (currentSort === "title-az") {
-    sorted.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
-  } else if (currentSort === "title-za") {
-    sorted.sort((a, b) => (b.title || "").localeCompare(a.title || ""));
-  } else if (currentSort === "shuffle") {
-    const stickers = sorted.filter(p => p.collection === 'collection4');
-    const otherPosts = sorted.filter(p => p.collection !== 'collection4');
-    
-    const shuffleArray = (arr) => {
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
-      return arr;
-    };
-    
-    const limitedStickers = shuffleArray([...stickers]).slice(0, Math.floor(Math.random() * 4) + 5);
-    
-    sorted = shuffleArray([...otherPosts, ...limitedStickers]);
-  }
-  
-  return sorted;
-}
-
-function filterPosts(arr) {
-  let filtered = arr;
-  
-  if (currentFilter === "saved") {
-    filtered = filtered.filter(p => savedPosts.includes(p.url));
-  } else if (currentFilter !== "all") {
-    filtered = filtered.filter(p => p.collection === currentFilter);
-  }
-  
-  if (searchQuery) {
-    const query = searchQuery.toLowerCase();
-    
-    filtered = filtered.filter(post => {
-      return Object.values(post).some(value => {
-        return value && typeof value === 'string' && value.toLowerCase().includes(query);
-      });
-    });
-    
-    if (currentFilter === "all") {
-      const matchingPhotographers = photographers.filter(p => {
-        return p.name.toLowerCase().includes(query) || 
-               p.firstName.toLowerCase().includes(query) ||
-               p.lastName.toLowerCase().includes(query) ||
-               p.website.toLowerCase().includes(query);
-      }).map(p => ({
-        collection: "photographer",
-        collectionName: "Photographers",
-        title: p.name,
-        url: p.website,
-        image: '',
-        date: p.dateAdded,
-        noImage: true
-      }));
-      
-      const matchingStickers = stickersIndex.filter(s => {
-        return Object.values(s).some(value => {
-          return value && typeof value === 'string' && value.toLowerCase().includes(query);
-        });
-      }).map(s => ({
-        collection: "collection4",
-        collectionName: "Stickers",
-        title: s.location || 'Sticker',
-        url: s.image,
-        image: s.image,
-        date: s.date,
-        medium: s.medium,
-        location: s.location,
-        artist: s.artist
-      }));
-      
-      filtered = [...filtered, ...matchingPhotographers, ...matchingStickers];
-    }
-  }
-  
-  return filtered;
 }
