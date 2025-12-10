@@ -326,10 +326,12 @@ async function loadAllData() {
     // Initialize icons first
     lucide.createIcons();
     
-    // Force immediate render
-    setTimeout(() => {
-      render();
-    }, 0);
+    // Ensure we're in feed view and render immediately
+    currentView = "feed";
+    currentFilter = "all";
+    
+    // Call render directly without setTimeout
+    render();
   } catch (error) {
     console.error("Error loading data:", error);
     const feed = document.getElementById("feedItems");
