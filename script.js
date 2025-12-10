@@ -53,6 +53,18 @@ function normalizeDate(dateStr) {
     return `${parts[1].padStart(2, '0')}/01/${parts[0]}`;
   }
   
+  // Handle YYYY.MM.DD format
+  if (/^\d{4}\.\d{1,2}\.\d{1,2}$/.test(dateStr)) {
+    const parts = dateStr.split('.');
+    return `${parts[1].padStart(2, '0')}/${parts[2].padStart(2, '0')}/${parts[0]}`;
+  }
+  
+  // Handle YYYY.MM format
+  if (/^\d{4}\.\d{1,2}$/.test(dateStr)) {
+    const parts = dateStr.split('.');
+    return `${parts[1].padStart(2, '0')}/01/${parts[0]}`;
+  }
+  
   if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(dateStr)) {
     const parts = dateStr.split('-');
     return `${parts[1].padStart(2, '0')}/${parts[2].padStart(2, '0')}/${parts[0]}`;
