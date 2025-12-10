@@ -238,10 +238,9 @@ function renderPhotoGrid(photosList, container) {
       });
     };
     
+    // Only show photographer in overlay
     const overlayContent = [];
-    if (photo.date) overlayContent.push(`<div><strong>Date:</strong> ${photo.date}</div>`);
-    overlayContent.push(`<div><strong>Photographer:</strong> ${photo.photographer}</div>`);
-    if (photo.note) overlayContent.push(`<div><strong>Note:</strong> ${photo.note}</div>`);
+    overlayContent.push(`<div>${photo.photographer}</div>`);
     
     item.innerHTML = `
       <img class="sticker-grid-image" src="${photo.link}" alt="${photo.photographer}">
