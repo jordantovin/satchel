@@ -140,12 +140,16 @@ function renderPhotosIndex() {
       </div>
     </div>
     <div class="index-search">
-      <input type="text" id="photoSearch" placeholder="Search photos by title, location, or notes..." />
+      <input type="text" id="photoSearch" placeholder="Search photos by photographer, note, or date..." />
     </div>
   `;
   indexContainer.appendChild(header);
   
-  let sortedPhotos = [...photosIndex].sort((a, b) => new Date(b.date) - new Date(a.date));
+  let sortedPhotos = [...photosIndex].sort((a, b) => {
+    const dateA = a.date ? new Date(a.date) : new Date(0);
+    const dateB = b.date ? new Date(b.date) : new Date(0);
+    return dateB - dateA;
+  });
   let currentPhotoSort = 'latest';
   
   const gridContainer = document.createElement("div");
@@ -163,13 +167,21 @@ function renderPhotosIndex() {
       currentPhotoSort = this.dataset.sort;
       
       if (currentPhotoSort === 'az') {
-        sortedPhotos = [...photosIndex].sort((a, b) => a.title.localeCompare(b.title));
+        sortedPhotos = [...photosIndex].sort((a, b) => a.photographer.localeCompare(b.photographer));
       } else if (currentPhotoSort === 'za') {
-        sortedPhotos = [...photosIndex].sort((a, b) => b.title.localeCompare(a.title));
+        sortedPhotos = [...photosIndex].sort((a, b) => b.photographer.localeCompare(a.photographer));
       } else if (currentPhotoSort === 'latest') {
-        sortedPhotos = [...photosIndex].sort((a, b) => new Date(b.date) - new Date(a.date));
+        sortedPhotos = [...photosIndex].sort((a, b) => {
+          const dateA = a.date ? new Date(a.date) : new Date(0);
+          const dateB = b.date ? new Date(b.date) : new Date(0);
+          return dateB - dateA;
+        });
       } else if (currentPhotoSort === 'oldest') {
-        sortedPhotos = [...photosIndex].sort((a, b) => new Date(a.date) - new Date(b.date));
+        sortedPhotos = [...photosIndex].sort((a, b) => {
+          const dateA = a.date ? new Date(a.date) : new Date(0);
+          const dateB = b.date ? new Date(b.date) : new Date(0);
+          return dateA - dateB;
+        });
       }
       
       const query = document.getElementById('photoSearch').value.toLowerCase().trim();
@@ -218,24 +230,21 @@ function renderPhotoGrid(photosList, container) {
     const item = document.createElement("div");
     item.className = "sticker-grid-item";
     item.onclick = () => {
-      openPhotoFullscreen({
-        collection: 'photos',
-        image: photo.image,
-        date: photo.date,
-        location: photo.location,
-        notes: photo.notes,
-        title: photo.title
+      window.open(photo.link, '_blank');
+      addToHistory({
+        url: photo.link,
+        title: photo.photographer,
+        image: photo.link
       });
     };
     
     const overlayContent = [];
-    overlayContent.push(`<div><strong>Date:</strong> ${photo.date}</div>`);
-    if (photo.title) overlayContent.push(`<div><strong>Title:</strong> ${photo.title}</div>`);
-    if (photo.location) overlayContent.push(`<div><strong>Location:</strong> ${photo.location}</div>`);
-    if (photo.notes) overlayContent.push(`<div><strong>Notes:</strong> ${photo.notes}</div>`);
+    if (photo.date) overlayContent.push(`<div><strong>Date:</strong> ${photo.date}</div>`);
+    overlayContent.push(`<div><strong>Photographer:</strong> ${photo.photographer}</div>`);
+    if (photo.note) overlayContent.push(`<div><strong>Note:</strong> ${photo.note}</div>`);
     
     item.innerHTML = `
-      <img class="sticker-grid-image" src="${photo.image}" alt="${photo.title}">
+      <img class="sticker-grid-image" src="${photo.link}" alt="${photo.photographer}">
       <div class="sticker-grid-overlay">
         ${overlayContent.join('')}
       </div>
@@ -248,123 +257,5 @@ function renderPhotoGrid(photosList, container) {
 }
 
 function renderPicturesIndex() {
-  const feed = document.getElementById("feedItems");
-  feed.innerHTML = "";
-  
-  showFullscreenToggle();
-  
-  const indexContainer = document.createElement("div");
-  indexContainer.className = "photographers-index";
-  
-  const header = document.createElement("div");
-  header.innerHTML = `
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-      <h2 style="margin: 0;">Pictures</h2>
-      <div style="display: flex; gap: 8px; margin-right: 40px;">
-        <button class="sort-btn active" data-sort="az">A-Z</button>
-        <button class="sort-btn" data-sort="za">Z-A</button>
-      </div>
-    </div>
-    <div class="index-search">
-      <input type="text" id="pictureSearch" placeholder="Search pictures by photographer..." />
-    </div>
-  `;
-  indexContainer.appendChild(header);
-  
-  let sortedPictures = [...picturesIndex].sort((a, b) => a.photographer.localeCompare(b.photographer));
-  let currentPictureSort = 'az';
-  
-  const listContainer = document.createElement("div");
-  listContainer.id = "pictureList";
-  indexContainer.appendChild(listContainer);
-  
-  feed.appendChild(indexContainer);
-  
-  renderPictureList(sortedPictures, listContainer);
-  
-  document.querySelectorAll('.photographers-index .sort-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      document.querySelectorAll('.photographers-index .sort-btn').forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
-      currentPictureSort = this.dataset.sort;
-      
-      if (currentPictureSort === 'az') {
-        sortedPictures = [...picturesIndex].sort((a, b) => a.photographer.localeCompare(b.photographer));
-      } else if (currentPictureSort === 'za') {
-        sortedPictures = [...picturesIndex].sort((a, b) => b.photographer.localeCompare(a.photographer));
-      }
-      
-      const query = document.getElementById('pictureSearch').value.toLowerCase().trim();
-      if (query) {
-        const filtered = sortedPictures.filter(p => p.photographer.toLowerCase().includes(query));
-        renderPictureList(filtered, listContainer);
-      } else {
-        renderPictureList(sortedPictures, listContainer);
-      }
-    });
-  });
-  
-  document.getElementById('pictureSearch').addEventListener('input', (e) => {
-    const query = e.target.value.toLowerCase().trim();
-    if (query === '') {
-      renderPictureList(sortedPictures, listContainer);
-    } else {
-      const filtered = sortedPictures.filter(p => 
-        p.photographer.toLowerCase().includes(query)
-      );
-      renderPictureList(filtered, listContainer);
-    }
-  });
-  
-  lucide.createIcons();
-}
-
-function renderPictureList(picturesList, container) {
-  container.innerHTML = '';
-  
-  if (picturesList.length === 0) {
-    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #7c7c7c;">No pictures found</div>';
-    return;
-  }
-  
-  const grouped = {};
-  picturesList.forEach(p => {
-    const letter = p.photographer.charAt(0).toUpperCase();
-    if (!grouped[letter]) {
-      grouped[letter] = [];
-    }
-    grouped[letter].push(p);
-  });
-  
-  Object.keys(grouped).sort().forEach(letter => {
-    const section = document.createElement("div");
-    section.className = "alphabet-section";
-    
-    const letterHeader = document.createElement("div");
-    letterHeader.className = "alphabet-letter";
-    letterHeader.textContent = letter;
-    section.appendChild(letterHeader);
-    
-    const grid = document.createElement("div");
-    grid.className = "photographer-grid";
-    
-    grouped[letter].forEach(picture => {
-      const link = document.createElement("a");
-      link.className = "photographer-link";
-      link.href = picture.link;
-      link.target = "_blank";
-      link.textContent = picture.photographer.toLowerCase();
-      link.onclick = (e) => {
-        addToHistory({
-          url: picture.link,
-          title: picture.photographer,
-          image: ''
-        });
-      };
-      grid.appendChild(link);
-    });
-    
-    section.appendChild(grid);
-    container.appendChild(section);
-  });
+  renderPhotosIndex();
 }
