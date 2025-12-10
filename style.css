@@ -297,7 +297,7 @@
     height: calc(100vh - 70px);
     overflow-y: auto;
     padding-top: 0;
-    padding-left: 16px;
+    padding-left: 8px;
   }
 
   .center-feed {
