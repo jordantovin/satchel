@@ -104,6 +104,13 @@ async function loadAllData() {
   try {
     // Show loading state
     const feed = document.getElementById("feedItems");
+    if (!feed) {
+      console.error('Feed element not found during initial load');
+      // Retry after a short delay
+      setTimeout(loadAllData, 100);
+      return;
+    }
+    
     feed.innerHTML = '<div style="text-align: center; padding: 60px 20px; color: #7c7c7c;"><div style="font-size: 16px;">Loading posts...</div></div>';
     
     const [res1, res2, res3, res4, res5, res6, res7] = await Promise.all([
@@ -307,6 +314,8 @@ async function loadAllData() {
 
     allPosts = [ ...posts1, ...posts2, ...posts4, ...posts5, ...jordanPosts, ...photosPosts ];
     
+    console.log('Total posts loaded:', allPosts.length);
+    
     document.getElementById('countAll').textContent = allPosts.length;
     document.getElementById('count1').textContent = posts1.length;
     document.getElementById('count2').textContent = posts2.length;
@@ -323,18 +332,33 @@ async function loadAllData() {
     updateHistory();
     document.getElementById('countSaved').textContent = savedPosts.length;
 
-    // Initialize icons first
-    lucide.createIcons();
-    
-    // Ensure we're in feed view and render immediately
+    // Ensure we're in feed view
     currentView = "feed";
     currentFilter = "all";
     
-    // Call render directly without setTimeout
+    // Initialize Lucide icons before rendering
+    if (typeof lucide !== 'undefined' && lucide.createIcons) {
+      lucide.createIcons();
+    }
+    
+    // Force immediate render
+    console.log('Calling render() with', allPosts.length, 'posts');
     render();
+    
+    // Double-check render happened
+    setTimeout(() => {
+      const feedCheck = document.getElementById("feedItems");
+      if (feedCheck && feedCheck.children.length === 0) {
+        console.warn('Feed is empty after render, retrying...');
+        render();
+      }
+    }, 100);
+    
   } catch (error) {
     console.error("Error loading data:", error);
     const feed = document.getElementById("feedItems");
-    feed.innerHTML = '<div style="text-align: center; padding: 60px 20px; color: #7c7c7c;"><div style="font-size: 16px; color: #d9534f;">Error loading data. Please refresh the page.</div></div>';
+    if (feed) {
+      feed.innerHTML = '<div style="text-align: center; padding: 60px 20px; color: #7c7c7c;"><div style="font-size: 16px; color: #d9534f;">Error loading data. Please refresh the page.</div></div>';
+    }
   }
 }
