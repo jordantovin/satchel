@@ -639,8 +639,26 @@ function hideFullscreenToggle() {
 function initialize() {
   console.log('Initializing application...');
   
+  // First, verify critical elements exist
+  const feed = document.getElementById("feedItems");
+  const searchBox = document.getElementById("searchBox");
+  
+  if (!feed) {
+    console.error('Critical elements not found, retrying...');
+    setTimeout(initialize, 50);
+    return;
+  }
+  
+  console.log('DOM elements found, setting up...');
+  
   // Set up all event listeners first
   initializeEventListeners();
+  
+  // Set default active state
+  const allPostsNav = document.querySelector('.nav-item[data-filter="all"]');
+  if (allPostsNav) {
+    allPostsNav.classList.add('active');
+  }
   
   // Then load the data
   loadAllData();
@@ -650,5 +668,10 @@ function initialize() {
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initialize);
 } else {
-  initialize();
+  // DOM is already ready, but give it a moment to ensure all elements are parsed
+  if (document.getElementById("feedItems")) {
+    initialize();
+  } else {
+    setTimeout(initialize, 50);
+  }
 }
