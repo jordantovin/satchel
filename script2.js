@@ -103,11 +103,11 @@ function filterPosts(arr) {
 async function loadAllData() {
   let retryCount = 0;
   const maxRetries = 5;
-  
+
   async function attemptLoad() {
     try {
       console.log('Attempting to load data... (attempt ' + (retryCount + 1) + ')');
-      
+
       const feed = document.getElementById("feedItems");
       if (!feed) {
         console.error('Feed element not found');
@@ -117,11 +117,12 @@ async function loadAllData() {
         }
         return;
       }
-      
+
       feed.innerHTML = '<div style="text-align: center; padding: 60px 20px; color: #7c7c7c;"><div style="font-size: 16px;">Loading posts...</div></div>';
-      
+
       console.log('Fetching data from sheets...');
-      
+
+      // Assuming sheetURL1 to sheetURL7 are defined globally/in scope
       const [res1, res2, res3, res4, res5, res6, res7] = await Promise.all([
         fetch(sheetURL1),
         fetch(sheetURL2),
@@ -131,9 +132,9 @@ async function loadAllData() {
         fetch(sheetURL6),
         fetch(sheetURL7)
       ]);
-      
+
       console.log('Fetch complete, parsing responses...');
-      
+
       const [text1, text2, text3, text4, text5, text6, text7] = await Promise.all([
         res1.text(),
         res2.text(),
@@ -143,9 +144,11 @@ async function loadAllData() {
         res6.text(),
         res7.text()
       ]);
-      
+
       console.log('Parsing CSVs...');
-      
+      // Assuming Papa, normalizeDate, articlesIndex, photographers, stickersIndex, objectsIndex, jordanPosts, photosIndex, allPosts, currentView, currentFilter, updateHistory, render, lucide, savedPosts are defined globally/in scope
+
+      // === Collection 1: Articles ===
       const parsed1 = Papa.parse(text1, { header: true, skipEmptyLines: true }).data;
       const posts1 = parsed1.filter(r => r.src && r.photo).map(p => ({
         ...p,
@@ -156,15 +159,15 @@ async function loadAllData() {
         image: p.photo,
         date: normalizeDate(p.date)
       }));
-
-      articlesIndex = parsed1.filter(r => r.src && r.photo).map(p => ({
+      articlesIndex = posts1.map(p => ({
         ...p,
         title: p.test,
         url: p.src,
         image: p.photo,
-        date: normalizeDate(p.date)
+        date: p.date
       }));
 
+      // === Collection 2: Field Notes ===
       const parsed2 = Papa.parse(text2, { header: true, skipEmptyLines: true }).data;
       const posts2 = parsed2.filter(r => r.image).map(p => ({
         ...p,
@@ -176,6 +179,7 @@ async function loadAllData() {
         date: normalizeDate(p.date)
       }));
 
+      // === Collection 3: Photographers ===
       const parsed3 = Papa.parse(text3, { header: true, skipEmptyLines: true }).data;
       photographers = parsed3.filter(r => r['First Name'] && r['Last Name'] && r.Website).map(p => ({
         firstName: p['First Name'],
@@ -184,15 +188,21 @@ async function loadAllData() {
         website: p.Website,
         dateAdded: normalizeDate(p['Date Added'])
       }));
+      // *** NEW: Create posts from Photographers for the feed ***
+      const posts3 = photographers.map(p => ({
+        collection: "photographer",
+        collectionName: "Photographers",
+        title: p.name,
+        url: p.website,
+        image: '', // Photographers might not have an image in this sheet
+        date: p.dateAdded,
+        noImage: true // Indicate this is a text-only/link-only post
+      }));
 
+      // === Collection 4: Stickers ===
       const parsed4 = Papa.parse(text4, { header: true, skipEmptyLines: true }).data;
       stickersIndex = parsed4
-        .filter(r =>
-          r.src &&
-          r.date &&
-          r.location_overlay &&
-          r.medium
-        )
+        .filter(r => r.src && r.date && r.location_overlay && r.medium)
         .map(p => ({
           ...p,
           image: p.src,
@@ -202,50 +212,8 @@ async function loadAllData() {
           medium: p.medium,
           artist: p.artist || 'Unknown'
         }));
-
-      const parsed5 = Papa.parse(text5, { header: true, skipEmptyLines: true }).data;
-
-      objectsIndex = parsed5
-        .filter(r => r.Date && r.Text && r.Image)
-        .map(o => ({
-          date: normalizeDate(o.Date),
-          text: o.Text,
-          image: o.Image
-        }));
-
-      const posts5 = parsed5
-        .filter(r => r.Date && r.Text && r.Image)
-        .map(o => ({
-          collection: "objects",
-          collectionName: "Objects",
-          title: o.Text,
-          date: normalizeDate(o.Date),
-          url: o.Image,
-          image: o.Image,
-          text: o.Text
-        }));
-
-      const parsed6 = Papa.parse(text6, { header: true, skipEmptyLines: true }).data;
-
-      jordanPosts = parsed6
-        .filter(r => r.Date && r.Title)
-        .map(p => {
-          const hasImage = p.Image && p.Image.trim() !== "";
-          const hasLink = p.Link && p.Link.trim() !== "";
-
-          return {
-            collection: "jordan",
-            collectionName: "Jordan",
-            title: p.Title,
-            date: normalizeDate(p.Date),
-            text: p.Text || "",
-            image: hasImage ? p.Image : "",
-            url: hasLink ? p.Link : (hasImage ? p.Image : "#")
-          };
-        });
-
       const posts4 = parsed4
-        .filter(r => 
+        .filter(r =>
           r.src &&
           r.date &&
           r.location_card &&
@@ -266,10 +234,48 @@ async function loadAllData() {
           artist: p.artist
         }));
 
+      // === Collection 5: Objects ===
+      const parsed5 = Papa.parse(text5, { header: true, skipEmptyLines: true }).data;
+      objectsIndex = parsed5
+        .filter(r => r.Date && r.Text && r.Image)
+        .map(o => ({
+          date: normalizeDate(o.Date),
+          text: o.Text,
+          image: o.Image
+        }));
+      const posts5 = objectsIndex.map(o => ({ // Use objectsIndex for consistency
+          collection: "objects",
+          collectionName: "Objects",
+          title: o.text,
+          date: o.date,
+          url: o.image, // Assuming the image link can serve as the url
+          image: o.image,
+          text: o.text
+        }));
+
+      // === Collection 6: Jordan ===
+      const parsed6 = Papa.parse(text6, { header: true, skipEmptyLines: true }).data;
+      const jordanPosts = parsed6
+        .filter(r => r.Date && r.Title)
+        .map(p => {
+          const hasImage = p.Image && p.Image.trim() !== "";
+          const hasLink = p.Link && p.Link.trim() !== "";
+
+          return {
+            collection: "jordan",
+            collectionName: "Jordan",
+            title: p.Title,
+            date: normalizeDate(p.Date),
+            text: p.Text || "",
+            image: hasImage ? p.Image : "",
+            url: hasLink ? p.Link : (hasImage ? p.Image : "#")
+          };
+        });
+
+      // === Collection 7: Photos ===
       const parsed7 = Papa.parse(text7, { header: true, skipEmptyLines: true }).data;
-      
       console.log('Parsed photos CSV, rows:', parsed7.length);
-      
+
       photosIndex = parsed7
         .filter(r => {
           const link = r.Link || r.link || '';
@@ -281,7 +287,7 @@ async function loadAllData() {
           const photographer = (p.Photographer || p.photographer || '').trim();
           const note = (p.Note || p.note || '').trim();
           const date = (p.Date || p.date || '').trim();
-          
+
           return {
             link: link,
             photographer: photographer,
@@ -302,7 +308,7 @@ async function loadAllData() {
           const photographer = (p.Photographer || p.photographer || '').trim();
           const note = (p.Note || p.note || '').trim();
           const date = (p.Date || p.date || '').trim();
-          
+
           return {
             collection: "photos",
             collectionName: "Photos",
@@ -315,17 +321,19 @@ async function loadAllData() {
         });
 
       console.log('Building allPosts array...');
-      allPosts = [ ...posts1, ...posts2, ...posts4, ...posts5, ...jordanPosts, ...photosPosts ];
-      
+      // *** UPDATED: Include posts3 (Photographers) in allPosts ***
+      allPosts = [ ...posts1, ...posts2, ...posts3, ...posts4, ...posts5, ...jordanPosts, ...photosPosts ];
+
       console.log('Total posts loaded:', allPosts.length);
       console.log('Posts breakdown:');
       console.log('- Articles (posts1):', posts1.length);
       console.log('- Field Notes (posts2):', posts2.length);
+      console.log('- Photographers (posts3):', posts3.length); // Added breakdown
       console.log('- Stickers (posts4):', posts4.length);
       console.log('- Objects (posts5):', posts5.length);
       console.log('- Jordan:', jordanPosts.length);
       console.log('- Photos:', photosPosts.length);
-      
+
       // Update all counters
       document.getElementById('countAll').textContent = allPosts.length;
       document.getElementById('count1').textContent = posts1.length;
@@ -346,21 +354,21 @@ async function loadAllData() {
       // Set view state
       currentView = "feed";
       currentFilter = "all";
-      
+
       // Initialize Lucide icons
       if (typeof lucide !== 'undefined' && lucide.createIcons) {
         lucide.createIcons();
       }
-      
+
       console.log('Calling render() to display posts...');
       render();
-      
+
       console.log('Data loading complete!');
-      
+
     } catch (error) {
       console.error("Error loading data:", error);
       console.error("Error details:", error.message, error.stack);
-      
+
       const feed = document.getElementById("feedItems");
       if (feed && retryCount < maxRetries) {
         retryCount++;
@@ -371,6 +379,6 @@ async function loadAllData() {
       }
     }
   }
-  
+
   attemptLoad();
 }
