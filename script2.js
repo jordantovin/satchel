@@ -244,37 +244,30 @@ async function loadAllData() {
 
     const parsed7 = Papa.parse(text7, { header: true }).data;
     
+    // Pictures Index - all entries
     picturesIndex = parsed7
       .filter(r => r.Link && r.Photographer)
       .map(p => ({
         link: p.Link,
-        photographer: p.Photographer
+        photographer: p.Photographer,
+        note: p.Note || '',
+        date: normalizeDate(p.Date)
       }));
 
-    photosIndex = parsed7
-      .filter(r => r.Image && r.Date)
+    // Pictures for feed - entries with dates that should show in feed
+    const picturesPosts = parsed7
+      .filter(r => r.Link && r.Photographer && r.Date)
       .map(p => ({
-        image: p.Image,
+        collection: "pictures",
+        collectionName: "Pictures",
+        title: p.Photographer,
         date: normalizeDate(p.Date),
-        title: p.Title || 'Photo',
-        location: p.Location || '',
-        notes: p.Notes || ''
+        url: p.Link,
+        image: p.Link,
+        text: p.Note || ''
       }));
 
-    const posts7 = parsed7
-      .filter(r => r.Image && r.Date && r.Feed && r.Feed.trim().toLowerCase() === "yes")
-      .map(p => ({
-        collection: "photos",
-        collectionName: "Photos",
-        title: p.Title || 'Photo',
-        date: normalizeDate(p.Date),
-        url: p.Image,
-        image: p.Image,
-        location: p.Location || '',
-        notes: p.Notes || ''
-      }));
-
-    allPosts = [ ...posts1, ...posts2, ...posts4, ...posts5, ...jordanPosts, ...posts7 ];
+    allPosts = [ ...posts1, ...posts2, ...posts4, ...posts5, ...jordanPosts, ...picturesPosts ];
     
     document.getElementById('countAll').textContent = allPosts.length;
     document.getElementById('count1').textContent = posts1.length;
@@ -285,8 +278,7 @@ async function loadAllData() {
     document.getElementById('countArticlesIndex').textContent = articlesIndex.length;
     document.getElementById("countObjects").textContent = posts5.length;
     document.getElementById("countObjectsIndex").textContent = objectsIndex.length;
-    document.getElementById("countPhotos").textContent = posts7.length;
-    document.getElementById("countPhotosIndex").textContent = photosIndex.length;
+    document.getElementById("countPictures").textContent = picturesPosts.length;
     document.getElementById("countPicturesIndex").textContent = picturesIndex.length;
 
     updateHistory();
