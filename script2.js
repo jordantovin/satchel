@@ -246,33 +246,60 @@ async function loadAllData() {
     
     console.log('Parsed CSV data:', parsed7);
     console.log('First row:', parsed7[0]);
+    console.log('Column headers:', Object.keys(parsed7[0] || {}));
     
     // Photos Index - all entries with Link and Photographer
+    // Being flexible with column names (handling potential whitespace or case issues)
     photosIndex = parsed7
-      .filter(r => r.Link && r.Link.trim() !== '' && r.Photographer && r.Photographer.trim() !== '')
-      .map(p => ({
-        link: p.Link.trim(),
-        photographer: p.Photographer.trim(),
-        note: (p.Note || '').trim(),
-        date: p.Date ? normalizeDate(p.Date) : ''
-      }));
+      .filter(r => {
+        const link = r.Link || r.link || '';
+        const photographer = r.Photographer || r.photographer || '';
+        return link.trim() !== '' && photographer.trim() !== '';
+      })
+      .map(p => {
+        const link = (p.Link || p.link || '').trim();
+        const photographer = (p.Photographer || p.photographer || '').trim();
+        const note = (p.Note || p.note || '').trim();
+        const date = (p.Date || p.date || '').trim();
+        
+        return {
+          link: link,
+          photographer: photographer,
+          note: note,
+          date: date ? normalizeDate(date) : ''
+        };
+      });
 
     console.log('Photos Index:', photosIndex);
+    console.log('Photos Index length:', photosIndex.length);
 
     // Photos for feed - only entries with dates
     const photosPosts = parsed7
-      .filter(r => r.Link && r.Link.trim() !== '' && r.Photographer && r.Photographer.trim() !== '' && r.Date && r.Date.trim() !== '')
-      .map(p => ({
-        collection: "photos",
-        collectionName: "Photos",
-        title: p.Photographer.trim(),
-        date: normalizeDate(p.Date),
-        url: p.Link.trim(),
-        image: p.Link.trim(),
-        text: (p.Note || '').trim()
-      }));
+      .filter(r => {
+        const link = r.Link || r.link || '';
+        const photographer = r.Photographer || r.photographer || '';
+        const date = r.Date || r.date || '';
+        return link.trim() !== '' && photographer.trim() !== '' && date.trim() !== '';
+      })
+      .map(p => {
+        const link = (p.Link || p.link || '').trim();
+        const photographer = (p.Photographer || p.photographer || '').trim();
+        const note = (p.Note || p.note || '').trim();
+        const date = (p.Date || p.date || '').trim();
+        
+        return {
+          collection: "photos",
+          collectionName: "Photos",
+          title: photographer,
+          date: normalizeDate(date),
+          url: link,
+          image: link,
+          text: note
+        };
+      });
 
     console.log('Photos Posts:', photosPosts);
+    console.log('Photos Posts length:', photosPosts.length);
 
     allPosts = [ ...posts1, ...posts2, ...posts4, ...posts5, ...jordanPosts, ...photosPosts ];
     
