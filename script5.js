@@ -43,9 +43,17 @@ function render() {
   
   hideFullscreenToggle();
   
-  document.querySelector('.sort-bar').style.display = 'flex';
+  const sortBar = document.querySelector('.sort-bar');
+  if (sortBar) {
+    sortBar.style.display = 'flex';
+  }
   
   const feed = document.getElementById("feedItems");
+  if (!feed) {
+    console.error('Feed element not found');
+    return;
+  }
+  
   feed.innerHTML = "";
   
   const filtered = filterPosts(allPosts);
