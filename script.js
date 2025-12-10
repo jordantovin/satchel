@@ -5,6 +5,7 @@ const sheetURL4 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4QAkAIi
 const sheetURL5 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRPknkbhkxJidsCcMnFmvdB2gKx4miqtuECGc5udX7hEAY9IQeTCpNDGMkh31uGuSS1NcODADU_jcRT/pub?output=csv";
 const sheetURL6 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQgrPlpxYaFJdMcgf_-UT0hA4u-uzsbXlgOwVaI2ox9S44XPXySHiNogkYfkno84Ur5V0oCMet0thHp/pub?output=csv";
 const sheetURL7 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ5j1OVFnwB19xVA3ZVM46C8tNKvGHimyElwIAgMFDzurSEFA0m_8iHBIvD1_TKbtlfWw2MaDAirm47/pub?output=csv";
+const sheetURL8 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ5j1OVFnwB19xVA3ZVM46C8tNKvGHimyElwIAgMFDzurSEFA0m_8iHBIvD1_TKbtlfWw2MaDAirm47/pub?output=csv"; // Pictures CSV
 
 let jordanPosts = [];
 let objectsIndex = [];
@@ -13,6 +14,7 @@ let photographers = [];
 let stickersIndex = [];
 let articlesIndex = [];
 let photosIndex = [];
+let picturesIndex = [];
 let displayLimit = 10;
 let currentFilter = "all";
 let currentSort = "date-newest";
@@ -83,7 +85,8 @@ function getCollectionIcon(collection) {
     'photographer': 'users',
     'objects': 'box',
     'jordan': 'camera',
-    'photos': 'image'
+    'photos': 'image',
+    'pictures': 'image'
   };
   return icons[collection] || 'file';
 }
@@ -194,6 +197,17 @@ function openPhotoFullscreen(item) {
   document.getElementById('stickerFullscreenDate').textContent = item.date;
   document.getElementById('stickerFullscreenLocation').textContent = item.location || '';
   document.getElementById('stickerFullscreenMedium').textContent = item.notes || '';
+  document.getElementById('stickerFullscreenArtist').textContent = '';
+  
+  document.getElementById('stickerFullscreen').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function openPictureFullscreen(item) {
+  document.getElementById('stickerFullscreenImage').src = item.image;
+  document.getElementById('stickerFullscreenDate').textContent = '';
+  document.getElementById('stickerFullscreenLocation').textContent = item.photographer || '';
+  document.getElementById('stickerFullscreenMedium').textContent = '';
   document.getElementById('stickerFullscreenArtist').textContent = '';
   
   document.getElementById('stickerFullscreen').classList.add('active');
