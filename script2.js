@@ -188,7 +188,6 @@ async function loadAllData() {
     console.error("Error loading data:", error);
   }
 }
-
 function renderPhotographersIndex() {
   const feed = document.getElementById("feedItems");
   feed.innerHTML = "";
@@ -760,4 +759,14 @@ function renderPhotosIndex() {
     if (query === '') {
       renderPhotoGrid(sortedPhotos, gridContainer);
     } else {
-      const filtered = sort
+      const filtered = sortedPhotos.filter(p => {
+        return Object.values(p).some(value => {
+          return value && typeof value === 'string' && value.toLowerCase().includes(query);
+        });
+      });
+      renderPhotoGrid(filtered, gridContainer);
+    }
+  });
+  
+  lucide.createIcons();
+}
