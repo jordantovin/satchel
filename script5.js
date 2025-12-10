@@ -259,189 +259,207 @@ function render() {
   });
 }
 
-document.querySelectorAll('.nav-item[data-filter]').forEach(item => {
-  item.addEventListener("click", function() {
-    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-    this.classList.add('active');
-    currentFilter = this.dataset.filter;
-    currentView = "feed";
-    displayLimit = 10;
-    closeMobileMenuOnClick();
-    render();
-  });
-});
-
-document.querySelectorAll('.nav-item[data-view]').forEach(item => {
-  item.addEventListener("click", function() {
-    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-    this.classList.add('active');
-    currentView = this.dataset.view;
-    closeMobileMenuOnClick();
-    render();
-  });
-});
-
-document.querySelectorAll('.sort-btn').forEach(btn => {
-  btn.addEventListener("click", function() {
-    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
-    this.classList.add('active');
-    currentSort = this.dataset.sort;
-    render();
-  });
-});
-
-document.getElementById("searchBox").addEventListener("input", (e) => {
-  searchQuery = e.target.value.trim();
-  displayLimit = 10;
-  
-  if (searchQuery) {
-    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-    document.querySelector('.nav-item[data-filter="all"]').classList.add('active');
-    currentFilter = "all";
-    currentView = "feed";
-  }
-  
-  render();
-});
-
-let isLoadingMore = false;
-window.addEventListener('scroll', () => {
-  if (currentView !== "feed") return;
-  if (isLoadingMore) return;
-  
-  const scrollPosition = window.innerHeight + window.scrollY;
-  const documentHeight = document.documentElement.scrollHeight;
-  
-  if (scrollPosition >= documentHeight - 500) {
-    const filtered = filterPosts(allPosts);
-    const sorted = sortPosts(filtered);
-    
-    if (displayLimit < sorted.length) {
-      isLoadingMore = true;
-      displayLimit += 10;
+// Initialize event listeners immediately when script loads
+function initializeEventListeners() {
+  document.querySelectorAll('.nav-item[data-filter]').forEach(item => {
+    item.addEventListener("click", function() {
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      this.classList.add('active');
+      currentFilter = this.dataset.filter;
+      currentView = "feed";
+      displayLimit = 10;
+      closeMobileMenuOnClick();
       render();
-      setTimeout(() => {
-        isLoadingMore = false;
-      }, 500);
-    }
-  }
-});
+    });
+  });
 
-document.addEventListener('keydown', (e) => {
-  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-    return;
-  }
-  
-  if (e.ctrlKey || e.metaKey || e.altKey) {
-    return;
-  }
-  
-  switch(e.key.toLowerCase()) {
-    case '/':
-      e.preventDefault();
-      document.getElementById('searchBox').focus();
-      break;
+  document.querySelectorAll('.nav-item[data-view]').forEach(item => {
+    item.addEventListener("click", function() {
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      this.classList.add('active');
+      currentView = this.dataset.view;
+      closeMobileMenuOnClick();
+      render();
+    });
+  });
+
+  document.querySelectorAll('.sort-btn').forEach(btn => {
+    btn.addEventListener("click", function() {
+      document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      currentSort = this.dataset.sort;
+      render();
+    });
+  });
+
+  const searchBox = document.getElementById("searchBox");
+  if (searchBox) {
+    searchBox.addEventListener("input", (e) => {
+      searchQuery = e.target.value.trim();
+      displayLimit = 10;
       
-    case 'h':
-      e.preventDefault();
-      goToAllPosts();
-      break;
-      
-    case '2':
-      e.preventDefault();
-      document.querySelector('.nav-item[data-filter="collection1"]').click();
-      break;
-      
-    case '1':
-      e.preventDefault();
-      document.querySelector('.nav-item[data-filter="collection2"]').click();
-      break;
-      
-    case '3':
-      e.preventDefault();
-      document.querySelector('.nav-item[data-filter="collection4"]').click();
-      break;
-      
-    case '4':
-      e.preventDefault();
-      document.querySelector('.nav-item[data-filter="objects"]').click();
-      break;
-      
-    case '6':
-      e.preventDefault();
-      document.querySelector('.nav-item[data-filter="photos"]').click();
-      break;
-      
-    case '5':
-    case 's':
-      e.preventDefault();
-      document.querySelector('.nav-item[data-filter="saved"]').click();
-      break;
-      
-    case 'a':
-      e.preventDefault();
-      document.querySelector('.nav-item[data-view="articles-index"]').click();
-      break;
-      
-    case 'p':
-      e.preventDefault();
-      document.querySelector('.nav-item[data-view="photographers-index"]').click();
-      break;
-      
-    case 'i':
-      e.preventDefault();
-      document.querySelector('.nav-item[data-view="stickers-index"]').click();
-      break;
-      
-    case 'o':
-      e.preventDefault();
-      document.querySelector('.nav-item[data-view="objects-index"]').click();
-      break;
-      
-    case 'm':
-      e.preventDefault();
-      document.querySelector('.nav-item[data-view="photos-index"]').click();
-      break;
-      
-    case 'l':
-      e.preventDefault();
-      document.querySelector('.nav-item[data-view="pictures-index"]').click();
-      break;
-      
-    case 'r':
-      e.preventDefault();
-      if (currentView === 'photographers-index') {
-        randomPhotographer();
+      if (searchQuery) {
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        document.querySelector('.nav-item[data-filter="all"]').classList.add('active');
+        currentFilter = "all";
+        currentView = "feed";
       }
-      break;
       
-    case 'x':
-      e.preventDefault();
-      document.querySelector('.sort-btn[data-sort="shuffle"]').click();
-      break;
+      render();
+    });
+  }
+
+  let isLoadingMore = false;
+  window.addEventListener('scroll', () => {
+    if (currentView !== "feed") return;
+    if (isLoadingMore) return;
+    
+    const scrollPosition = window.innerHeight + window.scrollY;
+    const documentHeight = document.documentElement.scrollHeight;
+    
+    if (scrollPosition >= documentHeight - 500) {
+      const filtered = filterPosts(allPosts);
+      const sorted = sortPosts(filtered);
       
-    case 'f':
-      if (currentView.includes('-index')) {
+      if (displayLimit < sorted.length) {
+        isLoadingMore = true;
+        displayLimit += 10;
+        render();
+        setTimeout(() => {
+          isLoadingMore = false;
+        }, 500);
+      }
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+      return;
+    }
+    
+    if (e.ctrlKey || e.metaKey || e.altKey) {
+      return;
+    }
+    
+    switch(e.key.toLowerCase()) {
+      case '/':
         e.preventDefault();
-        toggleFullscreen();
-      }
-      break;
-      
-    case '?':
-      e.preventDefault();
-      showKeyboardShortcuts();
-      break;
-      
-    case 'escape':
-      if (document.getElementById('stickerFullscreen').classList.contains('active')) {
-        closeStickerFullscreen(e);
-      }
-      if (document.getElementById('keyboardShortcutsModal')) {
-        closeKeyboardShortcuts();
-      }
-      break;
-  }
-});
+        document.getElementById('searchBox').focus();
+        break;
+        
+      case 'h':
+        e.preventDefault();
+        goToAllPosts();
+        break;
+        
+      case '2':
+        e.preventDefault();
+        document.querySelector('.nav-item[data-filter="collection1"]').click();
+        break;
+        
+      case '1':
+        e.preventDefault();
+        document.querySelector('.nav-item[data-filter="collection2"]').click();
+        break;
+        
+      case '3':
+        e.preventDefault();
+        document.querySelector('.nav-item[data-filter="collection4"]').click();
+        break;
+        
+      case '4':
+        e.preventDefault();
+        document.querySelector('.nav-item[data-filter="objects"]').click();
+        break;
+        
+      case '6':
+        e.preventDefault();
+        document.querySelector('.nav-item[data-filter="photos"]').click();
+        break;
+        
+      case '5':
+      case 's':
+        e.preventDefault();
+        document.querySelector('.nav-item[data-filter="saved"]').click();
+        break;
+        
+      case 'a':
+        e.preventDefault();
+        document.querySelector('.nav-item[data-view="articles-index"]').click();
+        break;
+        
+      case 'p':
+        e.preventDefault();
+        document.querySelector('.nav-item[data-view="photographers-index"]').click();
+        break;
+        
+      case 'i':
+        e.preventDefault();
+        document.querySelector('.nav-item[data-view="stickers-index"]').click();
+        break;
+        
+      case 'o':
+        e.preventDefault();
+        document.querySelector('.nav-item[data-view="objects-index"]').click();
+        break;
+        
+      case 'm':
+        e.preventDefault();
+        document.querySelector('.nav-item[data-view="photos-index"]').click();
+        break;
+        
+      case 'l':
+        e.preventDefault();
+        document.querySelector('.nav-item[data-view="pictures-index"]').click();
+        break;
+        
+      case 'r':
+        e.preventDefault();
+        if (currentView === 'photographers-index') {
+          randomPhotographer();
+        }
+        break;
+        
+      case 'x':
+        e.preventDefault();
+        document.querySelector('.sort-btn[data-sort="shuffle"]').click();
+        break;
+        
+      case 'f':
+        if (currentView.includes('-index')) {
+          e.preventDefault();
+          toggleFullscreen();
+        }
+        break;
+        
+      case '?':
+        e.preventDefault();
+        showKeyboardShortcuts();
+        break;
+        
+      case 'escape':
+        if (document.getElementById('stickerFullscreen').classList.contains('active')) {
+          closeStickerFullscreen(e);
+        }
+        if (document.getElementById('keyboardShortcutsModal')) {
+          closeKeyboardShortcuts();
+        }
+        break;
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    const sidebar = document.querySelector('.left-sidebar');
+    const menuButton = document.querySelector('.mobile-menu-toggle');
+    
+    if (sidebar && menuButton && 
+        sidebar.classList.contains('mobile-open') && 
+        !sidebar.contains(e.target) && 
+        !menuButton.contains(e.target)) {
+      toggleMobileMenu();
+    }
+  });
+}
 
 function showKeyboardShortcuts() {
   const existing = document.getElementById('keyboardShortcutsModal');
@@ -617,20 +635,20 @@ function hideFullscreenToggle() {
   lucide.createIcons();
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', loadAllData);
-} else {
+// Initialize everything when DOM is ready
+function initialize() {
+  console.log('Initializing application...');
+  
+  // Set up all event listeners first
+  initializeEventListeners();
+  
+  // Then load the data
   loadAllData();
 }
 
-document.addEventListener('click', (e) => {
-  const sidebar = document.querySelector('.left-sidebar');
-  const menuButton = document.querySelector('.mobile-menu-toggle');
-  
-  if (sidebar && menuButton && 
-      sidebar.classList.contains('mobile-open') && 
-      !sidebar.contains(e.target) && 
-      !menuButton.contains(e.target)) {
-    toggleMobileMenu();
-  }
-});
+// Run initialization when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initialize);
+} else {
+  initialize();
+}
