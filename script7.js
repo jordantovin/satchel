@@ -98,20 +98,15 @@ document.addEventListener('keydown', (e) => {
       e.preventDefault();
       showKeyboardShortcuts();
       break;
-  }
-  
-  // Handle Escape key separately (case-sensitive)
-  if (e.key === 'Escape') {
-    e.preventDefault();
-    if (document.getElementById('stickerFullscreen').classList.contains('active')) {
-      closeStickerFullscreen(e);
-    }
-    const modal = document.getElementById('keyboardShortcutsModal');
-    if (modal) {
-      closeKeyboardShortcuts();
-    }
-  }
-});
+      
+    case 'escape':
+      if (document.getElementById('stickerFullscreen').classList.contains('active')) {
+        closeStickerFullscreen(e);
+      }
+      if (document.getElementById('keyboardShortcutsModal')) {
+        closeKeyboardShortcuts();
+      }
+      break;
   }
 });
 
