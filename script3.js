@@ -3,10 +3,13 @@ function openStickerFullscreen(item) {
   document.getElementById('stickerFullscreenImage').src = item.image;
   
   if (item.collection === 'collection4') {
-    document.getElementById('stickerFullscreenDate').textContent = item.date;
-    document.getElementById('stickerFullscreenLocation').textContent = item.location;
-    document.getElementById('stickerFullscreenMedium').textContent = item.medium;
-    document.getElementById('stickerFullscreenArtist').textContent = item.artist || 'Unknown';
+    const infoDiv = document.querySelector('.sticker-fullscreen-info');
+    infoDiv.innerHTML = `
+      <div><strong>Date:</strong> <span>${item.date}</span></div>
+      <div><strong>Location:</strong><br><span>${item.location}</span></div>
+      <div><strong>Medium:</strong> <span>${item.medium}</span></div>
+      <div><strong>Artist:</strong> <span>${item.artist || 'Unknown'}</span></div>
+    `;
   }
   
   document.getElementById('stickerFullscreen').classList.add('active');
@@ -15,10 +18,12 @@ function openStickerFullscreen(item) {
 
 function openObjectFullscreen(item) {
   document.getElementById('stickerFullscreenImage').src = item.image;
-  document.getElementById('stickerFullscreenDate').textContent = item.date;
-  document.getElementById('stickerFullscreenLocation').textContent = item.text;
-  document.getElementById('stickerFullscreenMedium').textContent = "";
-  document.getElementById('stickerFullscreenArtist').textContent = "";
+  
+  const infoDiv = document.querySelector('.sticker-fullscreen-info');
+  infoDiv.innerHTML = `
+    <div><strong>Date:</strong> <span>${item.date}</span></div>
+    <div><strong>Location:</strong><br><span>${item.text}</span></div>
+  `;
   
   document.getElementById('stickerFullscreen').classList.add('active');
   document.body.style.overflow = 'hidden';
@@ -26,10 +31,10 @@ function openObjectFullscreen(item) {
 
 function openPhotoFullscreen(item) {
   document.getElementById('stickerFullscreenImage').src = item.image;
-  document.getElementById('stickerFullscreenDate').textContent = "";
-  document.getElementById('stickerFullscreenLocation').textContent = item.photographer;
-  document.getElementById('stickerFullscreenMedium').textContent = "";
-  document.getElementById('stickerFullscreenArtist').textContent = "";
+  
+  // Hide all labels and values except photographer
+  const infoDiv = document.querySelector('.sticker-fullscreen-info');
+  infoDiv.innerHTML = `<div style="font-size: 18px; font-weight: 400;">${item.photographer}</div>`;
   
   document.getElementById('stickerFullscreen').classList.add('active');
   document.body.style.overflow = 'hidden';
