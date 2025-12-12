@@ -413,6 +413,7 @@
   .post-card[data-collection="objects"] .post-image {
     object-fit: contain;
     background: white;
+    cursor: pointer;
   }
 
   .post-content { padding: 16px; }
