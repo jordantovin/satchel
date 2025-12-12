@@ -98,15 +98,18 @@ document.addEventListener('keydown', (e) => {
       e.preventDefault();
       showKeyboardShortcuts();
       break;
-      
-    case 'escape':
-      if (document.getElementById('stickerFullscreen').classList.contains('active')) {
-        closeStickerFullscreen(e);
-      }
-      if (document.getElementById('keyboardShortcutsModal')) {
-        closeKeyboardShortcuts();
-      }
-      break;
+  }
+  
+  // Handle Escape key separately (it's not lowercase)
+  if (e.key === 'Escape') {
+    if (document.getElementById('stickerFullscreen').classList.contains('active')) {
+      closeStickerFullscreen(e);
+    }
+    if (document.getElementById('keyboardShortcutsModal')) {
+      closeKeyboardShortcuts();
+    }
+  }
+});
   }
 });
 
