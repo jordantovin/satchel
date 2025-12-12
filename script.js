@@ -1,25 +1,10 @@
 // Keyboard shortcuts handler - use capture phase to intercept before other handlers
 document.addEventListener('keydown', (e) => {
-  // Handle Escape key first with highest priority
+  // Completely block Escape key
   if (e.key === 'Escape') {
     e.preventDefault();
     e.stopPropagation();
     e.stopImmediatePropagation();
-    
-    const fullscreen = document.getElementById('stickerFullscreen');
-    const modal = document.getElementById('keyboardShortcutsModal');
-    
-    if (fullscreen && fullscreen.classList.contains('active')) {
-      fullscreen.classList.remove('active');
-      document.body.style.overflow = '';
-      return false;
-    }
-    
-    if (modal) {
-      modal.remove();
-      return false;
-    }
-    
     return false;
   }
   
