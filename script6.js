@@ -45,6 +45,15 @@ function render() {
   const filtered = filterPosts(allPosts);
   const sorted = sortPosts(filtered);
   const visible = sorted.slice(0, displayLimit);
+  
+  console.log('Rendering posts:', {
+    total: allPosts.length,
+    filtered: filtered.length,
+    sorted: sorted.length,
+    visible: visible.length,
+    displayLimit: displayLimit,
+    currentFilter: currentFilter
+  });
 
   if (searchQuery) {
     const searchInfo = document.createElement("div");
