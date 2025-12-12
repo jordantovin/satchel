@@ -39,6 +39,11 @@ document.addEventListener('keydown', (e) => {
       document.querySelector('.nav-item[data-filter="objects"]').click();
       break;
       
+    case '6':
+      e.preventDefault();
+      document.querySelector('.nav-item[data-filter="photos"]').click();
+      break;
+      
     case '5':
     case 's':
       e.preventDefault();
@@ -63,6 +68,11 @@ document.addEventListener('keydown', (e) => {
     case 'o':
       e.preventDefault();
       document.querySelector('.nav-item[data-view="objects-index"]').click();
+      break;
+      
+    case 't':
+      e.preventDefault();
+      document.querySelector('.nav-item[data-view="photos-index"]').click();
       break;
       
     case 'r':
@@ -156,6 +166,10 @@ function showKeyboardShortcuts() {
               <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">4</kbd>
             </div>
             <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
+              <span>Go to Photos</span>
+              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">6</kbd>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
               <span>Go to Saved</span>
               <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">5</kbd> or <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">S</kbd>
             </div>
@@ -180,6 +194,10 @@ function showKeyboardShortcuts() {
             <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
               <span>Objects Index</span>
               <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">O</kbd>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
+              <span>Photos Index</span>
+              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">T</kbd>
             </div>
           </div>
         </div>
