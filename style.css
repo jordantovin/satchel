@@ -724,6 +724,10 @@
     grid-template-columns: repeat(3, 1fr);
   }
 
+body.fullscreen-mode .stickers-grid {
+  grid-template-columns: repeat(5, 1fr);
+}
+
   .sticker-grid-item {
     position: relative;
     aspect-ratio: 1;
