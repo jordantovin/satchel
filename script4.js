@@ -209,6 +209,13 @@ async function loadAllData() {
     updateHistory();
     document.getElementById('countSaved').textContent = savedPosts.length;
 
+    // Ensure "All Posts" is active on initial load
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    const allPostsNav = document.querySelector('.nav-item[data-filter="all"]');
+    if (allPostsNav) {
+      allPostsNav.classList.add('active');
+    }
+
     lucide.createIcons();
     render();
   } catch (error) {
