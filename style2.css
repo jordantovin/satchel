@@ -124,9 +124,10 @@
     }
   }
 
+  /* Articles grid - 3 columns by default, 5 in fullscreen */
   .articles-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 16px;
   }
 
@@ -137,12 +138,12 @@
   }
    
   body.fullscreen-mode .articles-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(5, 1fr);
   }
 
-body.fullscreen-mode .stickers-grid {
-  grid-template-columns: repeat(5, 1fr);
-}
+  body.fullscreen-mode .stickers-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
 
   .sticker-grid-item {
     position: relative;
@@ -180,21 +181,19 @@ body.fullscreen-mode .stickers-grid {
     right: 0;
     background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 70%, transparent 100%);
     color: white;
-    text-align: center;
     padding: 16px;
     font-size: 14px;
     line-height: 1.3;
+    text-align: left;
   }
 
   .article-grid-title {
     font-weight: 600;
-    margin-bottom: 4px;
     font-size: 15px;
   }
 
   .article-grid-date {
-    font-size: 12px;
-    opacity: 0.9;
+    display: none;
   }
 
   .sticker-grid-image {
@@ -231,6 +230,19 @@ body.fullscreen-mode .stickers-grid {
 
   .sticker-grid-overlay div:last-child {
     margin-bottom: 0;
+  }
+
+  /* Center overlay text for Photos and Objects indexes only */
+  #photoGrid .sticker-grid-overlay,
+  #objectGrid .sticker-grid-overlay {
+    justify-content: center;
+    text-align: center;
+  }
+
+  /* Ensure stickers overlay stays left-aligned */
+  #stickerGrid .sticker-grid-overlay {
+    justify-content: center;
+    text-align: left;
   }
 
   .sticker-fullscreen {
