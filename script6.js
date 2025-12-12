@@ -180,15 +180,17 @@ function render() {
         return;
       }
 
-      if (data && type === "objects") {
-        link.onclick = (e) => {
-          e.preventDefault();
-          const item = JSON.parse(data);
-          openObjectFullscreen(item);
-          addToHistory({ url: item.url, title: item.text, image: item.image });
-        };
-        return;
-      }
+if (data && type === "objects") {
+  link.onclick = (e) => {
+    e.preventDefault();
+    const item = JSON.parse(data);
+    
+    // Open image in new tab (clickable)
+    addToHistory({ url: item.url, title: item.title, image: item.image });
+    window.open(item.url, '_blank');
+  };
+  return;
+}
 
       if (data && type === "photos") {
         link.onclick = (e) => {
