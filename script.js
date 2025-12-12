@@ -121,8 +121,6 @@ document.addEventListener('keydown', (e) => {
       break;
   }
 });
-  }
-});
 
 // Keyboard shortcuts modal
 function showKeyboardShortcuts() {
