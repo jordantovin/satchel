@@ -1,4 +1,5 @@
-function renderObjectsIndex() {
+// Photographers Index rendering
+function renderPhotographersIndex() {
   const feed = document.getElementById("feedItems");
   feed.innerHTML = "";
   
@@ -10,116 +11,127 @@ function renderObjectsIndex() {
   const header = document.createElement("div");
   header.innerHTML = `
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-      <h2 style="margin: 0;">Objects</h2>
+      <h2 style="margin: 0;">Photographers</h2>
       <div style="display: flex; gap: 8px; margin-right: 40px;">
-        <button class="sort-btn" data-sort="az">A-Z</button>
+        <button class="sort-btn active" data-sort="az">A-Z</button>
         <button class="sort-btn" data-sort="za">Z-A</button>
-        <button class="sort-btn active" data-sort="latest">Latest</button>
+        <button class="sort-btn" data-sort="latest">Latest</button>
         <button class="sort-btn" data-sort="oldest">Oldest</button>
       </div>
     </div>
     <div class="index-search">
-      <input type="text" id="objectSearch" placeholder="Search objects by text or date..." />
+      <div class="index-search-wrapper">
+        <input type="text" id="photographerSearch" placeholder="Search photographers by name..." />
+        <button class="random-btn" onclick="randomPhotographer()">Random</button>
+      </div>
     </div>
   `;
   indexContainer.appendChild(header);
   
-  let sortedObjects = [...objectsIndex].sort((a, b) => new Date(b.date) - new Date(a.date));
-  let currentObjectSort = 'latest';
+  let sortedPhotographers = [...photographers].sort((a, b) => a.lastName.localeCompare(b.lastName));
+  let currentPhotographerSort = 'az';
   
-  const gridContainer = document.createElement("div");
-  gridContainer.id = "objectGrid";
-  indexContainer.appendChild(gridContainer);
+  const listContainer = document.createElement("div");
+  listContainer.id = "photographerList";
+  indexContainer.appendChild(listContainer);
   
   feed.appendChild(indexContainer);
   
-  renderObjectGrid(sortedObjects, gridContainer);
+  renderPhotographerList(sortedPhotographers, listContainer);
   
   document.querySelectorAll('.photographers-index .sort-btn').forEach(btn => {
     btn.addEventListener('click', function() {
       document.querySelectorAll('.photographers-index .sort-btn').forEach(b => b.classList.remove('active'));
       this.classList.add('active');
-      currentObjectSort = this.dataset.sort;
+      currentPhotographerSort = this.dataset.sort;
       
-      if (currentObjectSort === 'az') {
-        sortedObjects = [...objectsIndex].sort((a, b) => a.text.localeCompare(b.text));
-      } else if (currentObjectSort === 'za') {
-        sortedObjects = [...objectsIndex].sort((a, b) => b.text.localeCompare(a.text));
-      } else if (currentObjectSort === 'latest') {
-        sortedObjects = [...objectsIndex].sort((a, b) => new Date(b.date) - new Date(a.date));
-      } else if (currentObjectSort === 'oldest') {
-        sortedObjects = [...objectsIndex].sort((a, b) => new Date(a.date) - new Date(b.date));
+      if (currentPhotographerSort === 'az') {
+        sortedPhotographers = [...photographers].sort((a, b) => a.lastName.localeCompare(b.lastName));
+      } else if (currentPhotographerSort === 'za') {
+        sortedPhotographers = [...photographers].sort((a, b) => b.lastName.localeCompare(a.lastName));
+      } else if (currentPhotographerSort === 'latest') {
+        sortedPhotographers = [...photographers].sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));
+      } else if (currentPhotographerSort === 'oldest') {
+        sortedPhotographers = [...photographers].sort((a, b) => new Date(a.dateAdded) - new Date(b.dateAdded));
       }
       
-      const query = document.getElementById('objectSearch').value.toLowerCase().trim();
+      const query = document.getElementById('photographerSearch').value.toLowerCase().trim();
       if (query) {
-        const filtered = sortedObjects.filter(o => {
-          return Object.values(o).some(value => {
-            return value && typeof value === 'string' && value.toLowerCase().includes(query);
-          });
-        });
-        renderObjectGrid(filtered, gridContainer);
+        const filtered = sortedPhotographers.filter(p => p.name.toLowerCase().includes(query));
+        renderPhotographerList(filtered, listContainer);
       } else {
-        renderObjectGrid(sortedObjects, gridContainer);
+        renderPhotographerList(sortedPhotographers, listContainer);
       }
     });
   });
   
-  document.getElementById('objectSearch').addEventListener('input', (e) => {
+  document.getElementById('photographerSearch').addEventListener('input', (e) => {
     const query = e.target.value.toLowerCase().trim();
     if (query === '') {
-      renderObjectGrid(sortedObjects, gridContainer);
+      renderPhotographerList(sortedPhotographers, listContainer);
     } else {
-      const filtered = sortedObjects.filter(o => {
-        return Object.values(o).some(value => {
-          return value && typeof value === 'string' && value.toLowerCase().includes(query);
-        });
-      });
-      renderObjectGrid(filtered, gridContainer);
+      const filtered = sortedPhotographers.filter(p => 
+        p.name.toLowerCase().includes(query)
+      );
+      renderPhotographerList(filtered, listContainer);
     }
   });
   
   lucide.createIcons();
 }
 
-function renderObjectGrid(objectsList, container) {
+function renderPhotographerList(photographersList, container) {
   container.innerHTML = '';
   
-  if (objectsList.length === 0) {
-    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #7c7c7c;">No objects found</div>';
+  if (photographersList.length === 0) {
+    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #7c7c7c;">No photographers found</div>';
     return;
   }
   
-  const grid = document.createElement("div");
-  grid.className = "stickers-grid";
-  
-  objectsList.forEach(obj => {
-    const item = document.createElement("div");
-    item.className = "sticker-grid-item";
-    item.onclick = () => {
-      openObjectFullscreen({
-        collection: 'objects',
-        image: obj.image,
-        date: obj.date,
-        text: obj.text
-      });
-    };
-    
-    item.innerHTML = `
-      <img class="sticker-grid-image" src="${obj.image}" alt="${obj.text}">
-      <div class="sticker-grid-overlay">
-        <div><strong>Date:</strong> ${obj.date}</div>
-        <div><strong>Text:</strong> ${obj.text}</div>
-      </div>
-    `;
-    
-    grid.appendChild(item);
+  const grouped = {};
+  photographersList.forEach(p => {
+    const letter = p.lastName.charAt(0).toUpperCase();
+    if (!grouped[letter]) {
+      grouped[letter] = [];
+    }
+    grouped[letter].push(p);
   });
   
-  container.appendChild(grid);
+  Object.keys(grouped).sort().forEach(letter => {
+    const section = document.createElement("div");
+    section.className = "alphabet-section";
+    
+    const letterHeader = document.createElement("div");
+    letterHeader.className = "alphabet-letter";
+    letterHeader.textContent = letter;
+    section.appendChild(letterHeader);
+    
+    const grid = document.createElement("div");
+    grid.className = "photographer-grid";
+    
+    grouped[letter].forEach(photographer => {
+      const link = document.createElement("a");
+      link.className = "photographer-link";
+      link.href = photographer.website;
+      link.target = "_blank";
+      link.textContent = photographer.name.toLowerCase();
+      link.onclick = (e) => {
+        addToHistory({
+          url: photographer.website,
+          title: photographer.name,
+          image: ''
+        });
+      };
+      grid.appendChild(link);
+    });
+    
+    section.appendChild(grid);
+    container.appendChild(section);
+  });
 }
 
-function renderPhotosIndex() {
+// Stickers Index rendering
+function renderStickersIndex() {
   const feed = document.getElementById("feedItems");
   feed.innerHTML = "";
   
@@ -131,7 +143,7 @@ function renderPhotosIndex() {
   const header = document.createElement("div");
   header.innerHTML = `
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-      <h2 style="margin: 0;">Photos</h2>
+      <h2 style="margin: 0;">Stickers</h2>
       <div style="display: flex; gap: 8px; margin-right: 40px;">
         <button class="sort-btn" data-sort="az">A-Z</button>
         <button class="sort-btn" data-sort="za">Z-A</button>
@@ -140,112 +152,101 @@ function renderPhotosIndex() {
       </div>
     </div>
     <div class="index-search">
-      <input type="text" id="photoSearch" placeholder="Search photos by photographer, note, or date..." />
+      <input type="text" id="stickerSearch" placeholder="Search stickers by location, medium, or artist..." />
     </div>
   `;
   indexContainer.appendChild(header);
   
-  let sortedPhotos = [...photosIndex].sort((a, b) => {
-    const dateA = a.date ? new Date(a.date) : new Date(0);
-    const dateB = b.date ? new Date(b.date) : new Date(0);
-    return dateB - dateA;
-  });
-  let currentPhotoSort = 'latest';
+  let sortedStickers = [...stickersIndex].sort((a, b) => new Date(b.date) - new Date(a.date));
+  let currentStickerSort = 'latest';
   
   const gridContainer = document.createElement("div");
-  gridContainer.id = "photoGrid";
+  gridContainer.id = "stickerGrid";
   indexContainer.appendChild(gridContainer);
   
   feed.appendChild(indexContainer);
   
-  renderPhotoGrid(sortedPhotos, gridContainer);
+  renderStickerGrid(sortedStickers, gridContainer);
   
   document.querySelectorAll('.photographers-index .sort-btn').forEach(btn => {
     btn.addEventListener('click', function() {
       document.querySelectorAll('.photographers-index .sort-btn').forEach(b => b.classList.remove('active'));
       this.classList.add('active');
-      currentPhotoSort = this.dataset.sort;
+      currentStickerSort = this.dataset.sort;
       
-      if (currentPhotoSort === 'az') {
-        sortedPhotos = [...photosIndex].sort((a, b) => a.photographer.localeCompare(b.photographer));
-      } else if (currentPhotoSort === 'za') {
-        sortedPhotos = [...photosIndex].sort((a, b) => b.photographer.localeCompare(a.photographer));
-      } else if (currentPhotoSort === 'latest') {
-        sortedPhotos = [...photosIndex].sort((a, b) => {
-          const dateA = a.date ? new Date(a.date) : new Date(0);
-          const dateB = b.date ? new Date(b.date) : new Date(0);
-          return dateB - dateA;
-        });
-      } else if (currentPhotoSort === 'oldest') {
-        sortedPhotos = [...photosIndex].sort((a, b) => {
-          const dateA = a.date ? new Date(a.date) : new Date(0);
-          const dateB = b.date ? new Date(b.date) : new Date(0);
-          return dateA - dateB;
-        });
+      if (currentStickerSort === 'az') {
+        sortedStickers = [...stickersIndex].sort((a, b) => a.location.localeCompare(b.location));
+      } else if (currentStickerSort === 'za') {
+        sortedStickers = [...stickersIndex].sort((a, b) => b.location.localeCompare(a.location));
+      } else if (currentStickerSort === 'latest') {
+        sortedStickers = [...stickersIndex].sort((a, b) => new Date(b.date) - new Date(a.date));
+      } else if (currentStickerSort === 'oldest') {
+        sortedStickers = [...stickersIndex].sort((a, b) => new Date(a.date) - new Date(b.date));
       }
       
-      const query = document.getElementById('photoSearch').value.toLowerCase().trim();
+      const query = document.getElementById('stickerSearch').value.toLowerCase().trim();
       if (query) {
-        const filtered = sortedPhotos.filter(p => {
-          return Object.values(p).some(value => {
+        const filtered = sortedStickers.filter(s => {
+          return Object.values(s).some(value => {
             return value && typeof value === 'string' && value.toLowerCase().includes(query);
           });
         });
-        renderPhotoGrid(filtered, gridContainer);
+        renderStickerGrid(filtered, gridContainer);
       } else {
-        renderPhotoGrid(sortedPhotos, gridContainer);
+        renderStickerGrid(sortedStickers, gridContainer);
       }
     });
   });
   
-  document.getElementById('photoSearch').addEventListener('input', (e) => {
+  document.getElementById('stickerSearch').addEventListener('input', (e) => {
     const query = e.target.value.toLowerCase().trim();
     if (query === '') {
-      renderPhotoGrid(sortedPhotos, gridContainer);
+      renderStickerGrid(sortedStickers, gridContainer);
     } else {
-      const filtered = sortedPhotos.filter(p => {
-        return Object.values(p).some(value => {
+      const filtered = sortedStickers.filter(s => {
+        return Object.values(s).some(value => {
           return value && typeof value === 'string' && value.toLowerCase().includes(query);
         });
       });
-      renderPhotoGrid(filtered, gridContainer);
+      renderStickerGrid(filtered, gridContainer);
     }
   });
   
   lucide.createIcons();
 }
 
-function renderPhotoGrid(photosList, container) {
+function renderStickerGrid(stickersList, container) {
   container.innerHTML = '';
   
-  if (photosList.length === 0) {
-    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #7c7c7c;">No photos found</div>';
+  if (stickersList.length === 0) {
+    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #7c7c7c;">No stickers found</div>';
     return;
   }
   
   const grid = document.createElement("div");
   grid.className = "stickers-grid";
   
-  photosList.forEach(photo => {
+  stickersList.forEach(sticker => {
     const item = document.createElement("div");
     item.className = "sticker-grid-item";
     item.onclick = () => {
-      window.open(photo.link, '_blank');
-      addToHistory({
-        url: photo.link,
-        title: photo.photographer,
-        image: photo.link
+      openStickerFullscreen({
+        collection: 'collection4',
+        image: sticker.image,
+        date: sticker.date,
+        location: sticker.location,
+        medium: sticker.medium,
+        artist: sticker.artist
       });
     };
     
-    // Only show photographer in overlay
-    const overlayContent = [];
-    overlayContent.push(`<div>${photo.photographer}</div>`);
-    
     item.innerHTML = `
-      <img class="sticker-grid-image" src="${photo.link}" alt="${photo.photographer}">
+      <img class="sticker-grid-image" src="${sticker.image}" alt="${sticker.location_card}">
       <div class="sticker-grid-overlay">
-        ${overlayContent.join('')}
+        <div><strong>Date:</strong> ${sticker.date}</div>
+        <div><strong>Location:</strong> ${sticker.location_card}</div>
+        <div><strong>Medium:</strong> ${sticker.medium}</div>
+        <div><strong>Artist:</strong> ${sticker.artist}</div>
       </div>
     `;
     
@@ -253,8 +254,4 @@ function renderPhotoGrid(photosList, container) {
   });
   
   container.appendChild(grid);
-}
-
-function renderPicturesIndex() {
-  renderPhotosIndex();
 }
