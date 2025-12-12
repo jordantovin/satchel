@@ -8,26 +8,28 @@ document.addEventListener('keydown', (e) => {
     return;
   }
   
-  // Handle Escape key first
-  if (e.key === 'Escape') {
-    const fullscreen = document.getElementById('stickerFullscreen');
-    const modal = document.getElementById('keyboardShortcutsModal');
-    
-    if (fullscreen && fullscreen.classList.contains('active')) {
-      e.preventDefault();
-      fullscreen.classList.remove('active');
-      document.body.style.overflow = '';
-      return;
-    }
-    
-    if (modal) {
-      e.preventDefault();
-      modal.remove();
-      return;
-    }
-    
-    return;
+// Handle Escape key first
+if (e.key === 'Escape') {
+  e.preventDefault();
+  e.stopPropagation();
+  e.stopImmediatePropagation(); // ADD THIS LINE
+  
+  const fullscreen = document.getElementById('stickerFullscreen');
+  const modal = document.getElementById('keyboardShortcutsModal');
+  
+  if (fullscreen && fullscreen.classList.contains('active')) {
+    fullscreen.classList.remove('active');
+    document.body.style.overflow = '';
+    return false; // ADD THIS
   }
+  
+  if (modal) {
+    modal.remove();
+    return false; // ADD THIS
+  }
+  
+  return false; // ADD THIS
+}
   
   switch(e.key.toLowerCase()) {
     case '/':
