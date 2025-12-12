@@ -1,4 +1,121 @@
 // Articles Index rendering
+function renderArticlesIndex() {
+  const feed = document.getElementById("feedItems");
+  feed.innerHTML = "";
+  
+  showFullscreenToggle();
+  
+  const indexContainer = document.createElement("div");
+  indexContainer.className = "photographers-index";
+  
+  const header = document.createElement("div");
+  header.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <h2 style="margin: 0;">Articles</h2>
+      <div style="display: flex; gap: 8px; margin-right: 40px;">
+        <button class="sort-btn" data-sort="az">A-Z</button>
+        <button class="sort-btn" data-sort="za">Z-A</button>
+        <button class="sort-btn active" data-sort="latest">Latest</button>
+        <button class="sort-btn" data-sort="oldest">Oldest</button>
+      </div>
+    </div>
+    <div class="index-search">
+      <input type="text" id="articleSearch" placeholder="Search articles by title..." />
+    </div>
+  `;
+  indexContainer.appendChild(header);
+  
+  let sortedArticles = [...articlesIndex].sort((a, b) => new Date(b.date) - new Date(a.date));
+  let currentArticleSort = 'latest';
+  
+  const gridContainer = document.createElement("div");
+  gridContainer.id = "articleGrid";
+  indexContainer.appendChild(gridContainer);
+  
+  feed.appendChild(indexContainer);
+  
+  renderArticleGrid(sortedArticles, gridContainer);
+  
+  document.querySelectorAll('.photographers-index .sort-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.photographers-index .sort-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      currentArticleSort = this.dataset.sort;
+      
+      if (currentArticleSort === 'az') {
+        sortedArticles = [...articlesIndex].sort((a, b) => a.title.localeCompare(b.title));
+      } else if (currentArticleSort === 'za') {
+        sortedArticles = [...articlesIndex].sort((a, b) => b.title.localeCompare(a.title));
+      } else if (currentArticleSort === 'latest') {
+        sortedArticles = [...articlesIndex].sort((a, b) => new Date(b.date) - new Date(a.date));
+      } else if (currentArticleSort === 'oldest') {
+        sortedArticles = [...articlesIndex].sort((a, b) => new Date(a.date) - new Date(b.date));
+      }
+      
+      const query = document.getElementById('articleSearch').value.toLowerCase().trim();
+      if (query) {
+        const filtered = sortedArticles.filter(a => {
+          return Object.values(a).some(value => {
+            return value && typeof value === 'string' && value.toLowerCase().includes(query);
+          });
+        });
+        renderArticleGrid(filtered, gridContainer);
+      } else {
+        renderArticleGrid(sortedArticles, gridContainer);
+      }
+    });
+  });
+  
+  document.getElementById('articleSearch').addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase().trim();
+    if (query === '') {
+      renderArticleGrid(sortedArticles, gridContainer);
+    } else {
+      const filtered = sortedArticles.filter(a => {
+        return Object.values(a).some(value => {
+          return value && typeof value === 'string' && value.toLowerCase().includes(query);
+        });
+      });
+      renderArticleGrid(filtered, gridContainer);
+    }
+  });
+  
+  lucide.createIcons();
+}
+
+function renderArticleGrid(articlesList, container) {
+  container.innerHTML = '';
+  
+  if (articlesList.length === 0) {
+    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #7c7c7c;">No articles found</div>';
+    return;
+  }
+  
+  const grid = document.createElement("div");
+  grid.className = "articles-grid";
+  
+  articlesList.forEach(article => {
+    const item = document.createElement("div");
+    item.className = "article-grid-item";
+    item.onclick = () => {
+      addToHistory({ url: article.url, title: article.title, image: article.image });
+      window.open(article.url, '_blank');
+    };
+    
+    item.innerHTML = `
+      <img class="article-grid-image" src="${article.image}" alt="${article.title}">
+      <div class="article-grid-overlay">
+        <div class="article-grid-title">${article.title}</div>
+        <div class="article-grid-date">${article.date}</div>
+      </div>
+    `;
+    
+    grid.appendChild(item);
+  });
+  
+  container.appendChild(grid);
+}
+
 // Objects Index rendering - UPDATED
 function renderObjectsIndex() {
   const feed = document.getElementById("feedItems");
@@ -111,7 +228,7 @@ function renderObjectGrid(objectsList, container) {
     item.innerHTML = `
       <img class="sticker-grid-image" src="${obj.image}" alt="${obj.title}">
       <div class="sticker-grid-overlay">
-        <div>${obj.title}</div>
+        <div><strong>Title:</strong> ${obj.title}</div>
       </div>
     `;
     
