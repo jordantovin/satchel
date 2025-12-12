@@ -1,303 +1,246 @@
-// Keyboard shortcuts handler
-document.addEventListener('keydown', (e) => {
-  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-    return;
+// Fullscreen modal functions
+function openStickerFullscreen(item) {
+  document.getElementById('stickerFullscreenImage').src = item.image;
+  
+  if (item.collection === 'collection4') {
+    const infoDiv = document.querySelector('.sticker-fullscreen-info');
+    infoDiv.innerHTML = `
+      <div><strong>Date:</strong> <span>${item.date}</span></div>
+      <div><strong>Location:</strong><br><span>${item.location}</span></div>
+      <div><strong>Medium:</strong> <span>${item.medium}</span></div>
+      <div><strong>Artist:</strong> <span>${item.artist || 'Unknown'}</span></div>
+    `;
   }
   
-  if (e.ctrlKey || e.metaKey || e.altKey) {
-    return;
-  }
-  
-  switch(e.key.toLowerCase()) {
-    case '/':
-      e.preventDefault();
-      document.getElementById('searchBox').focus();
-      break;
-      
-    case 'h':
-      e.preventDefault();
-      goToAllPosts();
-      break;
-      
-    case '2':
-      e.preventDefault();
-      document.querySelector('.nav-item[data-filter="collection1"]').click();
-      break;
-      
-    case '1':
-      e.preventDefault();
-      document.querySelector('.nav-item[data-filter="collection2"]').click();
-      break;
-      
-    case '3':
-      e.preventDefault();
-      document.querySelector('.nav-item[data-filter="collection4"]').click();
-      break;
-      
-    case '4':
-      e.preventDefault();
-      document.querySelector('.nav-item[data-filter="objects"]').click();
-      break;
-      
-    case '6':
-      e.preventDefault();
-      document.querySelector('.nav-item[data-filter="photos"]').click();
-      break;
-      
-    case '5':
-    case 's':
-      e.preventDefault();
-      document.querySelector('.nav-item[data-filter="saved"]').click();
-      break;
-      
-    case 'a':
-      e.preventDefault();
-      document.querySelector('.nav-item[data-view="articles-index"]').click();
-      break;
-      
-    case 'p':
-      e.preventDefault();
-      document.querySelector('.nav-item[data-view="photographers-index"]').click();
-      break;
-      
-    case 'i':
-      e.preventDefault();
-      document.querySelector('.nav-item[data-view="stickers-index"]').click();
-      break;
-      
-    case 'o':
-      e.preventDefault();
-      document.querySelector('.nav-item[data-view="objects-index"]').click();
-      break;
-      
-    case 't':
-      e.preventDefault();
-      document.querySelector('.nav-item[data-view="photos-index"]').click();
-      break;
-      
-    case 'r':
-      e.preventDefault();
-      if (currentView === 'photographers-index') {
-        randomPhotographer();
-      }
-      break;
-      
-    case 'x':
-      e.preventDefault();
-      document.querySelector('.sort-btn[data-sort="shuffle"]').click();
-      break;
-      
-    case 'f':
-      if (currentView.includes('-index')) {
-        e.preventDefault();
-        toggleFullscreen();
-      }
-      break;
-      
-    case '?':
-      e.preventDefault();
-      showKeyboardShortcuts();
-      break;
-      
-    case 'escape':
-      if (document.getElementById('stickerFullscreen').classList.contains('active')) {
-        closeStickerFullscreen(e);
-      }
-      if (document.getElementById('keyboardShortcutsModal')) {
-        closeKeyboardShortcuts();
-      }
-      break;
-  }
-});
+  document.getElementById('stickerFullscreen').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
 
-// Keyboard shortcuts modal
-function showKeyboardShortcuts() {
-  const existing = document.getElementById('keyboardShortcutsModal');
-  if (existing) {
-    existing.remove();
-    return;
+function openObjectFullscreen(item) {
+  document.getElementById('stickerFullscreenImage').src = item.image;
+  
+  const infoDiv = document.querySelector('.sticker-fullscreen-info');
+  infoDiv.innerHTML = `
+    <div><strong>Date:</strong> <span>${item.date}</span></div>
+    <div><strong>Location:</strong><br><span>${item.text}</span></div>
+  `;
+  
+  document.getElementById('stickerFullscreen').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function openPhotoFullscreen(item) {
+  document.getElementById('stickerFullscreenImage').src = item.image;
+  
+  // Hide all labels and values except photographer
+  const infoDiv = document.querySelector('.sticker-fullscreen-info');
+  infoDiv.innerHTML = `<div style="font-size: 18px; font-weight: 400;">${item.photographer}</div>`;
+  
+  document.getElementById('stickerFullscreen').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeStickerFullscreen(event) {
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+  document.getElementById('stickerFullscreen').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+// History management
+function addToHistory(post) {
+  viewHistory = viewHistory.filter(item => item.url !== post.url);
+  
+  viewHistory.unshift({
+    url: post.url,
+    title: post.title,
+    image: post.image,
+    timestamp: Date.now()
+  });
+  
+  viewHistory = viewHistory.slice(0, 20);
+  
+  localStorage.setItem('satchelHistory', JSON.stringify(viewHistory));
+  
+  updateHistory();
+}
+
+function updateHistory() {
+  const historyList = document.getElementById('historyList');
+  
+  if (viewHistory.length === 0) {
+    historyList.innerHTML = `
+      <div class="no-history">
+        <i data-lucide="clock" style="width: 32px; height: 32px; margin: 0 auto 8px; display: block; color: #ccc;"></i>
+        <div>No reading history yet</div>
+      </div>
+    `;
+  } else {
+    historyList.innerHTML = viewHistory.map(item => {
+      const hasImage = item.image && item.image.trim() !== '';
+      
+      if (hasImage) {
+        return `
+          <div class="history-item" onclick="window.open('${item.url}', '_blank')">
+            <div class="history-thumbnail-wrapper">
+              <img class="history-thumbnail" src="${item.image}" alt="${item.title}">
+            </div>
+            <div class="history-info">
+              <div class="history-title">${item.title}</div>
+              <div class="history-time">${formatCommentTime(item.timestamp)}</div>
+            </div>
+          </div>
+        `;
+      } else {
+        return `
+          <div class="history-item" onclick="window.open('${item.url}', '_blank')">
+            <div class="history-thumbnail-wrapper">
+              <div class="history-thumbnail circle" style="background: #1c1c1c; display: flex; align-items: center; justify-content: center; color: white;">
+                <i data-lucide="users" style="width: 20px; height: 20px;"></i>
+              </div>
+            </div>
+            <div class="history-info">
+              <div class="history-title">${item.title}</div>
+              <div class="history-time">${formatCommentTime(item.timestamp)}</div>
+            </div>
+          </div>
+        `;
+      }
+    }).join('');
   }
   
-  const modal = document.createElement('div');
-  modal.id = 'keyboardShortcutsModal';
-  modal.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    z-index: 2000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: fadeIn 0.2s ease;
-  `;
+  lucide.createIcons();
+}
+
+function clearHistory() {
+  if (confirm('Are you sure you want to clear your reading history?')) {
+    viewHistory = [];
+    localStorage.setItem('satchelHistory', JSON.stringify(viewHistory));
+    updateHistory();
+  }
+}
+
+// Sorting and filtering functions
+function sortPosts(arr) {
+  let sorted = [...arr];
   
-  modal.innerHTML = `
-    <div style="background: white; border-radius: 12px; padding: 32px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-        <h2 style="margin: 0; font-size: 24px; font-weight: 700;">Keyboard Shortcuts</h2>
-        <button onclick="closeKeyboardShortcuts()" style="background: transparent; border: none; font-size: 24px; cursor: pointer; color: #7c7c7c; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">×</button>
-      </div>
-      
-      <div style="display: grid; gap: 20px;">
-        <div>
-          <h3 style="font-size: 14px; font-weight: 700; text-transform: uppercase; color: #7c7c7c; margin-bottom: 12px;">Navigation</h3>
-          <div style="display: grid; gap: 8px;">
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Go to All Posts</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">H</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Go to Articles</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">1</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Go to Field Notes</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">2</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Go to Stickers</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">3</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Go to Objects</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">4</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Go to Photos</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">6</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Go to Saved</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">5</kbd> or <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">S</kbd>
-            </div>
-          </div>
-        </div>
-        
-        <div>
-          <h3 style="font-size: 14px; font-weight: 700; text-transform: uppercase; color: #7c7c7c; margin-bottom: 12px;">Indexes</h3>
-          <div style="display: grid; gap: 8px;">
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Articles Index</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">A</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Photographers Index</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">P</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Stickers Index</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">I</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Objects Index</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">O</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Photos Index</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">T</kbd>
-            </div>
-          </div>
-        </div>
-        
-        <div>
-          <h3 style="font-size: 14px; font-weight: 700; text-transform: uppercase; color: #7c7c7c; margin-bottom: 12px;">Actions</h3>
-          <div style="display: grid; gap: 8px;">
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Search</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">/</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Shuffle Posts</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">X</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Random Photographer</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">R</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Toggle Fullscreen (Index pages)</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">F</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Close Modal</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">Esc</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0;">
-              <span>Show This Help</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">?</kbd>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #edeff1; text-align: center; color: #7c7c7c; font-size: 14px;">
-        Press <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">?</kbd> anytime to toggle this help
-      </div>
-    </div>
-  `;
-  
-  modal.onclick = (e) => {
-    if (e.target === modal) {
-      closeKeyboardShortcuts();
+  const parseDate = (dateStr) => {
+    if (!dateStr) return new Date(0);
+    
+    const slashMatch = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (slashMatch) {
+      const month = parseInt(slashMatch[1], 10) - 1;
+      const day = parseInt(slashMatch[2], 10);
+      const year = parseInt(slashMatch[3], 10);
+      return new Date(year, month, day);
     }
+    
+    return new Date(dateStr);
   };
   
-  document.body.appendChild(modal);
-}
-
-function closeKeyboardShortcuts() {
-  const modal = document.getElementById('keyboardShortcutsModal');
-  if (modal) {
-    modal.remove();
+  if (currentSort === "date-oldest") {
+    sorted.sort((a, b) => parseDate(a.date) - parseDate(b.date));
+  } else if (currentSort === "date-newest") {
+    sorted.sort((a, b) => parseDate(b.date) - parseDate(a.date));
+  } else if (currentSort === "title-az") {
+    sorted.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+  } else if (currentSort === "title-za") {
+    sorted.sort((a, b) => (b.title || "").localeCompare(a.title || ""));
+  } else if (currentSort === "shuffle") {
+    const stickers = sorted.filter(p => p.collection === 'collection4');
+    const otherPosts = sorted.filter(p => p.collection !== 'collection4');
+    
+    const shuffleArray = (arr) => {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    };
+    
+    const limitedStickers = shuffleArray([...stickers]).slice(0, Math.floor(Math.random() * 4) + 5);
+    
+    sorted = shuffleArray([...otherPosts, ...limitedStickers]);
   }
+  
+  return sorted;
 }
 
-// Fullscreen toggle functions
-function toggleFullscreen() {
-  document.body.classList.toggle('fullscreen-mode');
-  const icon = document.getElementById('fullscreenIcon');
-  const isFullscreen = document.body.classList.contains('fullscreen-mode');
+function filterPosts(arr) {
+  let filtered = arr;
   
-  if (isFullscreen) {
-    icon.setAttribute('data-lucide', 'minimize-2');
-  } else {
-    icon.setAttribute('data-lucide', 'maximize-2');
+  if (currentFilter === "saved") {
+    filtered = filtered.filter(p => savedPosts.includes(p.url));
+  } else if (currentFilter !== "all") {
+    filtered = filtered.filter(p => p.collection === currentFilter);
   }
   
-  lucide.createIcons();
-}
-
-function showFullscreenToggle() {
-  document.getElementById('fullscreenToggle').classList.add('visible');
-}
-
-function hideFullscreenToggle() {
-  document.getElementById('fullscreenToggle').classList.remove('visible');
-  document.body.classList.remove('fullscreen-mode');
-  const icon = document.getElementById('fullscreenIcon');
-  icon.setAttribute('data-lucide', 'maximize-2');
-  lucide.createIcons();
-}
-
-// Initialize application
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', loadAllData);
-} else {
-  loadAllData();
-}
-
-// Mobile menu close on outside click
-document.addEventListener('click', (e) => {
-  const sidebar = document.querySelector('.left-sidebar');
-  const menuButton = document.querySelector('.mobile-menu-toggle');
-  
-  if (sidebar && menuButton && 
-      sidebar.classList.contains('mobile-open') && 
-      !sidebar.contains(e.target) && 
-      !menuButton.contains(e.target)) {
-    toggleMobileMenu();
+  if (searchQuery) {
+    const query = searchQuery.toLowerCase();
+    
+    filtered = filtered.filter(post => {
+      return Object.values(post).some(value => {
+        return value && typeof value === 'string' && value.toLowerCase().includes(query);
+      });
+    });
+    
+    if (currentFilter === "all") {
+      const matchingPhotographers = photographers.filter(p => {
+        return p.name.toLowerCase().includes(query) || 
+               p.firstName.toLowerCase().includes(query) ||
+               p.lastName.toLowerCase().includes(query) ||
+               p.website.toLowerCase().includes(query) ||
+               (p.type && p.type.toLowerCase().includes(query)) ||
+               (p.class && p.class.toLowerCase().includes(query)) ||
+               (p.why && p.why.toLowerCase().includes(query)) ||
+               (p.what && p.what.toLowerCase().includes(query)) ||
+               (p.location && p.location.toLowerCase().includes(query));
+      }).map(p => ({
+        collection: "photographer",
+        collectionName: "Photographers",
+        title: p.name,
+        url: p.website,
+        image: '',
+        date: p.dateAdded,
+        noImage: true
+      }));
+      
+      const matchingStickers = stickersIndex.filter(s => {
+        return Object.values(s).some(value => {
+          return value && typeof value === 'string' && value.toLowerCase().includes(query);
+        });
+      }).map(s => ({
+        collection: "collection4",
+        collectionName: "Stickers",
+        title: s.location || 'Sticker',
+        url: s.image,
+        image: s.image,
+        date: s.date,
+        medium: s.medium,
+        location: s.location,
+        artist: s.artist
+      }));
+      
+      const matchingPhotos = photosIndex.filter(p => {
+        return Object.values(p).some(value => {
+          return value && typeof value === 'string' && value.toLowerCase().includes(query);
+        });
+      }).map(p => ({
+        collection: "photos",
+        collectionName: "Photos",
+        title: p.photographer,
+        url: p.link,
+        image: p.link,
+        date: p.date,
+        text: p.note,
+        photographer: p.photographer
+      }));
+      
+      filtered = [...filtered, ...matchingPhotographers, ...matchingStickers, ...matchingPhotos];
+    }
   }
-});
+  
+  return filtered;
+}
