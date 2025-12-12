@@ -111,7 +111,7 @@ function renderObjectGrid(objectsList, container) {
     item.innerHTML = `
       <img class="sticker-grid-image" src="${obj.image}" alt="${obj.title}">
       <div class="sticker-grid-overlay">
-        <div><strong>Title:</strong> ${obj.title}</div>
+        <div>${obj.title}</div>
       </div>
     `;
     
