@@ -221,10 +221,6 @@ function showKeyboardShortcuts() {
               <span>Toggle Fullscreen (Index pages)</span>
               <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">F</kbd>
             </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Close Modal</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">Esc</kbd>
-            </div>
             <div style="display: flex; justify-content: space-between; padding: 8px 0;">
               <span>Show This Help</span>
               <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">?</kbd>
