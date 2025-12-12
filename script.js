@@ -1,168 +1,257 @@
-// Configuration and CSV URLs
-const sheetURL1 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTo8ua4UreD9MUP4CI6OOXkt8LeagGX9w85veJfgi9DKJnHc2-dbCMvq5cx8DtlUO0YcV5RMPzcJ_KG/pub?output=csv";
-const sheetURL2 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcOtzV-2ZVl1aaRXhnlXEDNmJ8y1pUArx3qjhV3AR66kKSMtR17702FGlrBdppy0YPI084PxrMu9uL/pub?output=csv";
-const sheetURL3 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR4UTNOg8d2LIrCU8A9ebfkYOMV2V3E7egroQgliVc4v6mp7Xi9fdmPaxN3k3YUmeW123C8UvwdiNmy/pub?output=csv";
-const sheetURL4 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4QAkAIideMvvWDNWq2Aj_Nx6m4QG9snhFkpqqOGX8gU09X6uUQdkfuOj9yLIybn0iPIFoZbK-/pub?output=csv";
-const sheetURL5 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRPknkbhkxJidsCcMnFmvdB2gKx4miqtuECGc5udX7hEAY9IQeTCpNDGMkh31uGuSS1NcODADU_jcRT/pub?output=csv";
-const sheetURL6 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQgrPlpxYaFJdMcgf_-UT0hA4u-uzsbXlgOwVaI2ox9S44XPXySHiNogkYfkno84Ur5V0oCMet0thHp/pub?output=csv";
-
-// Global state variables
-let jordanPosts = [];
-let objectsIndex = [];
-let allPosts = [];
-let photographers = [];
-let stickersIndex = [];
-let articlesIndex = [];
-let displayLimit = 10;
-let currentFilter = "all";
-let currentSort = "date-newest";
-let savedPosts = JSON.parse(localStorage.getItem('satchelSaved') || '[]');
-let searchQuery = "";
-let viewHistory = JSON.parse(localStorage.getItem('satchelHistory') || '[]');
-let currentView = "feed";
-
-// Mobile menu functions
-function toggleMobileMenu() {
-  document.querySelector('.left-sidebar').classList.toggle('mobile-open');
-  document.body.classList.toggle('menu-open');
-}
-
-function closeMobileMenuOnClick() {
-  if (window.innerWidth <= 768) {
-    document.querySelector('.left-sidebar').classList.remove('mobile-open');
-    document.body.classList.remove('menu-open');
-  }
-}
-
-// Date normalization utility
-function normalizeDate(dateStr) {
-  if (!dateStr) return '';
-  dateStr = dateStr.trim();
+// Photographers Index rendering
+function renderPhotographersIndex() {
+  const feed = document.getElementById("feedItems");
+  feed.innerHTML = "";
   
-  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)) {
-    const parts = dateStr.split('/');
-    return `${parts[0].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[2]}`;
-  }
+  showFullscreenToggle();
   
-  if (/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(dateStr)) {
-    const parts = dateStr.split('/');
-    return `${parts[1].padStart(2, '0')}/${parts[2].padStart(2, '0')}/${parts[0]}`;
-  }
+  const indexContainer = document.createElement("div");
+  indexContainer.className = "photographers-index";
   
-  if (/^\d{4}\/\d{1,2}$/.test(dateStr)) {
-    const parts = dateStr.split('/');
-    return `${parts[1].padStart(2, '0')}/01/${parts[0]}`;
-  }
+  const header = document.createElement("div");
+  header.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <h2 style="margin: 0;">Photographers</h2>
+      <div style="display: flex; gap: 8px; margin-right: 40px;">
+        <button class="sort-btn active" data-sort="az">A-Z</button>
+        <button class="sort-btn" data-sort="za">Z-A</button>
+        <button class="sort-btn" data-sort="latest">Latest</button>
+        <button class="sort-btn" data-sort="oldest">Oldest</button>
+      </div>
+    </div>
+    <div class="index-search">
+      <div class="index-search-wrapper">
+        <input type="text" id="photographerSearch" placeholder="Search photographers by name..." />
+        <button class="random-btn" onclick="randomPhotographer()">Random</button>
+      </div>
+    </div>
+  `;
+  indexContainer.appendChild(header);
   
-  if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(dateStr)) {
-    const parts = dateStr.split('-');
-    return `${parts[1].padStart(2, '0')}/${parts[2].padStart(2, '0')}/${parts[0]}`;
-  }
+  let sortedPhotographers = [...photographers].sort((a, b) => a.lastName.localeCompare(b.lastName));
+  let currentPhotographerSort = 'az';
   
-  if (/^\d{4}-\d{1,2}$/.test(dateStr)) {
-    const parts = dateStr.split('-');
-    return `${parts[1].padStart(2, '0')}/01/${parts[0]}`;
-  }
+  const listContainer = document.createElement("div");
+  listContainer.id = "photographerList";
+  indexContainer.appendChild(listContainer);
   
-  try {
-    const date = new Date(dateStr);
-    if (!isNaN(date.getTime())) {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${month}/${day}/${year}`;
-    }
-  } catch (e) {}
+  feed.appendChild(indexContainer);
   
-  return dateStr;
-}
-
-// Get icon for collection type
-function getCollectionIcon(collection) {
-  const icons = {
-    'collection1': 'newspaper',
-    'collection2': 'pencil',
-    'collection4': 'sticker',
-    'photographer': 'users',
-    'objects': 'box',
-    'jordan': 'camera'
-  };
-  return icons[collection] || 'file';
-}
-
-// Post actions
-function savePost(postUrl) {
-  if (savedPosts.includes(postUrl)) {
-    savedPosts = savedPosts.filter(url => url !== postUrl);
-  } else {
-    savedPosts.push(postUrl);
-  }
-  localStorage.setItem('satchelSaved', JSON.stringify(savedPosts));
-  document.getElementById('countSaved').textContent = savedPosts.length;
-  render();
-}
-
-function sharePost(post) {
-  if (navigator.share) {
-    navigator.share({
-      title: post.title,
-      text: `Check out this article: ${post.title}`,
-      url: post.url
-    }).catch(err => {
-      if (err.name !== 'AbortError') {
-        copyToClipboard(post.url);
+  renderPhotographerList(sortedPhotographers, listContainer);
+  
+  document.querySelectorAll('.photographers-index .sort-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.photographers-index .sort-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      currentPhotographerSort = this.dataset.sort;
+      
+      if (currentPhotographerSort === 'az') {
+        sortedPhotographers = [...photographers].sort((a, b) => a.lastName.localeCompare(b.lastName));
+      } else if (currentPhotographerSort === 'za') {
+        sortedPhotographers = [...photographers].sort((a, b) => b.lastName.localeCompare(a.lastName));
+      } else if (currentPhotographerSort === 'latest') {
+        sortedPhotographers = [...photographers].sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));
+      } else if (currentPhotographerSort === 'oldest') {
+        sortedPhotographers = [...photographers].sort((a, b) => new Date(a.dateAdded) - new Date(b.dateAdded));
+      }
+      
+      const query = document.getElementById('photographerSearch').value.toLowerCase().trim();
+      if (query) {
+        const filtered = sortedPhotographers.filter(p => p.name.toLowerCase().includes(query));
+        renderPhotographerList(filtered, listContainer);
+      } else {
+        renderPhotographerList(sortedPhotographers, listContainer);
       }
     });
-  } else {
-    copyToClipboard(post.url);
-  }
-}
-
-function copyToClipboard(text) {
-  navigator.clipboard.writeText(text).then(() => {
-    alert('Link copied to clipboard!');
-  }).catch(() => {
-    const textarea = document.createElement('textarea');
-    textarea.value = text;
-    document.body.appendChild(textarea);
-    textarea.select();
-    document.execCommand('copy');
-    document.body.removeChild(textarea);
-    alert('Link copied to clipboard!');
   });
-}
-
-function formatCommentTime(timestamp) {
-  const diff = Date.now() - timestamp;
-  const minutes = Math.floor(diff / 60000);
-  const hours = Math.floor(diff / 3600000);
-  const days = Math.floor(diff / 86400000);
   
-  if (minutes < 1) return 'just now';
-  if (minutes < 60) return `${minutes}m ago`;
-  if (hours < 24) return `${hours}h ago`;
-  return `${days}d ago`;
-}
-
-function goToAllPosts() {
-  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-  document.querySelector('.nav-item[data-filter="all"]').classList.add('active');
-  currentFilter = "all";
-  currentView = "feed";
-  searchQuery = "";
-  document.getElementById('searchBox').value = "";
-  displayLimit = 10;
-  closeMobileMenuOnClick();
-  render();
-}
-
-function randomPhotographer() {
-  if (photographers.length === 0) return;
-  const random = photographers[Math.floor(Math.random() * photographers.length)];
-  window.open(random.website, '_blank');
-  addToHistory({
-    url: random.website,
-    title: random.name,
-    image: ''
+  document.getElementById('photographerSearch').addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase().trim();
+    if (query === '') {
+      renderPhotographerList(sortedPhotographers, listContainer);
+    } else {
+      const filtered = sortedPhotographers.filter(p => 
+        p.name.toLowerCase().includes(query)
+      );
+      renderPhotographerList(filtered, listContainer);
+    }
   });
+  
+  lucide.createIcons();
+}
+
+function renderPhotographerList(photographersList, container) {
+  container.innerHTML = '';
+  
+  if (photographersList.length === 0) {
+    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #7c7c7c;">No photographers found</div>';
+    return;
+  }
+  
+  const grouped = {};
+  photographersList.forEach(p => {
+    const letter = p.lastName.charAt(0).toUpperCase();
+    if (!grouped[letter]) {
+      grouped[letter] = [];
+    }
+    grouped[letter].push(p);
+  });
+  
+  Object.keys(grouped).sort().forEach(letter => {
+    const section = document.createElement("div");
+    section.className = "alphabet-section";
+    
+    const letterHeader = document.createElement("div");
+    letterHeader.className = "alphabet-letter";
+    letterHeader.textContent = letter;
+    section.appendChild(letterHeader);
+    
+    const grid = document.createElement("div");
+    grid.className = "photographer-grid";
+    
+    grouped[letter].forEach(photographer => {
+      const link = document.createElement("a");
+      link.className = "photographer-link";
+      link.href = photographer.website;
+      link.target = "_blank";
+      link.textContent = photographer.name.toLowerCase();
+      link.onclick = (e) => {
+        addToHistory({
+          url: photographer.website,
+          title: photographer.name,
+          image: ''
+        });
+      };
+      grid.appendChild(link);
+    });
+    
+    section.appendChild(grid);
+    container.appendChild(section);
+  });
+}
+
+// Stickers Index rendering
+function renderStickersIndex() {
+  const feed = document.getElementById("feedItems");
+  feed.innerHTML = "";
+  
+  showFullscreenToggle();
+  
+  const indexContainer = document.createElement("div");
+  indexContainer.className = "photographers-index";
+  
+  const header = document.createElement("div");
+  header.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <h2 style="margin: 0;">Stickers</h2>
+      <div style="display: flex; gap: 8px; margin-right: 40px;">
+        <button class="sort-btn" data-sort="az">A-Z</button>
+        <button class="sort-btn" data-sort="za">Z-A</button>
+        <button class="sort-btn active" data-sort="latest">Latest</button>
+        <button class="sort-btn" data-sort="oldest">Oldest</button>
+      </div>
+    </div>
+    <div class="index-search">
+      <input type="text" id="stickerSearch" placeholder="Search stickers by location, medium, or artist..." />
+    </div>
+  `;
+  indexContainer.appendChild(header);
+  
+  let sortedStickers = [...stickersIndex].sort((a, b) => new Date(b.date) - new Date(a.date));
+  let currentStickerSort = 'latest';
+  
+  const gridContainer = document.createElement("div");
+  gridContainer.id = "stickerGrid";
+  indexContainer.appendChild(gridContainer);
+  
+  feed.appendChild(indexContainer);
+  
+  renderStickerGrid(sortedStickers, gridContainer);
+  
+  document.querySelectorAll('.photographers-index .sort-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.photographers-index .sort-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      currentStickerSort = this.dataset.sort;
+      
+      if (currentStickerSort === 'az') {
+        sortedStickers = [...stickersIndex].sort((a, b) => a.location.localeCompare(b.location));
+      } else if (currentStickerSort === 'za') {
+        sortedStickers = [...stickersIndex].sort((a, b) => b.location.localeCompare(a.location));
+      } else if (currentStickerSort === 'latest') {
+        sortedStickers = [...stickersIndex].sort((a, b) => new Date(b.date) - new Date(a.date));
+      } else if (currentStickerSort === 'oldest') {
+        sortedStickers = [...stickersIndex].sort((a, b) => new Date(a.date) - new Date(b.date));
+      }
+      
+      const query = document.getElementById('stickerSearch').value.toLowerCase().trim();
+      if (query) {
+        const filtered = sortedStickers.filter(s => {
+          return Object.values(s).some(value => {
+            return value && typeof value === 'string' && value.toLowerCase().includes(query);
+          });
+        });
+        renderStickerGrid(filtered, gridContainer);
+      } else {
+        renderStickerGrid(sortedStickers, gridContainer);
+      }
+    });
+  });
+  
+  document.getElementById('stickerSearch').addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase().trim();
+    if (query === '') {
+      renderStickerGrid(sortedStickers, gridContainer);
+    } else {
+      const filtered = sortedStickers.filter(s => {
+        return Object.values(s).some(value => {
+          return value && typeof value === 'string' && value.toLowerCase().includes(query);
+        });
+      });
+      renderStickerGrid(filtered, gridContainer);
+    }
+  });
+  
+  lucide.createIcons();
+}
+
+function renderStickerGrid(stickersList, container) {
+  container.innerHTML = '';
+  
+  if (stickersList.length === 0) {
+    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #7c7c7c;">No stickers found</div>';
+    return;
+  }
+  
+  const grid = document.createElement("div");
+  grid.className = "stickers-grid";
+  
+  stickersList.forEach(sticker => {
+    const item = document.createElement("div");
+    item.className = "sticker-grid-item";
+    item.onclick = () => {
+      openStickerFullscreen({
+        collection: 'collection4',
+        image: sticker.image,
+        date: sticker.date,
+        location: sticker.location,
+        medium: sticker.medium,
+        artist: sticker.artist
+      });
+    };
+    
+    item.innerHTML = `
+      <img class="sticker-grid-image" src="${sticker.image}" alt="${sticker.location_card}">
+      <div class="sticker-grid-overlay">
+        <div><strong>Date:</strong> ${sticker.date}</div>
+        <div><strong>Location:</strong> ${sticker.location_card}</div>
+        <div><strong>Medium:</strong> ${sticker.medium}</div>
+        <div><strong>Artist:</strong> ${sticker.artist}</div>
+      </div>
+    `;
+    
+    grid.appendChild(item);
+  });
+  
+  container.appendChild(grid);
 }
