@@ -71,7 +71,15 @@ function renderPhotographersIndex() {
       renderPhotographerList(sortedPhotographers, listContainer);
     } else {
       const filtered = sortedPhotographers.filter(p => 
-        p.name.toLowerCase().includes(query)
+        p.name.toLowerCase().includes(query) ||
+        p.firstName.toLowerCase().includes(query) ||
+        p.lastName.toLowerCase().includes(query) ||
+        p.website.toLowerCase().includes(query) ||
+        (p.type && p.type.toLowerCase().includes(query)) ||
+        (p.class && p.class.toLowerCase().includes(query)) ||
+        (p.why && p.why.toLowerCase().includes(query)) ||
+        (p.what && p.what.toLowerCase().includes(query)) ||
+        (p.location && p.location.toLowerCase().includes(query))
       );
       renderPhotographerList(filtered, listContainer);
     }
