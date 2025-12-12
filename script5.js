@@ -233,7 +233,6 @@ function renderPhotoGrid(photosList, container) {
     item.innerHTML = `
       <img class="sticker-grid-image" src="${photo.link}" alt="${photo.photographer}">
       <div class="sticker-grid-overlay">
-        <div><strong>Date:</strong> ${photo.date}</div>
         <div><strong>Photographer:</strong> ${photo.photographer}</div>
         ${photo.note ? `<div><strong>Note:</strong> ${photo.note}</div>` : ''}
       </div>
