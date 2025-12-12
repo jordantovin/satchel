@@ -26,9 +26,9 @@ function openObjectFullscreen(item) {
 
 function openPhotoFullscreen(item) {
   document.getElementById('stickerFullscreenImage').src = item.image;
-  document.getElementById('stickerFullscreenDate').textContent = item.date;
+  document.getElementById('stickerFullscreenDate').textContent = "";
   document.getElementById('stickerFullscreenLocation').textContent = item.photographer;
-  document.getElementById('stickerFullscreenMedium').textContent = item.text || "";
+  document.getElementById('stickerFullscreenMedium').textContent = "";
   document.getElementById('stickerFullscreenArtist').textContent = "";
   
   document.getElementById('stickerFullscreen').classList.add('active');
