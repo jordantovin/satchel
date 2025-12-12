@@ -1,5 +1,29 @@
-// Keyboard shortcuts handler
+// Keyboard shortcuts handler - use capture phase to intercept before other handlers
 document.addEventListener('keydown', (e) => {
+  // Handle Escape key first with highest priority
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    
+    const fullscreen = document.getElementById('stickerFullscreen');
+    const modal = document.getElementById('keyboardShortcutsModal');
+    
+    if (fullscreen && fullscreen.classList.contains('active')) {
+      fullscreen.classList.remove('active');
+      document.body.style.overflow = '';
+      return false;
+    }
+    
+    if (modal) {
+      modal.remove();
+      return false;
+    }
+    
+    return false;
+  }
+  
+  // Skip other shortcuts if typing in input fields
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
     return;
   }
@@ -7,29 +31,6 @@ document.addEventListener('keydown', (e) => {
   if (e.ctrlKey || e.metaKey || e.altKey) {
     return;
   }
-  
-// Handle Escape key first
-if (e.key === 'Escape') {
-  e.preventDefault();
-  e.stopPropagation();
-  e.stopImmediatePropagation(); // ADD THIS LINE
-  
-  const fullscreen = document.getElementById('stickerFullscreen');
-  const modal = document.getElementById('keyboardShortcutsModal');
-  
-  if (fullscreen && fullscreen.classList.contains('active')) {
-    fullscreen.classList.remove('active');
-    document.body.style.overflow = '';
-    return false; // ADD THIS
-  }
-  
-  if (modal) {
-    modal.remove();
-    return false; // ADD THIS
-  }
-  
-  return false; // ADD THIS
-}
   
   switch(e.key.toLowerCase()) {
     case '/':
@@ -122,7 +123,7 @@ if (e.key === 'Escape') {
       showKeyboardShortcuts();
       break;
   }
-});
+}, true); // Use capture phase to run before base website handlers
 
 // Keyboard shortcuts modal
 function showKeyboardShortcuts() {
