@@ -183,6 +183,16 @@ async function loadAllData() {
     // Combine all posts
     allPosts = [ ...posts1, ...posts2, ...posts4, ...posts5, ...jordanPosts, ...posts7 ];
     
+    console.log('Data loaded:', {
+      articles: posts1.length,
+      fieldNotes: posts2.length,
+      stickers: posts4.length,
+      objects: posts5.length,
+      jordan: jordanPosts.length,
+      photos: posts7.length,
+      total: allPosts.length
+    });
+    
     // Update counts
     document.getElementById('countAll').textContent = allPosts.length;
     document.getElementById('count1').textContent = posts1.length;
