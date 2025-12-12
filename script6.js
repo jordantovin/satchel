@@ -80,10 +80,8 @@ function render() {
     const isJordan = post.collection === 'jordan';
     const isPhoto = post.collection === 'photos';
 
-    const fullscreenData = (isSticker || isObject || isJordan || isPhoto) ? JSON.stringify(post) : '';
-
     item.innerHTML = `
-      <a href="${post.url}" target="_blank" style="display: block; color: inherit;" data-article-link='${JSON.stringify({url: post.url, title: post.title, image: post.image || ''})}' data-fullscreen-data='${fullscreenData}' data-type='${post.collection}'>
+      <a href="${post.url}" target="_blank" style="display: block; color: inherit;" data-type='${post.collection}'>
         <div class="post-header">
           <div class="post-avatar">
             <i data-lucide="${icon}" style="width: 18px; height: 18px;"></i>
@@ -104,17 +102,21 @@ function render() {
         </div>
       </a>
       <div class="post-footer">
-        <span class="post-action" data-read='${JSON.stringify({url: post.url, title: post.title, image: post.image || ''})}'>
+        <span class="post-action" data-action="read">
           <i data-lucide="external-link"></i> Read
         </span>
-        <span class="post-action ${isSaved ? 'saved' : ''}" data-save-url="${post.url}">
+        <span class="post-action ${isSaved ? 'saved' : ''}" data-action="save">
           <i data-lucide="${isSaved ? 'bookmark-check' : 'bookmark'}"></i> ${isSaved ? 'Saved' : 'Save'}
         </span>
-        <span class="post-action" data-share='${JSON.stringify({title: post.title, url: post.url})}'>
+        <span class="post-action" data-action="share">
           <i data-lucide="share-2"></i> Share
         </span>
       </div>
     `;
+    
+    // Store post data directly on the element
+    item._postData = post;
+    
     fragment.appendChild(item);
   });
 
@@ -129,110 +131,85 @@ function render() {
   }
 
   requestAnimationFrame(() => {
-    document.querySelectorAll('[data-fullscreen-data]').forEach(link => {
-      const data = link.dataset.fullscreenData;
+    document.querySelectorAll('.post-card').forEach(card => {
+      const link = card.querySelector('a');
+      const post = card._postData;
       const type = link.dataset.type;
 
       if (type === "jordan") {
-        const item = JSON.parse(data);
-
-        if (item.url && item.url !== "#" && item.url.trim() !== "") {
+        if (post.url && post.url !== "#" && post.url.trim() !== "") {
           link.onclick = (e) => {
             e.preventDefault();
-            const d = JSON.parse(link.dataset.articleLink);
-            addToHistory(d);
-            window.open(item.url, "_blank");
+            addToHistory({url: post.url, title: post.title, image: post.image || ''});
+            window.open(post.url, "_blank");
           };
-          return;
-        }
-
-        if (item.image && item.image.trim() !== "") {
+        } else if (post.image && post.image.trim() !== "") {
           link.onclick = (e) => {
             e.preventDefault();
-            document.getElementById('stickerFullscreenImage').src = item.image;
-
-            document.getElementById('stickerFullscreenDate').textContent = "";
-            document.getElementById('stickerFullscreenLocation').textContent = "";
-            document.getElementById('stickerFullscreenMedium').textContent = "";
-            document.getElementById('stickerFullscreenArtist').textContent = "";
-
+            document.getElementById('stickerFullscreenImage').src = post.image;
             document.getElementById('stickerFullscreen').classList.add('active');
             document.body.style.overflow = 'hidden';
-
-            addToHistory({ url: item.url, title: item.title, image: item.image });
+            addToHistory({ url: post.url, title: post.title, image: post.image });
           };
-          return;
+        } else {
+          link.onclick = (e) => {
+            e.preventDefault();
+          };
         }
-
+      } else if (type === "collection4") {
         link.onclick = (e) => {
           e.preventDefault();
+          openStickerFullscreen(post);
+          addToHistory({ url: post.url, title: post.title, image: post.image });
         };
-        return;
-      }
-
-      if (data && type === "collection4") {
-        link.onclick = (e) => {
-          e.preventDefault();
-          const item = JSON.parse(data);
-          openStickerFullscreen(item);
-          addToHistory({ url: item.url, title: item.title, image: item.image });
-        };
-        return;
-      }
-
-      if (data && type === "objects") {
+      } else if (type === "objects") {
         link.onclick = (e) => {
           e.preventDefault();
           e.stopPropagation();
-          const item = JSON.parse(data);
-          openObjectFullscreen(item);
-          addToHistory({ url: item.url, title: item.title, image: item.image });
+          openObjectFullscreen(post);
+          addToHistory({ url: post.url, title: post.title, image: post.image });
         };
-        return;
-      }
-
-      if (data && type === "photos") {
+      } else if (type === "photos") {
         link.onclick = (e) => {
           e.preventDefault();
-          const item = JSON.parse(data);
-          openPhotoFullscreen(item);
-          addToHistory({ url: item.url, title: item.photographer, image: item.image });
+          openPhotoFullscreen(post);
+          addToHistory({ url: post.url, title: post.photographer, image: post.image });
         };
-        return;
-      }
-
-      if (!data) {
+      } else {
         link.onclick = (e) => {
-          const articleData = JSON.parse(link.dataset.articleLink);
-          addToHistory(articleData);
+          addToHistory({url: post.url, title: post.title, image: post.image || ''});
         };
-        return;
       }
     });
 
-    document.querySelectorAll('[data-read]').forEach(btn => {
+    document.querySelectorAll('[data-action="read"]').forEach(btn => {
+      const card = btn.closest('.post-card');
+      const post = card._postData;
       btn.onclick = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        const data = JSON.parse(btn.dataset.read);
-        addToHistory(data);
-        window.open(data.url, '_blank');
+        addToHistory({url: post.url, title: post.title, image: post.image || ''});
+        window.open(post.url, '_blank');
       };
     });
 
-    document.querySelectorAll('[data-save-url]').forEach(btn => {
+    document.querySelectorAll('[data-action="save"]').forEach(btn => {
+      const card = btn.closest('.post-card');
+      const post = card._postData;
       btn.onclick = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        savePost(btn.dataset.saveUrl);
+        savePost(post.url);
       };
     });
 
-    document.querySelectorAll('[data-share]').forEach(btn => {
+    document.querySelectorAll('[data-action="share"]').forEach(btn => {
+      const card = btn.closest('.post-card');
+      const post = card._postData;
       btn.onclick = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        sharePost(JSON.parse(btn.dataset.share));
+        sharePost({title: post.title, url: post.url});
       };
     });
   });
