@@ -1,677 +1,244 @@
-function render() {
-  if (currentView === "photographers-index") {
-    document.querySelector('.sort-bar').style.display = 'none';
-    document.getElementById('endOfFeed').style.display = 'none';
-    renderPhotographersIndex();
-    return;
-  }
-  
-  if (currentView === "stickers-index") {
-    document.querySelector('.sort-bar').style.display = 'none';
-    document.getElementById('endOfFeed').style.display = 'none';
-    renderStickersIndex();
-    return;
-  }
-  
-  if (currentView === "articles-index") {
-    document.querySelector('.sort-bar').style.display = 'none';
-    document.getElementById('endOfFeed').style.display = 'none';
-    renderArticlesIndex();
-    return;
-  }
-  
-  if (currentView === "objects-index") {
-    document.querySelector('.sort-bar').style.display = 'none';
-    document.getElementById('endOfFeed').style.display = 'none';
-    renderObjectsIndex();
-    return;
-  }
-  
-  if (currentView === "photos-index") {
-    document.querySelector('.sort-bar').style.display = 'none';
-    document.getElementById('endOfFeed').style.display = 'none';
-    renderPhotosIndex();
-    return;
-  }
-  
-  if (currentView === "pictures-index") {
-    document.querySelector('.sort-bar').style.display = 'none';
-    document.getElementById('endOfFeed').style.display = 'none';
-    renderPicturesIndex();
-    return;
-  }
-  
-  hideFullscreenToggle();
-  
-  const sortBar = document.querySelector('.sort-bar');
-  if (sortBar) {
-    sortBar.style.display = 'flex';
-  }
-  
+// Articles Index rendering
+function renderArticlesIndex() {
   const feed = document.getElementById("feedItems");
-  if (!feed) {
-    console.error('Feed element not found');
-    return;
-  }
-  
   feed.innerHTML = "";
   
-  const filtered = filterPosts(allPosts);
-  const sorted = sortPosts(filtered);
-  const visible = sorted.slice(0, displayLimit);
+  showFullscreenToggle();
   
-  if (searchQuery) {
-    const searchInfo = document.createElement("div");
-    searchInfo.style.cssText = "background: #f6f7f8; padding: 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; color: #7c7c7c;";
-    searchInfo.innerHTML = `<strong>${filtered.length}</strong> result${filtered.length !== 1 ? 's' : ''} for "<strong>${searchQuery}</strong>"`;
-    feed.appendChild(searchInfo);
-  }
+  const indexContainer = document.createElement("div");
+  indexContainer.className = "photographers-index";
   
-  if (visible.length === 0) {
-    const noResults = document.createElement("div");
-    noResults.style.cssText = "text-align: center; padding: 60px 20px; color: #7c7c7c;";
-    noResults.innerHTML = `
-      <i data-lucide="search-x" style="width: 48px; height: 48px; margin: 0 auto 16px; display: block; color: #ccc;"></i>
-      <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">No articles found</div>
-      <div style="font-size: 14px;">${searchQuery ? 'Try a different search term' : 'No articles available'}</div>
-    `;
-    feed.appendChild(noResults);
-    lucide.createIcons();
-    return;
-  }
-  
-  const fragment = document.createDocumentFragment();
-  
-  visible.forEach(post => {
-    const item = document.createElement("div");
-    item.className = "post-card";
-    item.setAttribute("data-collection", post.collection);
-    
-    const icon = getCollectionIcon(post.collection);
-    const isSaved = savedPosts.includes(post.url);
-    
-    const isSticker = post.collection === 'collection4';
-    const isObject = post.collection === 'objects';
-    const isJordan = post.collection === 'jordan';
-    const isPhoto = post.collection === 'photos';
-    const fullscreenData = (isSticker || isObject || isJordan || isPhoto) ? JSON.stringify(post) : '';
-    
-    // Build post content based on type
-    let postExtraContent = '';
-    if (isPhoto) {
-      // Photos: only show the note text if it exists, no labels
-      if (post.text) {
-        postExtraContent = `<div class="post-excerpt">${post.text}</div>`;
-      }
-    } else {
-      // Other post types: show their usual fields
-      if (post.text) postExtraContent += `<div class="post-excerpt">${post.text}</div>`;
-      if (post.medium) postExtraContent += `<div class="post-excerpt"><strong>Medium:</strong> ${post.medium}</div>`;
-      if (post.location) postExtraContent += `<div class="post-excerpt"><strong>Location:</strong> ${post.location}</div>`;
-      if (post.notes) postExtraContent += `<div class="post-excerpt"><strong>Notes:</strong> ${post.notes}</div>`;
-    }
-    
-    item.innerHTML = `
-      <a href="${post.url}" target="_blank" style="display: block; color: inherit;" data-article-link='${JSON.stringify({url: post.url, title: post.title, image: post.image || ''})}' data-fullscreen-data='${fullscreenData}' data-type='${post.collection}'>
-        <div class="post-header">
-          <div class="post-avatar">
-            <i data-lucide="${icon}" style="width: 18px; height: 18px;"></i>
-          </div>
-          <div class="post-meta">
-            <div class="post-source">${post.collectionName}</div>
-            <div class="post-date">${post.date}</div>
-          </div>
-        </div>
-        ${(!post.image || post.image.trim() === "") 
-           ? "" 
-           : `<img class="post-image" src="${post.image}" alt="${post.title}" loading="lazy">`}
-        <div class="post-content">
-          <div class="post-title">${post.title}</div>
-          ${postExtraContent}
-        </div>
-      </a>
-      <div class="post-footer">
-        <span class="post-action" data-read='${JSON.stringify({url: post.url, title: post.title, image: post.image || ''})}'>
-          <i data-lucide="external-link"></i> Read
-        </span>
-        <span class="post-action ${isSaved ? 'saved' : ''}" data-save-url="${post.url}">
-          <i data-lucide="${isSaved ? 'bookmark-check' : 'bookmark'}"></i> ${isSaved ? 'Saved' : 'Save'}
-        </span>
-        <span class="post-action" data-share='${JSON.stringify({title: post.title, url: post.url})}'>
-          <i data-lucide="share-2"></i> Share
-        </span>
-      </div>
-    `;
-    
-    fragment.appendChild(item);
-  });
-  
-  feed.appendChild(fragment);
-  lucide.createIcons();
-  
-  const endOfFeed = document.getElementById('endOfFeed');
-  if (visible.length >= sorted.length) {
-    endOfFeed.style.display = 'block';
-  } else {
-    endOfFeed.style.display = 'none';
-  }
-  
-  requestAnimationFrame(() => {
-    document.querySelectorAll('[data-fullscreen-data]').forEach(link => {
-      const data = link.dataset.fullscreenData;
-      const type = link.dataset.type;
-      
-      if (type === "jordan") {
-        const item = JSON.parse(data);
-        if (item.url && item.url !== "#" && item.url.trim() !== "") {
-          link.onclick = (e) => {
-            e.preventDefault();
-            const d = JSON.parse(link.dataset.articleLink);
-            addToHistory(d);
-            window.open(item.url, "_blank");
-          };
-          return;
-        }
-        if (item.image && item.image.trim() !== "") {
-          link.onclick = (e) => {
-            e.preventDefault();
-            document.getElementById('stickerFullscreenImage').src = item.image;
-            document.getElementById('stickerFullscreenDate').textContent = "";
-            document.getElementById('stickerFullscreenLocation').textContent = "";
-            document.getElementById('stickerFullscreenMedium').textContent = "";
-            document.getElementById('stickerFullscreenArtist').textContent = "";
-            document.getElementById('stickerFullscreen').classList.add('active');
-            document.body.style.overflow = 'hidden';
-            addToHistory({ url: item.url, title: item.title, image: item.image });
-          };
-          return;
-        }
-        link.onclick = (e) => {
-          e.preventDefault();
-        };
-        return;
-      }
-      
-      if (data && type === "collection4") {
-        link.onclick = (e) => {
-          e.preventDefault();
-          const item = JSON.parse(data);
-          openStickerFullscreen(item);
-          addToHistory({ url: item.url, title: item.title, image: item.image });
-        };
-        return;
-      }
-      
-      if (data && type === "objects") {
-        link.onclick = (e) => {
-          e.preventDefault();
-          const item = JSON.parse(data);
-          openObjectFullscreen(item);
-          addToHistory({ url: item.url, title: item.text, image: item.image });
-        };
-        return;
-      }
-      
-      if (data && type === "photos") {
-        link.onclick = (e) => {
-          e.preventDefault();
-          const item = JSON.parse(data);
-          openPhotoFullscreen(item);
-          addToHistory({ url: item.url, title: item.title, image: item.image });
-        };
-        return;
-      }
-      
-      if (!data) {
-        link.onclick = (e) => {
-          const articleData = JSON.parse(link.dataset.articleLink);
-          addToHistory(articleData);
-        };
-        return;
-      }
-    });
-    
-    document.querySelectorAll('[data-read]').forEach(btn => {
-      btn.onclick = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const data = JSON.parse(btn.dataset.read);
-        addToHistory(data);
-        window.open(data.url, '_blank');
-      };
-    });
-    
-    document.querySelectorAll('[data-save-url]').forEach(btn => {
-      btn.onclick = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        savePost(btn.dataset.saveUrl);
-      };
-    });
-    
-    document.querySelectorAll('[data-share]').forEach(btn => {
-      btn.onclick = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        sharePost(JSON.parse(btn.dataset.share));
-      };
-    });
-  });
-}
-
-// Initialize event listeners immediately when script loads
-function initializeEventListeners() {
-  document.querySelectorAll('.nav-item[data-filter]').forEach(item => {
-    item.addEventListener("click", function() {
-      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-      this.classList.add('active');
-      currentFilter = this.dataset.filter;
-      currentView = "feed";
-      displayLimit = 10;
-      closeMobileMenuOnClick();
-      render();
-    });
-  });
-
-  document.querySelectorAll('.nav-item[data-view]').forEach(item => {
-    item.addEventListener("click", function() {
-      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-      this.classList.add('active');
-      currentView = this.dataset.view;
-      closeMobileMenuOnClick();
-      render();
-    });
-  });
-
-  document.querySelectorAll('.sort-btn').forEach(btn => {
-    btn.addEventListener("click", function() {
-      document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
-      currentSort = this.dataset.sort;
-      render();
-    });
-  });
-
-  const searchBox = document.getElementById("searchBox");
-  if (searchBox) {
-    searchBox.addEventListener("input", (e) => {
-      searchQuery = e.target.value.trim();
-      displayLimit = 10;
-      
-      if (searchQuery) {
-        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-        document.querySelector('.nav-item[data-filter="all"]').classList.add('active');
-        currentFilter = "all";
-        currentView = "feed";
-      }
-      
-      render();
-    });
-  }
-
-  let isLoadingMore = false;
-  window.addEventListener('scroll', () => {
-    if (currentView !== "feed") return;
-    if (isLoadingMore) return;
-    
-    const scrollPosition = window.innerHeight + window.scrollY;
-    const documentHeight = document.documentElement.scrollHeight;
-    
-    if (scrollPosition >= documentHeight - 500) {
-      const filtered = filterPosts(allPosts);
-      const sorted = sortPosts(filtered);
-      
-      if (displayLimit < sorted.length) {
-        isLoadingMore = true;
-        displayLimit += 10;
-        render();
-        setTimeout(() => {
-          isLoadingMore = false;
-        }, 500);
-      }
-    }
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-      return;
-    }
-    
-    if (e.ctrlKey || e.metaKey || e.altKey) {
-      return;
-    }
-    
-    switch(e.key.toLowerCase()) {
-      case '/':
-        e.preventDefault();
-        document.getElementById('searchBox').focus();
-        break;
-        
-      case 'h':
-        e.preventDefault();
-        goToAllPosts();
-        break;
-        
-      case '2':
-        e.preventDefault();
-        document.querySelector('.nav-item[data-filter="collection1"]').click();
-        break;
-        
-      case '1':
-        e.preventDefault();
-        document.querySelector('.nav-item[data-filter="collection2"]').click();
-        break;
-        
-      case '3':
-        e.preventDefault();
-        document.querySelector('.nav-item[data-filter="collection4"]').click();
-        break;
-        
-      case '4':
-        e.preventDefault();
-        document.querySelector('.nav-item[data-filter="objects"]').click();
-        break;
-        
-      case '6':
-        e.preventDefault();
-        document.querySelector('.nav-item[data-filter="photos"]').click();
-        break;
-        
-      case '5':
-      case 's':
-        e.preventDefault();
-        document.querySelector('.nav-item[data-filter="saved"]').click();
-        break;
-        
-      case 'a':
-        e.preventDefault();
-        document.querySelector('.nav-item[data-view="articles-index"]').click();
-        break;
-        
-      case 'p':
-        e.preventDefault();
-        document.querySelector('.nav-item[data-view="photographers-index"]').click();
-        break;
-        
-      case 'i':
-        e.preventDefault();
-        document.querySelector('.nav-item[data-view="stickers-index"]').click();
-        break;
-        
-      case 'o':
-        e.preventDefault();
-        document.querySelector('.nav-item[data-view="objects-index"]').click();
-        break;
-        
-      case 'm':
-        e.preventDefault();
-        document.querySelector('.nav-item[data-view="photos-index"]').click();
-        break;
-        
-      case 'l':
-        e.preventDefault();
-        document.querySelector('.nav-item[data-view="pictures-index"]').click();
-        break;
-        
-      case 'r':
-        e.preventDefault();
-        if (currentView === 'photographers-index') {
-          randomPhotographer();
-        }
-        break;
-        
-      case 'x':
-        e.preventDefault();
-        document.querySelector('.sort-btn[data-sort="shuffle"]').click();
-        break;
-        
-      case 'f':
-        if (currentView.includes('-index')) {
-          e.preventDefault();
-          toggleFullscreen();
-        }
-        break;
-        
-      case '?':
-        e.preventDefault();
-        showKeyboardShortcuts();
-        break;
-        
-      case 'escape':
-        if (document.getElementById('stickerFullscreen').classList.contains('active')) {
-          closeStickerFullscreen(e);
-        }
-        if (document.getElementById('keyboardShortcutsModal')) {
-          closeKeyboardShortcuts();
-        }
-        break;
-    }
-  });
-
-  document.addEventListener('click', (e) => {
-    const sidebar = document.querySelector('.left-sidebar');
-    const menuButton = document.querySelector('.mobile-menu-toggle');
-    
-    if (sidebar && menuButton && 
-        sidebar.classList.contains('mobile-open') && 
-        !sidebar.contains(e.target) && 
-        !menuButton.contains(e.target)) {
-      toggleMobileMenu();
-    }
-  });
-}
-
-function showKeyboardShortcuts() {
-  const existing = document.getElementById('keyboardShortcutsModal');
-  if (existing) {
-    existing.remove();
-    return;
-  }
-  
-  const modal = document.createElement('div');
-  modal.id = 'keyboardShortcutsModal';
-  modal.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    z-index: 2000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: fadeIn 0.2s ease;
-  `;
-  
-  modal.innerHTML = `
-    <div style="background: white; border-radius: 12px; padding: 32px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-        <h2 style="margin: 0; font-size: 24px; font-weight: 700;">Keyboard Shortcuts</h2>
-        <button onclick="closeKeyboardShortcuts()" style="background: transparent; border: none; font-size: 24px; cursor: pointer; color: #7c7c7c; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">×</button>
-      </div>
-      
-      <div style="display: grid; gap: 20px;">
-        <div>
-          <h3 style="font-size: 14px; font-weight: 700; text-transform: uppercase; color: #7c7c7c; margin-bottom: 12px;">Navigation</h3>
-          <div style="display: grid; gap: 8px;">
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Go to All Posts</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">H</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Go to Field Notes</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">1</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Go to Articles</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">2</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Go to Stickers</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">3</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Go to Objects</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">4</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Go to Saved</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">5</kbd> or <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">S</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Go to Photos</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">6</kbd>
-            </div>
-          </div>
-        </div>
-        
-        <div>
-          <h3 style="font-size: 14px; font-weight: 700; text-transform: uppercase; color: #7c7c7c; margin-bottom: 12px;">Indexes</h3>
-          <div style="display: grid; gap: 8px;">
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Articles Index</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">A</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Photographers Index</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">P</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Stickers Index</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">I</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Objects Index</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">O</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Photos Index</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">M</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Pictures Index</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">L</kbd>
-            </div>
-          </div>
-        </div>
-        
-        <div>
-          <h3 style="font-size: 14px; font-weight: 700; text-transform: uppercase; color: #7c7c7c; margin-bottom: 12px;">Actions</h3>
-          <div style="display: grid; gap: 8px;">
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Search</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">/</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Shuffle Posts</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">X</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Random Photographer</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">R</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Toggle Fullscreen (Index pages)</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">F</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edeff1;">
-              <span>Close Modal</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">Esc</kbd>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0;">
-              <span>Show This Help</span>
-              <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">?</kbd>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #edeff1; text-align: center; color: #7c7c7c; font-size: 14px;">
-        Press <kbd style="background: #f6f7f8; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 12px;">?</kbd> anytime to toggle this help
+  const header = document.createElement("div");
+  header.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <h2 style="margin: 0;">Articles</h2>
+      <div style="display: flex; gap: 8px; margin-right: 40px;">
+        <button class="sort-btn" data-sort="az">A-Z</button>
+        <button class="sort-btn" data-sort="za">Z-A</button>
+        <button class="sort-btn active" data-sort="latest">Latest</button>
+        <button class="sort-btn" data-sort="oldest">Oldest</button>
       </div>
     </div>
+    <div class="index-search">
+      <input type="text" id="articleSearch" placeholder="Search articles by title or date..." />
+    </div>
   `;
+  indexContainer.appendChild(header);
   
-  modal.onclick = (e) => {
-    if (e.target === modal) {
-      closeKeyboardShortcuts();
+  let sortedArticles = [...articlesIndex].sort((a, b) => new Date(b.date) - new Date(a.date));
+  let currentArticleSort = 'latest';
+  
+  const gridContainer = document.createElement("div");
+  gridContainer.id = "articleGrid";
+  indexContainer.appendChild(gridContainer);
+  
+  feed.appendChild(indexContainer);
+  
+  renderArticleGrid(sortedArticles, gridContainer);
+  
+  document.querySelectorAll('.photographers-index .sort-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.photographers-index .sort-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      currentArticleSort = this.dataset.sort;
+      
+      if (currentArticleSort === 'az') {
+        sortedArticles = [...articlesIndex].sort((a, b) => a.title.localeCompare(b.title));
+      } else if (currentArticleSort === 'za') {
+        sortedArticles = [...articlesIndex].sort((a, b) => b.title.localeCompare(a.title));
+      } else if (currentArticleSort === 'latest') {
+        sortedArticles = [...articlesIndex].sort((a, b) => new Date(b.date) - new Date(a.date));
+      } else if (currentArticleSort === 'oldest') {
+        sortedArticles = [...articlesIndex].sort((a, b) => new Date(a.date) - new Date(b.date));
+      }
+      
+      const query = document.getElementById('articleSearch').value.toLowerCase().trim();
+      if (query) {
+        const filtered = sortedArticles.filter(a => {
+          return Object.values(a).some(value => {
+            return value && typeof value === 'string' && value.toLowerCase().includes(query);
+          });
+        });
+        renderArticleGrid(filtered, gridContainer);
+      } else {
+        renderArticleGrid(sortedArticles, gridContainer);
+      }
+    });
+  });
+  
+  document.getElementById('articleSearch').addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase().trim();
+    if (query === '') {
+      renderArticleGrid(sortedArticles, gridContainer);
+    } else {
+      const filtered = sortedArticles.filter(a => {
+        return Object.values(a).some(value => {
+          return value && typeof value === 'string' && value.toLowerCase().includes(query);
+        });
+      });
+      renderArticleGrid(filtered, gridContainer);
     }
-  };
-  
-  document.body.appendChild(modal);
-}
-
-function closeKeyboardShortcuts() {
-  const modal = document.getElementById('keyboardShortcutsModal');
-  if (modal) {
-    modal.remove();
-  }
-}
-
-function toggleFullscreen() {
-  document.body.classList.toggle('fullscreen-mode');
-  const icon = document.getElementById('fullscreenIcon');
-  const isFullscreen = document.body.classList.contains('fullscreen-mode');
-  
-  if (isFullscreen) {
-    icon.setAttribute('data-lucide', 'minimize-2');
-  } else {
-    icon.setAttribute('data-lucide', 'maximize-2');
-  }
+  });
   
   lucide.createIcons();
 }
 
-function showFullscreenToggle() {
-  document.getElementById('fullscreenToggle').classList.add('visible');
-}
-
-function hideFullscreenToggle() {
-  document.getElementById('fullscreenToggle').classList.remove('visible');
-  document.body.classList.remove('fullscreen-mode');
-  const icon = document.getElementById('fullscreenIcon');
-  icon.setAttribute('data-lucide', 'maximize-2');
-  lucide.createIcons();
-}
-
-// Initialize everything when DOM is ready
-function initialize() {
-  console.log('Initializing application...');
+function renderArticleGrid(articlesList, container) {
+  container.innerHTML = '';
   
-  // First, verify critical elements exist
-  const feed = document.getElementById("feedItems");
-  const searchBox = document.getElementById("searchBox");
-  
-  if (!feed) {
-    console.error('Critical elements not found, retrying...');
-    setTimeout(initialize, 50);
+  if (articlesList.length === 0) {
+    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #7c7c7c;">No articles found</div>';
     return;
   }
   
-  console.log('DOM elements found, setting up...');
+  const grid = document.createElement("div");
+  grid.className = "articles-grid";
   
-  // Set up all event listeners first
-  initializeEventListeners();
+  articlesList.forEach(article => {
+    const item = document.createElement("a");
+    item.className = "article-grid-item";
+    item.href = article.url;
+    item.target = "_blank";
+    item.onclick = () => {
+      addToHistory({
+        url: article.url,
+        title: article.title,
+        image: article.image
+      });
+    };
+    
+    item.innerHTML = `
+      <img class="article-grid-image" src="${article.image}" alt="${article.title}">
+      <div class="article-grid-overlay">
+        <div class="article-grid-title">${article.title}</div>
+        <div class="article-grid-date">${article.date}</div>
+      </div>
+    `;
+    
+    grid.appendChild(item);
+  });
   
-  // Set default active state
-  const allPostsNav = document.querySelector('.nav-item[data-filter="all"]');
-  if (allPostsNav) {
-    allPostsNav.classList.add('active');
-  }
-  
-  // Then load the data
-  loadAllData();
+  container.appendChild(grid);
 }
 
-// Run initialization when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initialize);
-} else {
-  // DOM is already ready, but give it a moment to ensure all elements are parsed
-  if (document.getElementById("feedItems")) {
-    initialize();
-  } else {
-    setTimeout(initialize, 50);
+// Objects Index rendering
+function renderObjectsIndex() {
+  const feed = document.getElementById("feedItems");
+  feed.innerHTML = "";
+  
+  showFullscreenToggle();
+  
+  const indexContainer = document.createElement("div");
+  indexContainer.className = "photographers-index";
+  
+  const header = document.createElement("div");
+  header.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <h2 style="margin: 0;">Objects</h2>
+      <div style="display: flex; gap: 8px; margin-right: 40px;">
+        <button class="sort-btn" data-sort="az">A-Z</button>
+        <button class="sort-btn" data-sort="za">Z-A</button>
+        <button class="sort-btn active" data-sort="latest">Latest</button>
+        <button class="sort-btn" data-sort="oldest">Oldest</button>
+      </div>
+    </div>
+    <div class="index-search">
+      <input type="text" id="objectSearch" placeholder="Search objects by text or date..." />
+    </div>
+  `;
+  indexContainer.appendChild(header);
+  
+  let sortedObjects = [...objectsIndex].sort((a, b) => new Date(b.date) - new Date(a.date));
+  let currentObjectSort = 'latest';
+  
+  const gridContainer = document.createElement("div");
+  gridContainer.id = "objectGrid";
+  indexContainer.appendChild(gridContainer);
+  
+  feed.appendChild(indexContainer);
+  
+  renderObjectGrid(sortedObjects, gridContainer);
+  
+  document.querySelectorAll('.photographers-index .sort-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.photographers-index .sort-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      currentObjectSort = this.dataset.sort;
+      
+      if (currentObjectSort === 'az') {
+        sortedObjects = [...objectsIndex].sort((a, b) => a.text.localeCompare(b.text));
+      } else if (currentObjectSort === 'za') {
+        sortedObjects = [...objectsIndex].sort((a, b) => b.text.localeCompare(a.text));
+      } else if (currentObjectSort === 'latest') {
+        sortedObjects = [...objectsIndex].sort((a, b) => new Date(b.date) - new Date(a.date));
+      } else if (currentObjectSort === 'oldest') {
+        sortedObjects = [...objectsIndex].sort((a, b) => new Date(a.date) - new Date(b.date));
+      }
+      
+      const query = document.getElementById('objectSearch').value.toLowerCase().trim();
+      if (query) {
+        const filtered = sortedObjects.filter(o => {
+          return Object.values(o).some(value => {
+            return value && typeof value === 'string' && value.toLowerCase().includes(query);
+          });
+        });
+        renderObjectGrid(filtered, gridContainer);
+      } else {
+        renderObjectGrid(sortedObjects, gridContainer);
+      }
+    });
+  });
+  
+  document.getElementById('objectSearch').addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase().trim();
+    if (query === '') {
+      renderObjectGrid(sortedObjects, gridContainer);
+    } else {
+      const filtered = sortedObjects.filter(o => {
+        return Object.values(o).some(value => {
+          return value && typeof value === 'string' && value.toLowerCase().includes(query);
+        });
+      });
+      renderObjectGrid(filtered, gridContainer);
+    }
+  });
+  
+  lucide.createIcons();
+}
+
+function renderObjectGrid(objectsList, container) {
+  container.innerHTML = '';
+  
+  if (objectsList.length === 0) {
+    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #7c7c7c;">No objects found</div>';
+    return;
   }
+  
+  const grid = document.createElement("div");
+  grid.className = "stickers-grid";
+  
+  objectsList.forEach(obj => {
+    const item = document.createElement("div");
+    item.className = "sticker-grid-item";
+    item.onclick = () => {
+      openObjectFullscreen({
+        collection: 'objects',
+        image: obj.image,
+        date: obj.date,
+        text: obj.text
+      });
+    };
+    
+    item.innerHTML = `
+      <img class="sticker-grid-image" src="${obj.image}" alt="${obj.text}">
+      <div class="sticker-grid-overlay">
+        <div><strong>Date:</strong> ${obj.date}</div>
+        <div><strong>Text:</strong> ${obj.text}</div>
+      </div>
+    `;
+    
+    grid.appendChild(item);
+  });
+  
+  container.appendChild(grid);
 }
