@@ -1,245 +1,265 @@
-// Fullscreen modal functions
-function openStickerFullscreen(item) {
-  document.getElementById('stickerFullscreenImage').src = item.image;
+// Photographers Index rendering
+function renderPhotographersIndex() {
+  const feed = document.getElementById("feedItems");
+  feed.innerHTML = "";
   
-  if (item.collection === 'collection4') {
-    const infoDiv = document.querySelector('.sticker-fullscreen-info');
-    infoDiv.innerHTML = `
-      <div><strong>Date:</strong> <span>${item.date}</span></div>
-      <div><strong>Location:</strong><br><span>${item.location}</span></div>
-      <div><strong>Medium:</strong> <span>${item.medium}</span></div>
-      <div><strong>Artist:</strong> <span>${item.artist || 'Unknown'}</span></div>
-    `;
-  }
+  showFullscreenToggle();
   
-  document.getElementById('stickerFullscreen').classList.add('active');
-  document.body.style.overflow = 'hidden';
-}
-
-function openObjectFullscreen(item) {
-  document.getElementById('stickerFullscreenImage').src = item.image;
+  const indexContainer = document.createElement("div");
+  indexContainer.className = "photographers-index";
   
-  const infoDiv = document.querySelector('.sticker-fullscreen-info');
-  infoDiv.innerHTML = `
-    <div><strong>Date:</strong> <span>${item.date}</span></div>
-    <div><strong>Location:</strong><br><span>${item.text}</span></div>
+  const header = document.createElement("div");
+  header.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <h2 style="margin: 0;">Photographers</h2>
+      <div style="display: flex; gap: 8px; margin-right: 40px;">
+        <button class="sort-btn active" data-sort="az">A-Z</button>
+        <button class="sort-btn" data-sort="za">Z-A</button>
+        <button class="sort-btn" data-sort="latest">Latest</button>
+        <button class="sort-btn" data-sort="oldest">Oldest</button>
+      </div>
+    </div>
+    <div class="index-search">
+      <div class="index-search-wrapper">
+        <input type="text" id="photographerSearch" placeholder="Search photographers by name..." />
+        <button class="random-btn" onclick="randomPhotographer()">Random</button>
+      </div>
+    </div>
   `;
+  indexContainer.appendChild(header);
   
-  document.getElementById('stickerFullscreen').classList.add('active');
-  document.body.style.overflow = 'hidden';
-}
-
-function openPhotoFullscreen(item) {
-  document.getElementById('stickerFullscreenImage').src = item.image;
+  let sortedPhotographers = [...photographers].sort((a, b) => a.lastName.localeCompare(b.lastName));
+  let currentPhotographerSort = 'az';
   
-  // Hide all labels and values except photographer
-  const infoDiv = document.querySelector('.sticker-fullscreen-info');
-  infoDiv.innerHTML = `<div style="font-size: 18px; font-weight: 400;">${item.photographer}</div>`;
+  const listContainer = document.createElement("div");
+  listContainer.id = "photographerList";
+  indexContainer.appendChild(listContainer);
   
-  document.getElementById('stickerFullscreen').classList.add('active');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeStickerFullscreen(event) {
-  if (event) {
-    event.stopPropagation();
-  }
-  document.getElementById('stickerFullscreen').classList.remove('active');
-  document.body.style.overflow = '';
-}
-
-// History management
-function addToHistory(post) {
-  viewHistory = viewHistory.filter(item => item.url !== post.url);
+  feed.appendChild(indexContainer);
   
-  viewHistory.unshift({
-    url: post.url,
-    title: post.title,
-    image: post.image,
-    timestamp: Date.now()
+  renderPhotographerList(sortedPhotographers, listContainer);
+  
+  document.querySelectorAll('.photographers-index .sort-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.photographers-index .sort-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      currentPhotographerSort = this.dataset.sort;
+      
+      if (currentPhotographerSort === 'az') {
+        sortedPhotographers = [...photographers].sort((a, b) => a.lastName.localeCompare(b.lastName));
+      } else if (currentPhotographerSort === 'za') {
+        sortedPhotographers = [...photographers].sort((a, b) => b.lastName.localeCompare(a.lastName));
+      } else if (currentPhotographerSort === 'latest') {
+        sortedPhotographers = [...photographers].sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));
+      } else if (currentPhotographerSort === 'oldest') {
+        sortedPhotographers = [...photographers].sort((a, b) => new Date(a.dateAdded) - new Date(b.dateAdded));
+      }
+      
+      const query = document.getElementById('photographerSearch').value.toLowerCase().trim();
+      if (query) {
+        const filtered = sortedPhotographers.filter(p => p.name.toLowerCase().includes(query));
+        renderPhotographerList(filtered, listContainer);
+      } else {
+        renderPhotographerList(sortedPhotographers, listContainer);
+      }
+    });
   });
   
-  viewHistory = viewHistory.slice(0, 20);
-  
-  localStorage.setItem('satchelHistory', JSON.stringify(viewHistory));
-  
-  updateHistory();
-}
-
-function updateHistory() {
-  const historyList = document.getElementById('historyList');
-  
-  if (viewHistory.length === 0) {
-    historyList.innerHTML = `
-      <div class="no-history">
-        <i data-lucide="clock" style="width: 32px; height: 32px; margin: 0 auto 8px; display: block; color: #ccc;"></i>
-        <div>No reading history yet</div>
-      </div>
-    `;
-  } else {
-    historyList.innerHTML = viewHistory.map(item => {
-      const hasImage = item.image && item.image.trim() !== '';
-      
-      if (hasImage) {
-        return `
-          <div class="history-item" onclick="window.open('${item.url}', '_blank')">
-            <div class="history-thumbnail-wrapper">
-              <img class="history-thumbnail" src="${item.image}" alt="${item.title}">
-            </div>
-            <div class="history-info">
-              <div class="history-title">${item.title}</div>
-              <div class="history-time">${formatCommentTime(item.timestamp)}</div>
-            </div>
-          </div>
-        `;
-      } else {
-        return `
-          <div class="history-item" onclick="window.open('${item.url}', '_blank')">
-            <div class="history-thumbnail-wrapper">
-              <div class="history-thumbnail circle" style="background: #1c1c1c; display: flex; align-items: center; justify-content: center; color: white;">
-                <i data-lucide="users" style="width: 20px; height: 20px;"></i>
-              </div>
-            </div>
-            <div class="history-info">
-              <div class="history-title">${item.title}</div>
-              <div class="history-time">${formatCommentTime(item.timestamp)}</div>
-            </div>
-          </div>
-        `;
-      }
-    }).join('');
-  }
+  document.getElementById('photographerSearch').addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase().trim();
+    if (query === '') {
+      renderPhotographerList(sortedPhotographers, listContainer);
+    } else {
+      const filtered = sortedPhotographers.filter(p => 
+        p.name.toLowerCase().includes(query) ||
+        p.firstName.toLowerCase().includes(query) ||
+        p.lastName.toLowerCase().includes(query) ||
+        p.website.toLowerCase().includes(query) ||
+        (p.type && p.type.toLowerCase().includes(query)) ||
+        (p.class && p.class.toLowerCase().includes(query)) ||
+        (p.why && p.why.toLowerCase().includes(query)) ||
+        (p.what && p.what.toLowerCase().includes(query)) ||
+        (p.location && p.location.toLowerCase().includes(query))
+      );
+      renderPhotographerList(filtered, listContainer);
+    }
+  });
   
   lucide.createIcons();
 }
 
-function clearHistory() {
-  if (confirm('Are you sure you want to clear your reading history?')) {
-    viewHistory = [];
-    localStorage.setItem('satchelHistory', JSON.stringify(viewHistory));
-    updateHistory();
-  }
-}
-
-// Sorting and filtering functions
-function sortPosts(arr) {
-  let sorted = [...arr];
+function renderPhotographerList(photographersList, container) {
+  container.innerHTML = '';
   
-  const parseDate = (dateStr) => {
-    if (!dateStr) return new Date(0);
-    
-    const slashMatch = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-    if (slashMatch) {
-      const month = parseInt(slashMatch[1], 10) - 1;
-      const day = parseInt(slashMatch[2], 10);
-      const year = parseInt(slashMatch[3], 10);
-      return new Date(year, month, day);
+  if (photographersList.length === 0) {
+    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #7c7c7c;">No photographers found</div>';
+    return;
+  }
+  
+  const grouped = {};
+  photographersList.forEach(p => {
+    const letter = p.lastName.charAt(0).toUpperCase();
+    if (!grouped[letter]) {
+      grouped[letter] = [];
     }
-    
-    return new Date(dateStr);
-  };
+    grouped[letter].push(p);
+  });
   
-  if (currentSort === "date-oldest") {
-    sorted.sort((a, b) => parseDate(a.date) - parseDate(b.date));
-  } else if (currentSort === "date-newest") {
-    sorted.sort((a, b) => parseDate(b.date) - parseDate(a.date));
-  } else if (currentSort === "title-az") {
-    sorted.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
-  } else if (currentSort === "title-za") {
-    sorted.sort((a, b) => (b.title || "").localeCompare(a.title || ""));
-  } else if (currentSort === "shuffle") {
-    const stickers = sorted.filter(p => p.collection === 'collection4');
-    const otherPosts = sorted.filter(p => p.collection !== 'collection4');
+  Object.keys(grouped).sort().forEach(letter => {
+    const section = document.createElement("div");
+    section.className = "alphabet-section";
     
-    const shuffleArray = (arr) => {
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
-      return arr;
-    };
+    const letterHeader = document.createElement("div");
+    letterHeader.className = "alphabet-letter";
+    letterHeader.textContent = letter;
+    section.appendChild(letterHeader);
     
-    const limitedStickers = shuffleArray([...stickers]).slice(0, Math.floor(Math.random() * 4) + 5);
+    const grid = document.createElement("div");
+    grid.className = "photographer-grid";
     
-    sorted = shuffleArray([...otherPosts, ...limitedStickers]);
-  }
-  
-  return sorted;
-}
-
-function filterPosts(arr) {
-  let filtered = arr;
-  
-  if (currentFilter === "saved") {
-    filtered = filtered.filter(p => savedPosts.includes(p.url));
-  } else if (currentFilter !== "all") {
-    filtered = filtered.filter(p => p.collection === currentFilter);
-  }
-  
-  if (searchQuery) {
-    const query = searchQuery.toLowerCase();
-    
-    filtered = filtered.filter(post => {
-      return Object.values(post).some(value => {
-        return value && typeof value === 'string' && value.toLowerCase().includes(query);
-      });
+    grouped[letter].forEach(photographer => {
+      const link = document.createElement("a");
+      link.className = "photographer-link";
+      link.href = photographer.website;
+      link.target = "_blank";
+      link.textContent = photographer.name.toLowerCase();
+      link.onclick = (e) => {
+        addToHistory({
+          url: photographer.website,
+          title: photographer.name,
+          image: ''
+        });
+      };
+      grid.appendChild(link);
     });
     
-    if (currentFilter === "all") {
-      const matchingPhotographers = photographers.filter(p => {
-        return p.name.toLowerCase().includes(query) || 
-               p.firstName.toLowerCase().includes(query) ||
-               p.lastName.toLowerCase().includes(query) ||
-               p.website.toLowerCase().includes(query) ||
-               (p.type && p.type.toLowerCase().includes(query)) ||
-               (p.class && p.class.toLowerCase().includes(query)) ||
-               (p.why && p.why.toLowerCase().includes(query)) ||
-               (p.what && p.what.toLowerCase().includes(query)) ||
-               (p.location && p.location.toLowerCase().includes(query));
-      }).map(p => ({
-        collection: "photographer",
-        collectionName: "Photographers",
-        title: p.name,
-        url: p.website,
-        image: '',
-        date: p.dateAdded,
-        noImage: true
-      }));
+    section.appendChild(grid);
+    container.appendChild(section);
+  });
+}
+
+// Stickers Index rendering
+function renderStickersIndex() {
+  const feed = document.getElementById("feedItems");
+  feed.innerHTML = "";
+  
+  showFullscreenToggle();
+  
+  const indexContainer = document.createElement("div");
+  indexContainer.className = "photographers-index";
+  
+  const header = document.createElement("div");
+  header.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <h2 style="margin: 0;">Stickers</h2>
+      <div style="display: flex; gap: 8px; margin-right: 40px;">
+        <button class="sort-btn" data-sort="az">A-Z</button>
+        <button class="sort-btn" data-sort="za">Z-A</button>
+        <button class="sort-btn active" data-sort="latest">Latest</button>
+        <button class="sort-btn" data-sort="oldest">Oldest</button>
+      </div>
+    </div>
+    <div class="index-search">
+      <input type="text" id="stickerSearch" placeholder="Search stickers by location, medium, or artist..." />
+    </div>
+  `;
+  indexContainer.appendChild(header);
+  
+  let sortedStickers = [...stickersIndex].sort((a, b) => new Date(b.date) - new Date(a.date));
+  let currentStickerSort = 'latest';
+  
+  const gridContainer = document.createElement("div");
+  gridContainer.id = "stickerGrid";
+  indexContainer.appendChild(gridContainer);
+  
+  feed.appendChild(indexContainer);
+  
+  renderStickerGrid(sortedStickers, gridContainer);
+  
+  document.querySelectorAll('.photographers-index .sort-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.photographers-index .sort-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      currentStickerSort = this.dataset.sort;
       
-      const matchingStickers = stickersIndex.filter(s => {
+      if (currentStickerSort === 'az') {
+        sortedStickers = [...stickersIndex].sort((a, b) => a.location.localeCompare(b.location));
+      } else if (currentStickerSort === 'za') {
+        sortedStickers = [...stickersIndex].sort((a, b) => b.location.localeCompare(a.location));
+      } else if (currentStickerSort === 'latest') {
+        sortedStickers = [...stickersIndex].sort((a, b) => new Date(b.date) - new Date(a.date));
+      } else if (currentStickerSort === 'oldest') {
+        sortedStickers = [...stickersIndex].sort((a, b) => new Date(a.date) - new Date(b.date));
+      }
+      
+      const query = document.getElementById('stickerSearch').value.toLowerCase().trim();
+      if (query) {
+        const filtered = sortedStickers.filter(s => {
+          return Object.values(s).some(value => {
+            return value && typeof value === 'string' && value.toLowerCase().includes(query);
+          });
+        });
+        renderStickerGrid(filtered, gridContainer);
+      } else {
+        renderStickerGrid(sortedStickers, gridContainer);
+      }
+    });
+  });
+  
+  document.getElementById('stickerSearch').addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase().trim();
+    if (query === '') {
+      renderStickerGrid(sortedStickers, gridContainer);
+    } else {
+      const filtered = sortedStickers.filter(s => {
         return Object.values(s).some(value => {
           return value && typeof value === 'string' && value.toLowerCase().includes(query);
         });
-      }).map(s => ({
-        collection: "collection4",
-        collectionName: "Stickers",
-        title: s.location || 'Sticker',
-        url: s.image,
-        image: s.image,
-        date: s.date,
-        medium: s.medium,
-        location: s.location,
-        artist: s.artist
-      }));
-      
-      const matchingPhotos = photosIndex.filter(p => {
-        return Object.values(p).some(value => {
-          return value && typeof value === 'string' && value.toLowerCase().includes(query);
-        });
-      }).map(p => ({
-        collection: "photos",
-        collectionName: "Photos",
-        title: p.photographer,
-        url: p.link,
-        image: p.link,
-        date: p.date,
-        text: p.note,
-        photographer: p.photographer
-      }));
-      
-      filtered = [...filtered, ...matchingPhotographers, ...matchingStickers, ...matchingPhotos];
+      });
+      renderStickerGrid(filtered, gridContainer);
     }
+  });
+  
+  lucide.createIcons();
+}
+
+function renderStickerGrid(stickersList, container) {
+  container.innerHTML = '';
+  
+  if (stickersList.length === 0) {
+    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #7c7c7c;">No stickers found</div>';
+    return;
   }
   
-  return filtered;
+  const grid = document.createElement("div");
+  grid.className = "stickers-grid";
+  
+  stickersList.forEach(sticker => {
+    const item = document.createElement("div");
+    item.className = "sticker-grid-item";
+    item.onclick = () => {
+      openStickerFullscreen({
+        collection: 'collection4',
+        image: sticker.image,
+        date: sticker.date,
+        location: sticker.location,
+        medium: sticker.medium,
+        artist: sticker.artist
+      });
+    };
+    
+    item.innerHTML = `
+      <img class="sticker-grid-image" src="${sticker.image}" alt="${sticker.location_card}">
+      <div class="sticker-grid-overlay">
+        <div><strong>Date:</strong> ${sticker.date}</div>
+        <div><strong>Location:</strong> ${sticker.location_card}</div>
+        <div><strong>Medium:</strong> ${sticker.medium}</div>
+        <div><strong>Artist:</strong> ${sticker.artist}</div>
+      </div>
+    `;
+    
+    grid.appendChild(item);
+  });
+  
+  container.appendChild(grid);
 }
