@@ -106,7 +106,6 @@ function renderArticleGrid(articlesList, container) {
       <img class="article-grid-image" src="${article.image}" alt="${article.title}">
       <div class="article-grid-overlay">
         <div class="article-grid-title">${article.title}</div>
-        <div class="article-grid-date">${article.date}</div>
       </div>
     `;
     
