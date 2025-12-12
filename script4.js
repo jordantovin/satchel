@@ -60,6 +60,11 @@ async function loadAllData() {
       lastName: p['Last Name'],
       name: `${p['First Name']} ${p['Last Name']}`,
       website: p.Website,
+      type: p.Type || '',
+      class: p.Class || '',
+      why: p.Why || '',
+      what: p.What || '',
+      location: p.Location || '',
       dateAdded: normalizeDate(p['Date Added'])
     }));
 
