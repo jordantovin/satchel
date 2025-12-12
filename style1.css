@@ -416,6 +416,12 @@
     cursor: pointer;
   }
 
+  .post-card[data-collection="photos"] .post-image {
+    object-fit: contain;
+    background: white;
+    padding: 5px;
+  }
+
   .post-content { padding: 16px; }
 
   .post-title {
