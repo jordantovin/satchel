@@ -20,9 +20,10 @@ function openObjectFullscreen(item) {
   document.getElementById('stickerFullscreenImage').src = item.image;
   
   const infoDiv = document.querySelector('.sticker-fullscreen-info');
+  const noteText = item.note || item.text || '';
   infoDiv.innerHTML = `
     <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">${item.title}</div>
-    ${item.note || item.text ? `<div style="font-size: 14px; color: #7c7c7c;">${item.note || item.text}</div>` : ''}
+    ${noteText ? `<div style="font-size: 14px; color: #7c7c7c;">${noteText}</div>` : ''}
   `;
   
   document.getElementById('stickerFullscreen').classList.add('active');
