@@ -183,6 +183,7 @@ function render() {
       if (data && type === "objects") {
         link.onclick = (e) => {
           e.preventDefault();
+          e.stopPropagation();
           const item = JSON.parse(data);
           openObjectFullscreen(item);
           addToHistory({ url: item.url, title: item.title, image: item.image });
