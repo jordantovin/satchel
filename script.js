@@ -1,19 +1,18 @@
+// Configuration and CSV URLs
 const sheetURL1 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTo8ua4UreD9MUP4CI6OOXkt8LeagGX9w85veJfgi9DKJnHc2-dbCMvq5cx8DtlUO0YcV5RMPzcJ_KG/pub?output=csv";
 const sheetURL2 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcOtzV-2ZVl1aaRXhnlXEDNmJ8y1pUArx3qjhV3AR66kKSMtR17702FGlrBdppy0YPI084PxrMu9uL/pub?output=csv";
 const sheetURL3 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR4UTNOg8d2LIrCU8A9ebfkYOMV2V3E7egroQgliVc4v6mp7Xi9fdmPaxN3k3YUmeW123C8UvwdiNmy/pub?output=csv";
 const sheetURL4 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4QAkAIideMvvWDNWq2Aj_Nx6m4QG9snhFkpqqOGX8gU09X6uUQdkfuOj9yLIybn0iPIFoZbK-/pub?output=csv";
 const sheetURL5 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRPknkbhkxJidsCcMnFmvdB2gKx4miqtuECGc5udX7hEAY9IQeTCpNDGMkh31uGuSS1NcODADU_jcRT/pub?output=csv";
 const sheetURL6 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQgrPlpxYaFJdMcgf_-UT0hA4u-uzsbXlgOwVaI2ox9S44XPXySHiNogkYfkno84Ur5V0oCMet0thHp/pub?output=csv";
-const sheetURL7 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ5j1OVFnwB19xVA3ZVM46C8tNKvGHimyElwIAgMFDzurSEFA0m_8iHBIvD1_TKbtlfWw2MaDAirm47/pub?output=csv";
 
+// Global state variables
 let jordanPosts = [];
 let objectsIndex = [];
 let allPosts = [];
 let photographers = [];
 let stickersIndex = [];
 let articlesIndex = [];
-let photosIndex = [];
-let picturesIndex = [];
 let displayLimit = 10;
 let currentFilter = "all";
 let currentSort = "date-newest";
@@ -22,6 +21,7 @@ let searchQuery = "";
 let viewHistory = JSON.parse(localStorage.getItem('satchelHistory') || '[]');
 let currentView = "feed";
 
+// Mobile menu functions
 function toggleMobileMenu() {
   document.querySelector('.left-sidebar').classList.toggle('mobile-open');
   document.body.classList.toggle('menu-open');
@@ -34,6 +34,7 @@ function closeMobileMenuOnClick() {
   }
 }
 
+// Date normalization utility
 function normalizeDate(dateStr) {
   if (!dateStr) return '';
   dateStr = dateStr.trim();
@@ -50,18 +51,6 @@ function normalizeDate(dateStr) {
   
   if (/^\d{4}\/\d{1,2}$/.test(dateStr)) {
     const parts = dateStr.split('/');
-    return `${parts[1].padStart(2, '0')}/01/${parts[0]}`;
-  }
-  
-  // Handle YYYY.MM.DD format
-  if (/^\d{4}\.\d{1,2}\.\d{1,2}$/.test(dateStr)) {
-    const parts = dateStr.split('.');
-    return `${parts[1].padStart(2, '0')}/${parts[2].padStart(2, '0')}/${parts[0]}`;
-  }
-  
-  // Handle YYYY.MM format
-  if (/^\d{4}\.\d{1,2}$/.test(dateStr)) {
-    const parts = dateStr.split('.');
     return `${parts[1].padStart(2, '0')}/01/${parts[0]}`;
   }
   
@@ -88,6 +77,7 @@ function normalizeDate(dateStr) {
   return dateStr;
 }
 
+// Get icon for collection type
 function getCollectionIcon(collection) {
   const icons = {
     'collection1': 'newspaper',
@@ -95,13 +85,12 @@ function getCollectionIcon(collection) {
     'collection4': 'sticker',
     'photographer': 'users',
     'objects': 'box',
-    'jordan': 'camera',
-    'photos': 'image',
-    'pictures': 'images'
+    'jordan': 'camera'
   };
   return icons[collection] || 'file';
 }
 
+// Post actions
 function savePost(postUrl) {
   if (savedPosts.includes(postUrl)) {
     savedPosts = savedPosts.filter(url => url !== postUrl);
@@ -176,120 +165,4 @@ function randomPhotographer() {
     title: random.name,
     image: ''
   });
-}
-
-function openStickerFullscreen(item) {
-  document.getElementById('stickerFullscreenImage').src = item.image;
-  
-  if (item.collection === 'collection4') {
-    document.getElementById('stickerFullscreenDate').textContent = item.date;
-    document.getElementById('stickerFullscreenLocation').textContent = item.location;
-    document.getElementById('stickerFullscreenMedium').textContent = item.medium;
-    document.getElementById('stickerFullscreenArtist').textContent = item.artist || 'Unknown';
-  }
-  
-  document.getElementById('stickerFullscreen').classList.add('active');
-  document.body.style.overflow = 'hidden';
-}
-
-function openObjectFullscreen(item) {
-  document.getElementById('stickerFullscreenImage').src = item.image;
-  document.getElementById('stickerFullscreenDate').textContent = item.date;
-  document.getElementById('stickerFullscreenLocation').textContent = item.text;
-  document.getElementById('stickerFullscreenMedium').textContent = "";
-  document.getElementById('stickerFullscreenArtist').textContent = "";
-  
-  document.getElementById('stickerFullscreen').classList.add('active');
-  document.body.style.overflow = 'hidden';
-}
-
-function openPhotoFullscreen(item) {
-  document.getElementById('stickerFullscreenImage').src = item.image;
-  document.getElementById('stickerFullscreenDate').textContent = item.date;
-  document.getElementById('stickerFullscreenLocation').textContent = item.location || '';
-  document.getElementById('stickerFullscreenMedium').textContent = item.notes || '';
-  document.getElementById('stickerFullscreenArtist').textContent = '';
-  
-  document.getElementById('stickerFullscreen').classList.add('active');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeStickerFullscreen(event) {
-  if (event) {
-    event.stopPropagation();
-  }
-  document.getElementById('stickerFullscreen').classList.remove('active');
-  document.body.style.overflow = '';
-}
-
-function addToHistory(post) {
-  viewHistory = viewHistory.filter(item => item.url !== post.url);
-  
-  viewHistory.unshift({
-    url: post.url,
-    title: post.title,
-    image: post.image,
-    timestamp: Date.now()
-  });
-  
-  viewHistory = viewHistory.slice(0, 20);
-  
-  localStorage.setItem('satchelHistory', JSON.stringify(viewHistory));
-  
-  updateHistory();
-}
-
-function updateHistory() {
-  const historyList = document.getElementById('historyList');
-  
-  if (viewHistory.length === 0) {
-    historyList.innerHTML = `
-      <div class="no-history">
-        <i data-lucide="clock" style="width: 32px; height: 32px; margin: 0 auto 8px; display: block; color: #ccc;"></i>
-        <div>No reading history yet</div>
-      </div>
-    `;
-  } else {
-    historyList.innerHTML = viewHistory.map(item => {
-      const hasImage = item.image && item.image.trim() !== '';
-      
-      if (hasImage) {
-        return `
-          <div class="history-item" onclick="window.open('${item.url}', '_blank')">
-            <div class="history-thumbnail-wrapper">
-              <img class="history-thumbnail" src="${item.image}" alt="${item.title}">
-            </div>
-            <div class="history-info">
-              <div class="history-title">${item.title}</div>
-              <div class="history-time">${formatCommentTime(item.timestamp)}</div>
-            </div>
-          </div>
-        `;
-      } else {
-        return `
-          <div class="history-item" onclick="window.open('${item.url}', '_blank')">
-            <div class="history-thumbnail-wrapper">
-              <div class="history-thumbnail circle" style="background: #1c1c1c; display: flex; align-items: center; justify-content: center; color: white;">
-                <i data-lucide="users" style="width: 20px; height: 20px;"></i>
-              </div>
-            </div>
-            <div class="history-info">
-              <div class="history-title">${item.title}</div>
-              <div class="history-time">${formatCommentTime(item.timestamp)}</div>
-            </div>
-          </div>
-        `;
-      }
-    }).join('');
-  }
-  
-  lucide.createIcons();
-}
-
-function clearHistory() {
-  if (confirm('Are you sure you want to clear your reading history?')) {
-    viewHistory = [];
-    localStorage.setItem('satchelHistory', JSON.stringify(viewHistory));
-    updateHistory();
-  }
 }
