@@ -168,12 +168,19 @@ function sortPosts(arr) {
 }
 
 function filterPosts(arr) {
+  console.log('filterPosts called:', { 
+    currentFilter, 
+    inputLength: arr.length,
+    collections: arr.map(p => p.collection)
+  });
+  
   let filtered = arr;
   
   if (currentFilter === "saved") {
     filtered = filtered.filter(p => savedPosts.includes(p.url));
   } else if (currentFilter !== "all") {
     filtered = filtered.filter(p => p.collection === currentFilter);
+    console.log('Filtered by collection:', currentFilter, 'Result:', filtered.length);
   }
   
   if (searchQuery) {
@@ -240,6 +247,8 @@ function filterPosts(arr) {
       filtered = [...filtered, ...matchingPhotographers, ...matchingStickers, ...matchingPhotos];
     }
   }
+  
+  console.log('filterPosts result:', filtered.length, 'collections:', [...new Set(filtered.map(p => p.collection))]);
   
   return filtered;
 }
