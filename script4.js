@@ -87,27 +87,28 @@ async function loadAllData() {
         artist: p.artist || 'Unknown'
       }));
 
-    // Parse Objects (Collection 5)
+    // Parse Objects (Collection 5) - UPDATED TO USE Title AND Note
     const parsed5 = Papa.parse(text5, { header: true }).data;
 
     objectsIndex = parsed5
-      .filter(r => r.Date && r.Text && r.Image)
+      .filter(r => r.Date && r.Title && r.Image)
       .map(o => ({
         date: normalizeDate(o.Date),
-        text: o.Text,
+        title: o.Title,
+        note: o.Note || '',
         image: o.Image
       }));
 
     const posts5 = parsed5
-      .filter(r => r.Date && r.Text && r.Image)
+      .filter(r => r.Date && r.Title && r.Image)
       .map(o => ({
         collection: "objects",
         collectionName: "Objects",
-        title: o.Text,
+        title: o.Title,
         date: normalizeDate(o.Date),
         url: o.Image,
         image: o.Image,
-        text: o.Text
+        text: o.Note || ''
       }));
 
     // Parse Jordan Posts
