@@ -28,6 +28,13 @@ function render() {
     return;
   }
   
+  if (currentView === "photos-index") {
+    document.querySelector('.sort-bar').style.display = 'none';
+    document.getElementById('endOfFeed').style.display = 'none';
+    renderPhotosIndex();
+    return;
+  }
+  
   hideFullscreenToggle();
   
   document.querySelector('.sort-bar').style.display = 'flex';
@@ -71,8 +78,9 @@ function render() {
     const isSticker = post.collection === 'collection4';
     const isObject = post.collection === 'objects';
     const isJordan = post.collection === 'jordan';
+    const isPhoto = post.collection === 'photos';
 
-    const fullscreenData = (isSticker || isObject || isJordan) ? JSON.stringify(post) : '';
+    const fullscreenData = (isSticker || isObject || isJordan || isPhoto) ? JSON.stringify(post) : '';
 
     item.innerHTML = `
       <a href="${post.url}" target="_blank" style="display: block; color: inherit;" data-article-link='${JSON.stringify({url: post.url, title: post.title, image: post.image || ''})}' data-fullscreen-data='${fullscreenData}' data-type='${post.collection}'>
@@ -92,6 +100,7 @@ function render() {
           <div class="post-title">${post.title}</div>
           ${post.text ? `<div class="post-excerpt">${post.text}</div>` : ''}
           ${post.medium ? `<div class="post-excerpt"><strong>Medium:</strong> ${post.medium}</div>` : ''}
+          ${post.photographer ? `<div class="post-excerpt"><strong>Photographer:</strong> ${post.photographer}</div>` : ''}
         </div>
       </a>
       <div class="post-footer">
@@ -177,6 +186,16 @@ function render() {
           const item = JSON.parse(data);
           openObjectFullscreen(item);
           addToHistory({ url: item.url, title: item.text, image: item.image });
+        };
+        return;
+      }
+
+      if (data && type === "photos") {
+        link.onclick = (e) => {
+          e.preventDefault();
+          const item = JSON.parse(data);
+          openPhotoFullscreen(item);
+          addToHistory({ url: item.url, title: item.photographer, image: item.image });
         };
         return;
       }
