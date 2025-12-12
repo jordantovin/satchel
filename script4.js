@@ -1,257 +1,200 @@
-// Photographers Index rendering
-function renderPhotographersIndex() {
-  const feed = document.getElementById("feedItems");
-  feed.innerHTML = "";
-  
-  showFullscreenToggle();
-  
-  const indexContainer = document.createElement("div");
-  indexContainer.className = "photographers-index";
-  
-  const header = document.createElement("div");
-  header.innerHTML = `
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-      <h2 style="margin: 0;">Photographers</h2>
-      <div style="display: flex; gap: 8px; margin-right: 40px;">
-        <button class="sort-btn active" data-sort="az">A-Z</button>
-        <button class="sort-btn" data-sort="za">Z-A</button>
-        <button class="sort-btn" data-sort="latest">Latest</button>
-        <button class="sort-btn" data-sort="oldest">Oldest</button>
-      </div>
-    </div>
-    <div class="index-search">
-      <div class="index-search-wrapper">
-        <input type="text" id="photographerSearch" placeholder="Search photographers by name..." />
-        <button class="random-btn" onclick="randomPhotographer()">Random</button>
-      </div>
-    </div>
-  `;
-  indexContainer.appendChild(header);
-  
-  let sortedPhotographers = [...photographers].sort((a, b) => a.lastName.localeCompare(b.lastName));
-  let currentPhotographerSort = 'az';
-  
-  const listContainer = document.createElement("div");
-  listContainer.id = "photographerList";
-  indexContainer.appendChild(listContainer);
-  
-  feed.appendChild(indexContainer);
-  
-  renderPhotographerList(sortedPhotographers, listContainer);
-  
-  document.querySelectorAll('.photographers-index .sort-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      document.querySelectorAll('.photographers-index .sort-btn').forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
-      currentPhotographerSort = this.dataset.sort;
-      
-      if (currentPhotographerSort === 'az') {
-        sortedPhotographers = [...photographers].sort((a, b) => a.lastName.localeCompare(b.lastName));
-      } else if (currentPhotographerSort === 'za') {
-        sortedPhotographers = [...photographers].sort((a, b) => b.lastName.localeCompare(a.lastName));
-      } else if (currentPhotographerSort === 'latest') {
-        sortedPhotographers = [...photographers].sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));
-      } else if (currentPhotographerSort === 'oldest') {
-        sortedPhotographers = [...photographers].sort((a, b) => new Date(a.dateAdded) - new Date(b.dateAdded));
-      }
-      
-      const query = document.getElementById('photographerSearch').value.toLowerCase().trim();
-      if (query) {
-        const filtered = sortedPhotographers.filter(p => p.name.toLowerCase().includes(query));
-        renderPhotographerList(filtered, listContainer);
-      } else {
-        renderPhotographerList(sortedPhotographers, listContainer);
-      }
-    });
-  });
-  
-  document.getElementById('photographerSearch').addEventListener('input', (e) => {
-    const query = e.target.value.toLowerCase().trim();
-    if (query === '') {
-      renderPhotographerList(sortedPhotographers, listContainer);
-    } else {
-      const filtered = sortedPhotographers.filter(p => 
-        p.name.toLowerCase().includes(query)
-      );
-      renderPhotographerList(filtered, listContainer);
-    }
-  });
-  
-  lucide.createIcons();
-}
+// Data loading and parsing
+async function loadAllData() {
+  try {
+    const [res1, res2, res3, res4, res5, res6, res7] = await Promise.all([
+      fetch(sheetURL1),
+      fetch(sheetURL2),
+      fetch(sheetURL3),
+      fetch(sheetURL4),
+      fetch(sheetURL5),
+      fetch(sheetURL6),
+      fetch(sheetURL7)
+    ]);
+    
+    const [text1, text2, text3, text4, text5, text6, text7] = await Promise.all([
+      res1.text(),
+      res2.text(),
+      res3.text(),
+      res4.text(),
+      res5.text(),
+      res6.text(),
+      res7.text()
+    ]);
+    
+    // Parse Articles (Collection 1)
+    const parsed1 = Papa.parse(text1, { header: true }).data;
+    const posts1 = parsed1.filter(r => r.src && r.photo).map(p => ({
+      ...p,
+      collection: "collection1",
+      collectionName: "Articles",
+      title: p.test,
+      url: p.src,
+      image: p.photo,
+      date: normalizeDate(p.date)
+    }));
 
-function renderPhotographerList(photographersList, container) {
-  container.innerHTML = '';
-  
-  if (photographersList.length === 0) {
-    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #7c7c7c;">No photographers found</div>';
-    return;
-  }
-  
-  const grouped = {};
-  photographersList.forEach(p => {
-    const letter = p.lastName.charAt(0).toUpperCase();
-    if (!grouped[letter]) {
-      grouped[letter] = [];
-    }
-    grouped[letter].push(p);
-  });
-  
-  Object.keys(grouped).sort().forEach(letter => {
-    const section = document.createElement("div");
-    section.className = "alphabet-section";
-    
-    const letterHeader = document.createElement("div");
-    letterHeader.className = "alphabet-letter";
-    letterHeader.textContent = letter;
-    section.appendChild(letterHeader);
-    
-    const grid = document.createElement("div");
-    grid.className = "photographer-grid";
-    
-    grouped[letter].forEach(photographer => {
-      const link = document.createElement("a");
-      link.className = "photographer-link";
-      link.href = photographer.website;
-      link.target = "_blank";
-      link.textContent = photographer.name.toLowerCase();
-      link.onclick = (e) => {
-        addToHistory({
-          url: photographer.website,
-          title: photographer.name,
-          image: ''
-        });
-      };
-      grid.appendChild(link);
-    });
-    
-    section.appendChild(grid);
-    container.appendChild(section);
-  });
-}
+    articlesIndex = parsed1.filter(r => r.src && r.photo).map(p => ({
+      ...p,
+      title: p.test,
+      url: p.src,
+      image: p.photo,
+      date: normalizeDate(p.date)
+    }));
 
-// Stickers Index rendering
-function renderStickersIndex() {
-  const feed = document.getElementById("feedItems");
-  feed.innerHTML = "";
-  
-  showFullscreenToggle();
-  
-  const indexContainer = document.createElement("div");
-  indexContainer.className = "photographers-index";
-  
-  const header = document.createElement("div");
-  header.innerHTML = `
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-      <h2 style="margin: 0;">Stickers</h2>
-      <div style="display: flex; gap: 8px; margin-right: 40px;">
-        <button class="sort-btn" data-sort="az">A-Z</button>
-        <button class="sort-btn" data-sort="za">Z-A</button>
-        <button class="sort-btn active" data-sort="latest">Latest</button>
-        <button class="sort-btn" data-sort="oldest">Oldest</button>
-      </div>
-    </div>
-    <div class="index-search">
-      <input type="text" id="stickerSearch" placeholder="Search stickers by location, medium, or artist..." />
-    </div>
-  `;
-  indexContainer.appendChild(header);
-  
-  let sortedStickers = [...stickersIndex].sort((a, b) => new Date(b.date) - new Date(a.date));
-  let currentStickerSort = 'latest';
-  
-  const gridContainer = document.createElement("div");
-  gridContainer.id = "stickerGrid";
-  indexContainer.appendChild(gridContainer);
-  
-  feed.appendChild(indexContainer);
-  
-  renderStickerGrid(sortedStickers, gridContainer);
-  
-  document.querySelectorAll('.photographers-index .sort-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      document.querySelectorAll('.photographers-index .sort-btn').forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
-      currentStickerSort = this.dataset.sort;
-      
-      if (currentStickerSort === 'az') {
-        sortedStickers = [...stickersIndex].sort((a, b) => a.location.localeCompare(b.location));
-      } else if (currentStickerSort === 'za') {
-        sortedStickers = [...stickersIndex].sort((a, b) => b.location.localeCompare(a.location));
-      } else if (currentStickerSort === 'latest') {
-        sortedStickers = [...stickersIndex].sort((a, b) => new Date(b.date) - new Date(a.date));
-      } else if (currentStickerSort === 'oldest') {
-        sortedStickers = [...stickersIndex].sort((a, b) => new Date(a.date) - new Date(b.date));
-      }
-      
-      const query = document.getElementById('stickerSearch').value.toLowerCase().trim();
-      if (query) {
-        const filtered = sortedStickers.filter(s => {
-          return Object.values(s).some(value => {
-            return value && typeof value === 'string' && value.toLowerCase().includes(query);
-          });
-        });
-        renderStickerGrid(filtered, gridContainer);
-      } else {
-        renderStickerGrid(sortedStickers, gridContainer);
-      }
-    });
-  });
-  
-  document.getElementById('stickerSearch').addEventListener('input', (e) => {
-    const query = e.target.value.toLowerCase().trim();
-    if (query === '') {
-      renderStickerGrid(sortedStickers, gridContainer);
-    } else {
-      const filtered = sortedStickers.filter(s => {
-        return Object.values(s).some(value => {
-          return value && typeof value === 'string' && value.toLowerCase().includes(query);
-        });
+    // Parse Field Notes (Collection 2)
+    const parsed2 = Papa.parse(text2, { header: true }).data;
+    const posts2 = parsed2.filter(r => r.image).map(p => ({
+      ...p,
+      collection: "collection2",
+      collectionName: "Field Notes",
+      title: p.title || p.url,
+      url: p.url,
+      image: p.image,
+      date: normalizeDate(p.date)
+    }));
+
+    // Parse Photographers
+    const parsed3 = Papa.parse(text3, { header: true }).data;
+    photographers = parsed3.filter(r => r['First Name'] && r['Last Name'] && r.Website).map(p => ({
+      firstName: p['First Name'],
+      lastName: p['Last Name'],
+      name: `${p['First Name']} ${p['Last Name']}`,
+      website: p.Website,
+      dateAdded: normalizeDate(p['Date Added'])
+    }));
+
+    // Parse Stickers (Collection 4)
+    const parsed4 = Papa.parse(text4, { header: true }).data;
+    stickersIndex = parsed4
+      .filter(r =>
+        r.src &&
+        r.date &&
+        r.location_overlay &&
+        r.medium
+      )
+      .map(p => ({
+        ...p,
+        image: p.src,
+        date: normalizeDate(p.date),
+        location: p.location_overlay,
+        location_card: p.location_card,
+        medium: p.medium,
+        artist: p.artist || 'Unknown'
+      }));
+
+    // Parse Objects (Collection 5)
+    const parsed5 = Papa.parse(text5, { header: true }).data;
+
+    objectsIndex = parsed5
+      .filter(r => r.Date && r.Text && r.Image)
+      .map(o => ({
+        date: normalizeDate(o.Date),
+        text: o.Text,
+        image: o.Image
+      }));
+
+    const posts5 = parsed5
+      .filter(r => r.Date && r.Text && r.Image)
+      .map(o => ({
+        collection: "objects",
+        collectionName: "Objects",
+        title: o.Text,
+        date: normalizeDate(o.Date),
+        url: o.Image,
+        image: o.Image,
+        text: o.Text
+      }));
+
+    // Parse Jordan Posts
+    const parsed6 = Papa.parse(text6, { header: true }).data;
+
+    jordanPosts = parsed6
+      .filter(r => r.Date && r.Title)
+      .map(p => {
+        const hasImage = p.Image && p.Image.trim() !== "";
+        const hasLink = p.Link && p.Link.trim() !== "";
+
+        return {
+          collection: "jordan",
+          collectionName: "Jordan",
+          title: p.Title,
+          date: normalizeDate(p.Date),
+          text: p.Text || "",
+          image: hasImage ? p.Image : "",
+          url: hasLink ? p.Link : (hasImage ? p.Image : "#")
+        };
       });
-      renderStickerGrid(filtered, gridContainer);
-    }
-  });
-  
-  lucide.createIcons();
-}
 
-function renderStickerGrid(stickersList, container) {
-  container.innerHTML = '';
-  
-  if (stickersList.length === 0) {
-    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #7c7c7c;">No stickers found</div>';
-    return;
+    // Filter stickers for feed
+    const posts4 = parsed4
+      .filter(r => 
+        r.src &&
+        r.date &&
+        r.location_card &&
+        r.medium &&
+        r.feed &&
+        r.feed.trim().toLowerCase() === "yes"
+      )
+      .map(p => ({
+        ...p,
+        collection: "collection4",
+        collectionName: "Stickers",
+        title: p.location_card || 'Sticker',
+        date: normalizeDate(p.date),
+        url: p.src,
+        image: p.src,
+        medium: p.medium,
+        location: p.location_card,
+        artist: p.artist
+      }));
+
+    // Parse Photos (Collection 7)
+    const parsed7 = Papa.parse(text7, { header: true }).data;
+
+    photosIndex = parsed7
+      .filter(r => r.Link && r.Photographer)
+      .map(p => ({
+        link: p.Link,
+        photographer: p.Photographer,
+        note: p.Note || '',
+        date: normalizeDate(p.Date)
+      }));
+
+    const posts7 = parsed7
+      .filter(r => r.Link && r.Photographer)
+      .map(p => ({
+        collection: "photos",
+        collectionName: "Photos",
+        title: p.Photographer,
+        date: normalizeDate(p.Date),
+        url: p.Link,
+        image: p.Link,
+        text: p.Note || '',
+        photographer: p.Photographer
+      }));
+
+    // Combine all posts
+    allPosts = [ ...posts1, ...posts2, ...posts4, ...posts5, ...jordanPosts, ...posts7 ];
+    
+    // Update counts
+    document.getElementById('countAll').textContent = allPosts.length;
+    document.getElementById('count1').textContent = posts1.length;
+    document.getElementById('count2').textContent = posts2.length;
+    document.getElementById('count3').textContent = photographers.length;
+    document.getElementById('count4').textContent = posts4.length;
+    document.getElementById('countStickersIndex').textContent = stickersIndex.length;
+    document.getElementById('countArticlesIndex').textContent = articlesIndex.length;
+    document.getElementById("countObjects").textContent = posts5.length;
+    document.getElementById("countObjectsIndex").textContent = objectsIndex.length;
+    document.getElementById("countPhotos").textContent = posts7.length;
+    document.getElementById("countPhotosIndex").textContent = photosIndex.length;
+
+    updateHistory();
+    document.getElementById('countSaved').textContent = savedPosts.length;
+
+    lucide.createIcons();
+    render();
+  } catch (error) {
+    console.error("Error loading data:", error);
   }
-  
-  const grid = document.createElement("div");
-  grid.className = "stickers-grid";
-  
-  stickersList.forEach(sticker => {
-    const item = document.createElement("div");
-    item.className = "sticker-grid-item";
-    item.onclick = () => {
-      openStickerFullscreen({
-        collection: 'collection4',
-        image: sticker.image,
-        date: sticker.date,
-        location: sticker.location,
-        medium: sticker.medium,
-        artist: sticker.artist
-      });
-    };
-    
-    item.innerHTML = `
-      <img class="sticker-grid-image" src="${sticker.image}" alt="${sticker.location_card}">
-      <div class="sticker-grid-overlay">
-        <div><strong>Date:</strong> ${sticker.date}</div>
-        <div><strong>Location:</strong> ${sticker.location_card}</div>
-        <div><strong>Medium:</strong> ${sticker.medium}</div>
-        <div><strong>Artist:</strong> ${sticker.artist}</div>
-      </div>
-    `;
-    
-    grid.appendChild(item);
-  });
-  
-  container.appendChild(grid);
 }
