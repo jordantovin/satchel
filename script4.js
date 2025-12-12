@@ -108,7 +108,8 @@ async function loadAllData() {
         date: normalizeDate(o.Date),
         url: o.Image,
         image: o.Image,
-        text: o.Note || ''
+        text: o.Note || '',
+        note: o.Note || ''
       }));
 
     // Parse Jordan Posts
