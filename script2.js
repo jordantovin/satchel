@@ -1,16 +1,13 @@
 // Fullscreen modal functions
-function openStickerFullscreen(item) {
+function openObjectFullscreen(item) {
   document.getElementById('stickerFullscreenImage').src = item.image;
   
-  if (item.collection === 'collection4') {
-    const infoDiv = document.querySelector('.sticker-fullscreen-info');
-    infoDiv.innerHTML = `
-      <div><strong>Date:</strong> <span>${item.date}</span></div>
-      <div><strong>Location:</strong><br><span>${item.location}</span></div>
-      <div><strong>Medium:</strong> <span>${item.medium}</span></div>
-      <div><strong>Artist:</strong> <span>${item.artist || 'Unknown'}</span></div>
-    `;
-  }
+  const infoDiv = document.querySelector('.sticker-fullscreen-info');
+  infoDiv.innerHTML = `
+    <div><strong>Date:</strong> <span>${item.date}</span></div>
+    <div><strong>Title:</strong><br><span>${item.title}</span></div>
+    ${item.note ? `<div><strong>Note:</strong><br><span>${item.note}</span></div>` : ''}
+  `;
   
   document.getElementById('stickerFullscreen').classList.add('active');
   document.body.style.overflow = 'hidden';
