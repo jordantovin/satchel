@@ -1,5 +1,6 @@
 // Articles Index rendering
-function renderArticlesIndex() {
+// Objects Index rendering - UPDATED
+function renderObjectsIndex() {
   const feed = document.getElementById("feedItems");
   feed.innerHTML = "";
   
@@ -11,7 +12,7 @@ function renderArticlesIndex() {
   const header = document.createElement("div");
   header.innerHTML = `
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-      <h2 style="margin: 0;">Articles</h2>
+      <h2 style="margin: 0;">Objects</h2>
       <div style="display: flex; gap: 8px; margin-right: 40px;">
         <button class="sort-btn" data-sort="az">A-Z</button>
         <button class="sort-btn" data-sort="za">Z-A</button>
@@ -20,98 +21,99 @@ function renderArticlesIndex() {
       </div>
     </div>
     <div class="index-search">
-      <input type="text" id="articleSearch" placeholder="Search articles by title or date..." />
+      <input type="text" id="objectSearch" placeholder="Search objects by title or note..." />
     </div>
   `;
   indexContainer.appendChild(header);
   
-  let sortedArticles = [...articlesIndex].sort((a, b) => new Date(b.date) - new Date(a.date));
-  let currentArticleSort = 'latest';
+  let sortedObjects = [...objectsIndex].sort((a, b) => new Date(b.date) - new Date(a.date));
+  let currentObjectSort = 'latest';
   
   const gridContainer = document.createElement("div");
-  gridContainer.id = "articleGrid";
+  gridContainer.id = "objectGrid";
   indexContainer.appendChild(gridContainer);
   
   feed.appendChild(indexContainer);
   
-  renderArticleGrid(sortedArticles, gridContainer);
+  renderObjectGrid(sortedObjects, gridContainer);
   
   document.querySelectorAll('.photographers-index .sort-btn').forEach(btn => {
     btn.addEventListener('click', function() {
       document.querySelectorAll('.photographers-index .sort-btn').forEach(b => b.classList.remove('active'));
       this.classList.add('active');
-      currentArticleSort = this.dataset.sort;
+      currentObjectSort = this.dataset.sort;
       
-      if (currentArticleSort === 'az') {
-        sortedArticles = [...articlesIndex].sort((a, b) => a.title.localeCompare(b.title));
-      } else if (currentArticleSort === 'za') {
-        sortedArticles = [...articlesIndex].sort((a, b) => b.title.localeCompare(a.title));
-      } else if (currentArticleSort === 'latest') {
-        sortedArticles = [...articlesIndex].sort((a, b) => new Date(b.date) - new Date(a.date));
-      } else if (currentArticleSort === 'oldest') {
-        sortedArticles = [...articlesIndex].sort((a, b) => new Date(a.date) - new Date(b.date));
+      if (currentObjectSort === 'az') {
+        sortedObjects = [...objectsIndex].sort((a, b) => a.title.localeCompare(b.title));
+      } else if (currentObjectSort === 'za') {
+        sortedObjects = [...objectsIndex].sort((a, b) => b.title.localeCompare(a.title));
+      } else if (currentObjectSort === 'latest') {
+        sortedObjects = [...objectsIndex].sort((a, b) => new Date(b.date) - new Date(a.date));
+      } else if (currentObjectSort === 'oldest') {
+        sortedObjects = [...objectsIndex].sort((a, b) => new Date(a.date) - new Date(b.date));
       }
       
-      const query = document.getElementById('articleSearch').value.toLowerCase().trim();
+      const query = document.getElementById('objectSearch').value.toLowerCase().trim();
       if (query) {
-        const filtered = sortedArticles.filter(a => {
-          return Object.values(a).some(value => {
+        const filtered = sortedObjects.filter(o => {
+          return Object.values(o).some(value => {
             return value && typeof value === 'string' && value.toLowerCase().includes(query);
           });
         });
-        renderArticleGrid(filtered, gridContainer);
+        renderObjectGrid(filtered, gridContainer);
       } else {
-        renderArticleGrid(sortedArticles, gridContainer);
+        renderObjectGrid(sortedObjects, gridContainer);
       }
     });
   });
   
-  document.getElementById('articleSearch').addEventListener('input', (e) => {
+  document.getElementById('objectSearch').addEventListener('input', (e) => {
     const query = e.target.value.toLowerCase().trim();
     if (query === '') {
-      renderArticleGrid(sortedArticles, gridContainer);
+      renderObjectGrid(sortedObjects, gridContainer);
     } else {
-      const filtered = sortedArticles.filter(a => {
-        return Object.values(a).some(value => {
+      const filtered = sortedObjects.filter(o => {
+        return Object.values(o).some(value => {
           return value && typeof value === 'string' && value.toLowerCase().includes(query);
         });
       });
-      renderArticleGrid(filtered, gridContainer);
+      renderObjectGrid(filtered, gridContainer);
     }
   });
   
   lucide.createIcons();
 }
 
-function renderArticleGrid(articlesList, container) {
+function renderObjectGrid(objectsList, container) {
   container.innerHTML = '';
   
-  if (articlesList.length === 0) {
-    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #7c7c7c;">No articles found</div>';
+  if (objectsList.length === 0) {
+    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #7c7c7c;">No objects found</div>';
     return;
   }
   
   const grid = document.createElement("div");
-  grid.className = "articles-grid";
+  grid.className = "stickers-grid";
   
-  articlesList.forEach(article => {
-    const item = document.createElement("a");
-    item.className = "article-grid-item";
-    item.href = article.url;
-    item.target = "_blank";
+  objectsList.forEach(obj => {
+    const item = document.createElement("div");
+    item.className = "sticker-grid-item";
     item.onclick = () => {
-      addToHistory({
-        url: article.url,
-        title: article.title,
-        image: article.image
+      openObjectFullscreen({
+        collection: 'objects',
+        image: obj.image,
+        date: obj.date,
+        title: obj.title,
+        note: obj.note
       });
     };
     
     item.innerHTML = `
-      <img class="article-grid-image" src="${article.image}" alt="${article.title}">
-      <div class="article-grid-overlay">
-        <div class="article-grid-title">${article.title}</div>
-        <div class="article-grid-date">${article.date}</div>
+      <img class="sticker-grid-image" src="${obj.image}" alt="${obj.title}">
+      <div class="sticker-grid-overlay">
+        <div><strong>Date:</strong> ${obj.date}</div>
+        <div><strong>Title:</strong> ${obj.title}</div>
+        ${obj.note ? `<div><strong>Note:</strong> ${obj.note}</div>` : ''}
       </div>
     `;
     
