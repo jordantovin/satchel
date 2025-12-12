@@ -227,7 +227,7 @@ function renderObjectGrid(objectsList, container) {
     item.innerHTML = `
       <img class="sticker-grid-image" src="${obj.image}" alt="${obj.title}">
       <div class="sticker-grid-overlay">
-        <div>${obj.title}</div>
+        <div><strong>Title:</strong> ${obj.title}</div>
       </div>
     `;
     
@@ -349,7 +349,7 @@ function renderPhotoGrid(photosList, container) {
     item.innerHTML = `
       <img class="sticker-grid-image" src="${photo.link}" alt="${photo.photographer}">
       <div class="sticker-grid-overlay">
-        <div>${photo.photographer}</div>
+        <div><strong>Photographer:</strong> ${photo.photographer}</div>
       </div>
     `;
     
