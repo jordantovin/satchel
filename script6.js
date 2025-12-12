@@ -100,7 +100,7 @@ function render() {
           <div class="post-title">${post.title}</div>
           ${post.text ? `<div class="post-excerpt">${post.text}</div>` : ''}
           ${post.medium ? `<div class="post-excerpt"><strong>Medium:</strong> ${post.medium}</div>` : ''}
-          ${post.photographer ? `<div class="post-excerpt"><strong>Photographer:</strong> ${post.photographer}</div>` : ''}
+          ${post.photographer && post.collection !== 'photos' ? `<div class="post-excerpt"><strong>Photographer:</strong> ${post.photographer}</div>` : ''}
         </div>
       </a>
       <div class="post-footer">
