@@ -1,4 +1,16 @@
-// Filter management
+// Filter functions
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+function toggleSearch() {
+  const searchInput = document.getElementById('topSearchInput');
+  searchInput.classList.toggle('active');
+  if (searchInput.classList.contains('active')) {
+    searchInput.focus();
+  }
+}
 
 function updateFilterVisibility() {
   // Hide all filter sections
