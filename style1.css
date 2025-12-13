@@ -350,8 +350,6 @@
 
   .post-card {
     background: white;
-    border: 1px solid #ccc;
-    border-radius: 8px;
     margin-bottom: 16px;
     overflow: hidden;
     transition: box-shadow 0.2s;
@@ -368,7 +366,6 @@
     align-items: center;
     gap: 10px;
     background: #f6f7f8;
-    border-bottom: 1px solid #edeff1;
   }
 
   .post-avatar {
