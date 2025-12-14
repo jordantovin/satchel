@@ -28,6 +28,51 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
       }
     }
 
+    function formatArticleDate(dateStr) {
+      if (!dateStr) return '';
+      
+      // Try to parse the date
+      let date;
+      
+      // Handle various date formats
+      if (dateStr.includes('-')) {
+        // YYYY-MM-DD or MM-DD-YYYY
+        const parts = dateStr.split('-');
+        if (parts[0].length === 4) {
+          // YYYY-MM-DD
+          date = new Date(dateStr);
+        } else {
+          // MM-DD-YYYY
+          date = new Date(`${parts[2]}-${parts[0]}-${parts[1]}`);
+        }
+      } else if (dateStr.includes('/')) {
+        // MM/DD/YYYY or YYYY/MM/DD
+        date = new Date(dateStr);
+      } else if (dateStr.includes('.')) {
+        // YYYY.MM.DD
+        const parts = dateStr.split('.');
+        date = new Date(`${parts[0]}-${parts[1]}-${parts[2]}`);
+      } else {
+        // Try to parse as-is
+        date = new Date(dateStr);
+      }
+      
+      // Check if valid date
+      if (isNaN(date.getTime())) {
+        return dateStr; // Return original if parsing failed
+      }
+      
+      // Format as "Month Day, Year"
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                         'July', 'August', 'September', 'October', 'November', 'December'];
+      
+      const month = monthNames[date.getMonth()];
+      const day = date.getDate();
+      const year = date.getFullYear();
+      
+      return `${month} ${day}, ${year}`;
+    }
+
     function parseDate(dateStr) {
       if (!dateStr) return '';
       
@@ -376,20 +421,14 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
 
     function applyFilters() {
       const searchInput = document.getElementById('topSearchInput');
-      console.log('applyFilters called, input element:', searchInput);
-      
       const keyword = searchInput ? searchInput.value.toLowerCase().trim() : '';
-      console.log('Search keyword:', keyword);
       
       // UNIVERSAL SEARCH MODE - Search across ALL data when there's a keyword
       if (keyword) {
-        console.log('Triggering universal search...');
         universalSearchMode = true;
         performUniversalSearch(keyword);
         return;
       }
-      
-      console.log('No keyword, normal filtering mode');
       
       // Normal filtering mode
       universalSearchMode = false;
@@ -443,14 +482,6 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
 
     function performUniversalSearch(query) {
       const results = [];
-      
-      console.log('Universal search for:', query);
-      console.log('Data available:', {
-        objects: allData.objects?.length || 0,
-        articles: allData.articles?.length || 0,
-        pictures: allData.pictures?.length || 0,
-        photographers: photographersData?.length || 0
-      });
       
       // Search Objects
       allData.objects.forEach(item => {
@@ -517,7 +548,7 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
     function createUniversalSearchCard(result) {
       const card = document.createElement('div');
       card.style.cssText = `
-        background: #f9f9f9;
+        background: #fff;
         border: 2px solid #000;
         padding: 16px;
         cursor: pointer;
@@ -576,32 +607,27 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
         
         const date = document.createElement('div');
         date.style.cssText = 'font-size: 12px; color: #666;';
-        date.textContent = result.data.date;
+        date.textContent = formatArticleDate(result.data.date);
         card.appendChild(date);
         
         card.onclick = () => window.open(result.data.src, '_blank');
       } else if (result.type === 'photographer') {
         const name = document.createElement('div');
-        name.style.cssText = 'font-weight: bold; font-size: 18px; margin-bottom: 8px;';
+        name.style.cssText = 'font-weight: bold; font-size: 18px;';
         name.textContent = `${result.data.firstName} ${result.data.lastName}`;
         card.appendChild(name);
-        
-        const website = document.createElement('div');
-        website.style.cssText = 'font-size: 12px; color: #0066cc; word-break: break-all;';
-        website.textContent = result.data.website;
-        card.appendChild(website);
         
         card.onclick = () => window.open(result.data.website, '_blank');
       }
       
       card.onmouseenter = () => {
-        card.style.backgroundColor = '#fff';
+        card.style.backgroundColor = '#f5f5f5';
         card.style.transform = 'translateY(-2px)';
         card.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
       };
       
       card.onmouseleave = () => {
-        card.style.backgroundColor = '#f9f9f9';
+        card.style.backgroundColor = '#fff';
         card.style.transform = 'translateY(0)';
         card.style.boxShadow = 'none';
       };
@@ -651,7 +677,7 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
           const info = document.createElement("div");
           info.className = "article-info";
           info.innerHTML = `
-            <div class="article-date">${img.date}</div>
+            <div class="article-date">${formatArticleDate(img.date)}</div>
             <div class="article-source">${img.source}</div>
           `;
           
