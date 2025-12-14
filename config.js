@@ -4,9 +4,6 @@ const objectsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRPknkbhkxJi
 const articlesURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTo8ua4UreD9MUP4CI6OOXkt8LeagGX9w85veJfgi9DKJnHc2-dbCMvq5cx8DtlUO0YcV5RMPzcJ_KG/pub?output=csv';
 const picturesURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ5j1OVFnwB19xVA3ZVM46C8tNKvGHimyElwIAgMFDzurSEFA0m_8iHBIvD1_TKbtlfWw2MaDAirm47/pub?output=csv';
 const photographersListURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR4UTNOg8d2LIrCU8A9ebfkYOMV2V3E7egroQgliVc4v6mp7Xi9fdmPaxN3k3YUmeW123C8UvwdiNmy/pub?output=csv';
-const blogPostsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vThaJ-Q5u7zUSy9DA5oMCUkajzPdkWpECZzQf7SYpi8SvSCqvRgzlQvAUI6xAtaumQEnsaHSbYLkHt_/pub?output=csv';
-const inspoPostsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTtF8T2xKCyuDXq1_hyxL0Do2g8wfQ5AtrA-SlKSoUa5TlyuaKgekwK4j4ezU1z8dVjf5P8YYVnoXT9/pub?output=csv';
-const fieldNotesURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTcOtzV-2ZVl1aaRXhnlXEDNmJ8y1pUArx3qjhV3AR66kKSMtR17702FGlrBdppy0YPI084PxrMu9uL/pub?output=csv';
 
 // Global state
 let allData = {
@@ -19,12 +16,6 @@ let filteredPhotographers = [];
 let currentIndex = 'objects';
 let filteredImages = [];
 let currentImageIndex = -1;
-let currentMode = 'archive';
-let blogPostsData = [];
-let inspoPostsData = [];
-let fieldNotesData = [];
-let universalSearchMode = false;
-let universalSearchResults = [];
 
 // Utility functions
 function parseDate(dateStr) {
