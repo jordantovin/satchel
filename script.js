@@ -31,29 +31,44 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
     function formatArticleDate(dateStr) {
       if (!dateStr) return '';
       
+      // Remove any timestamp portion (everything after space)
+      let cleanDate = dateStr.split(' ')[0].trim();
+      
       // Try to parse the date
       let date;
       
       // Handle various date formats
-      if (dateStr.includes('-')) {
-        // YYYY-MM-DD or MM-DD-YYYY
-        const parts = dateStr.split('-');
-        if (parts[0].length === 4) {
-          // YYYY-MM-DD
-          date = new Date(dateStr);
-        } else {
+      if (cleanDate.includes('-')) {
+        // YYYY-MM-DD format
+        const parts = cleanDate.split('-');
+        if (parts.length === 3 && parts[0].length === 4) {
+          date = new Date(cleanDate);
+        } else if (parts.length === 3) {
           // MM-DD-YYYY
           date = new Date(`${parts[2]}-${parts[0]}-${parts[1]}`);
         }
-      } else if (dateStr.includes('/')) {
+      } else if (cleanDate.includes('/')) {
         // MM/DD/YYYY or YYYY/MM/DD
-        date = new Date(dateStr);
-      } else if (dateStr.includes('.')) {
+        const parts = cleanDate.split('/');
+        if (parts.length === 3) {
+          if (parts[0].length === 4) {
+            // YYYY/MM/DD
+            date = new Date(`${parts[0]}-${parts[1]}-${parts[2]}`);
+          } else {
+            // MM/DD/YYYY
+            date = new Date(`${parts[2]}-${parts[0]}-${parts[1]}`);
+          }
+        }
+      } else if (cleanDate.includes('.')) {
         // YYYY.MM.DD
-        const parts = dateStr.split('.');
-        date = new Date(`${parts[0]}-${parts[1]}-${parts[2]}`);
-      } else {
-        // Try to parse as-is
+        const parts = cleanDate.split('.');
+        if (parts.length === 3) {
+          date = new Date(`${parts[0]}-${parts[1]}-${parts[2]}`);
+        }
+      }
+      
+      // If we still don't have a valid date, try parsing the original string
+      if (!date || isNaN(date.getTime())) {
         date = new Date(dateStr);
       }
       
