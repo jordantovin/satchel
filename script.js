@@ -375,14 +375,21 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
     }
 
     function applyFilters() {
-      const keyword = document.getElementById('topSearchInput').value.toLowerCase().trim();
+      const searchInput = document.getElementById('topSearchInput');
+      console.log('applyFilters called, input element:', searchInput);
+      
+      const keyword = searchInput ? searchInput.value.toLowerCase().trim() : '';
+      console.log('Search keyword:', keyword);
       
       // UNIVERSAL SEARCH MODE - Search across ALL data when there's a keyword
       if (keyword) {
+        console.log('Triggering universal search...');
         universalSearchMode = true;
         performUniversalSearch(keyword);
         return;
       }
+      
+      console.log('No keyword, normal filtering mode');
       
       // Normal filtering mode
       universalSearchMode = false;
@@ -438,6 +445,12 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
       const results = [];
       
       console.log('Universal search for:', query);
+      console.log('Data available:', {
+        objects: allData.objects?.length || 0,
+        articles: allData.articles?.length || 0,
+        pictures: allData.pictures?.length || 0,
+        photographers: photographersData?.length || 0
+      });
       
       // Search Objects
       allData.objects.forEach(item => {
