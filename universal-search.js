@@ -6,6 +6,7 @@
 
 let universalSearchActive = false;
 let universalSearchResults = [];
+let blogDataLoaded = false;
 
 // Initialize universal search functionality
 function initUniversalSearch() {
@@ -25,6 +26,36 @@ function initUniversalSearch() {
         clearUniversalSearch();
       }
     });
+  }
+  
+  // Proactively load blog data in the background so it's ready for search
+  loadAllBlogData();
+}
+
+// Load all blog data proactively
+async function loadAllBlogData() {
+  if (blogDataLoaded) return;
+  
+  try {
+    // Load blog posts if not already loaded
+    if (typeof blogPostsData === 'undefined' || blogPostsData.length === 0) {
+      await loadBlogPosts();
+    }
+    
+    // Load inspo posts if not already loaded
+    if (typeof inspoPostsData === 'undefined' || inspoPostsData.length === 0) {
+      await loadInspoPosts();
+    }
+    
+    // Load field notes if not already loaded
+    if (typeof fieldNotesData === 'undefined' || fieldNotesData.length === 0) {
+      await loadFieldNotes();
+    }
+    
+    blogDataLoaded = true;
+    console.log('All blog data loaded for search');
+  } catch (error) {
+    console.error('Error loading blog data:', error);
   }
 }
 
@@ -146,11 +177,14 @@ function renderUniversalSearchResults() {
   const blogContent = document.getElementById('blogContent');
   const imageCount = document.getElementById('imageCount');
   
-  // Hide other content, show gallery
+  // FORCE search view regardless of current mode
+  // Hide ALL other content
   photographersContent.classList.remove('active');
   blogContent.classList.remove('active');
+  
+  // Show gallery in search mode
   gallery.style.display = 'grid';
-  gallery.className = ''; // Reset classes
+  gallery.className = ''; // Reset all classes
   
   // Clear gallery
   gallery.innerHTML = '';
@@ -484,11 +518,28 @@ function clearUniversalSearch() {
     universalSearchActive = false;
     universalSearchResults = [];
     
-    // Restore the appropriate view based on current mode
-    if (currentMode === 'blog') {
-      switchMode();
+    // Restore the appropriate view based on current mode selector value
+    const currentModeValue = document.getElementById('modeSelector').value;
+    const currentIndexValue = document.getElementById('indexSelector').value;
+    
+    if (currentModeValue === 'blog') {
+      // Restore blog view
+      document.getElementById('blogContent').classList.add('active');
+      document.getElementById('gallery').style.display = 'none';
+      document.getElementById('photographersContent').classList.remove('active');
     } else {
-      switchIndex();
+      // Restore archive view
+      document.getElementById('blogContent').classList.remove('active');
+      
+      if (currentIndexValue === 'photographers') {
+        document.getElementById('photographersContent').classList.add('active');
+        document.getElementById('gallery').style.display = 'none';
+        renderPhotographers();
+      } else {
+        document.getElementById('photographersContent').classList.remove('active');
+        document.getElementById('gallery').style.display = 'grid';
+        applyFilters();
+      }
     }
   }
 }
@@ -498,4 +549,15 @@ function clearUniversalSearch() {
 // Call this after loadAllData() completes
 // Add this line at the end of your loadAllData() function:
 // initUniversalSearch();
+//
+// IMPORTANT: Also update your switchMode() and switchIndex() functions to check
+// if a search is active and skip the switch if it is:
+//
+// Add this at the START of switchMode():
+//   if (universalSearchActive) return;
+//
+// Add this at the START of switchIndex():
+//   if (universalSearchActive) return;
+//
+// This prevents mode/index changes from clearing active search results
 // ============================================================================
