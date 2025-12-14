@@ -1,7 +1,6 @@
 // ============================================================================
-// UNIVERSAL SEARCH MODULE
-// Add this code to your existing script.js file
-// This enables searching across all data sources (archive + blog)
+// UNIVERSAL SEARCH MODULE - FIXED VERSION
+// This matches your actual data structures from script.js
 // ============================================================================
 
 let universalSearchActive = false;
@@ -13,12 +12,17 @@ function initUniversalSearch() {
   const searchInput = document.getElementById('topSearchInput');
   
   if (searchInput) {
-    // Remove the existing applyFilters event listener behavior for search
-    // and replace with universal search
-    searchInput.removeEventListener('input', applyFilters);
+    console.log('Initializing universal search...');
     
-    searchInput.addEventListener('input', (e) => {
+    // Remove the existing event listener
+    const newSearchInput = searchInput.cloneNode(true);
+    searchInput.parentNode.replaceChild(newSearchInput, searchInput);
+    
+    // Add new event listener for universal search
+    newSearchInput.addEventListener('input', (e) => {
       const query = e.target.value.trim();
+      
+      console.log('Search input:', query);
       
       if (query.length > 0) {
         performUniversalSearch(query);
@@ -28,7 +32,7 @@ function initUniversalSearch() {
     });
   }
   
-  // Proactively load blog data in the background so it's ready for search
+  // Load blog data in background
   loadAllBlogData();
 }
 
@@ -37,23 +41,29 @@ async function loadAllBlogData() {
   if (blogDataLoaded) return;
   
   try {
-    // Load blog posts if not already loaded
-    if (typeof blogPostsData === 'undefined' || blogPostsData.length === 0) {
-      await loadBlogPosts();
+    console.log('Loading blog data for search...');
+    
+    // Check if blog functions exist
+    if (typeof loadBlogPosts === 'function') {
+      if (typeof blogPostsData === 'undefined' || blogPostsData.length === 0) {
+        await loadBlogPosts();
+      }
     }
     
-    // Load inspo posts if not already loaded
-    if (typeof inspoPostsData === 'undefined' || inspoPostsData.length === 0) {
-      await loadInspoPosts();
+    if (typeof loadInspoPosts === 'function') {
+      if (typeof inspoPostsData === 'undefined' || inspoPostsData.length === 0) {
+        await loadInspoPosts();
+      }
     }
     
-    // Load field notes if not already loaded
-    if (typeof fieldNotesData === 'undefined' || fieldNotesData.length === 0) {
-      await loadFieldNotes();
+    if (typeof loadFieldNotes === 'function') {
+      if (typeof fieldNotesData === 'undefined' || fieldNotesData.length === 0) {
+        await loadFieldNotes();
+      }
     }
     
     blogDataLoaded = true;
-    console.log('All blog data loaded for search');
+    console.log('Blog data loaded for search');
   } catch (error) {
     console.error('Error loading blog data:', error);
   }
@@ -66,8 +76,19 @@ function performUniversalSearch(query) {
   
   const lowerQuery = query.toLowerCase();
   
-  // Search Objects (Americanisms + Objects)
-  if (allData.objects && allData.objects.length > 0) {
+  console.log('Searching for:', lowerQuery);
+  console.log('Available data:', {
+    objects: typeof allData !== 'undefined' ? allData.objects?.length : 0,
+    articles: typeof allData !== 'undefined' ? allData.articles?.length : 0,
+    pictures: typeof allData !== 'undefined' ? allData.pictures?.length : 0,
+    photographers: typeof photographersData !== 'undefined' ? photographersData.length : 0,
+    blogPosts: typeof blogPostsData !== 'undefined' ? blogPostsData.length : 0,
+    inspo: typeof inspoPostsData !== 'undefined' ? inspoPostsData.length : 0,
+    fieldNotes: typeof fieldNotesData !== 'undefined' ? fieldNotesData.length : 0
+  });
+  
+  // Search Objects (using your actual data structure)
+  if (typeof allData !== 'undefined' && allData.objects && allData.objects.length > 0) {
     allData.objects.forEach(item => {
       if (matchesQuery(item, lowerQuery, ['title', 'date', 'medium', 'artist', 'location_card', 'location_overlay', 'keywords', 'note', 'source'])) {
         universalSearchResults.push({
@@ -80,7 +101,7 @@ function performUniversalSearch(query) {
   }
   
   // Search Articles
-  if (allData.articles && allData.articles.length > 0) {
+  if (typeof allData !== 'undefined' && allData.articles && allData.articles.length > 0) {
     allData.articles.forEach(item => {
       if (matchesQuery(item, lowerQuery, ['date', 'source', 'src'])) {
         universalSearchResults.push({
@@ -93,7 +114,7 @@ function performUniversalSearch(query) {
   }
   
   // Search Pictures
-  if (allData.pictures && allData.pictures.length > 0) {
+  if (typeof allData !== 'undefined' && allData.pictures && allData.pictures.length > 0) {
     allData.pictures.forEach(item => {
       if (matchesQuery(item, lowerQuery, ['date', 'photographer', 'note'])) {
         universalSearchResults.push({
@@ -105,12 +126,13 @@ function performUniversalSearch(query) {
     });
   }
   
-  // Search Photographers
-  if (photographersData && photographersData.length > 0) {
+  // Search Photographers (using your actual data structure with firstName/lastName)
+  if (typeof photographersData !== 'undefined' && photographersData.length > 0) {
     photographersData.forEach(item => {
-      const fullName = `${item.firstName} ${item.lastName}`;
-      if (fullName.toLowerCase().includes(lowerQuery) || 
-          (item.website && item.website.toLowerCase().includes(lowerQuery))) {
+      const fullName = `${item.firstName} ${item.lastName}`.toLowerCase();
+      const website = (item.website || '').toLowerCase();
+      
+      if (fullName.includes(lowerQuery) || website.includes(lowerQuery)) {
         universalSearchResults.push({
           type: 'photographer',
           data: item,
@@ -120,7 +142,7 @@ function performUniversalSearch(query) {
     });
   }
   
-  // Search Blog Posts (if loaded)
+  // Search Blog Posts
   if (typeof blogPostsData !== 'undefined' && blogPostsData.length > 0) {
     blogPostsData.forEach(item => {
       if (matchesQuery(item, lowerQuery, ['title', 'date', 'text'])) {
@@ -133,7 +155,7 @@ function performUniversalSearch(query) {
     });
   }
   
-  // Search Inspo Posts (if loaded)
+  // Search Inspo Posts
   if (typeof inspoPostsData !== 'undefined' && inspoPostsData.length > 0) {
     inspoPostsData.forEach(item => {
       if (matchesQuery(item, lowerQuery, ['name', 'date', 'text', 'link'])) {
@@ -146,7 +168,7 @@ function performUniversalSearch(query) {
     });
   }
   
-  // Search Field Notes (if loaded)
+  // Search Field Notes
   if (typeof fieldNotesData !== 'undefined' && fieldNotesData.length > 0) {
     fieldNotesData.forEach(item => {
       if (matchesQuery(item, lowerQuery, ['title', 'date', 'number'])) {
@@ -159,6 +181,7 @@ function performUniversalSearch(query) {
     });
   }
   
+  console.log('Found', universalSearchResults.length, 'results');
   renderUniversalSearchResults();
 }
 
@@ -177,8 +200,9 @@ function renderUniversalSearchResults() {
   const blogContent = document.getElementById('blogContent');
   const imageCount = document.getElementById('imageCount');
   
+  console.log('Rendering', universalSearchResults.length, 'search results');
+  
   // FORCE search view regardless of current mode
-  // Hide ALL other content
   photographersContent.classList.remove('active');
   blogContent.classList.remove('active');
   
@@ -274,16 +298,15 @@ function createSearchResultCard(result) {
   return card;
 }
 
+// Card renderers for each type (using your actual data structure)
 function renderObjectSearchCard(card, data) {
   if (data.src) {
     const img = document.createElement('img');
     img.src = data.src;
-    img.style.cssText = 'width: 100%; height: 120px; object-fit: contain; margin-bottom: 8px;';
+    img.style.cssText = 'width: 100%; height: 120px; object-fit: contain; margin-bottom: 8px; opacity: 0; transition: opacity 0.5s ease;';
     img.addEventListener('load', () => {
       img.style.opacity = '1';
     });
-    img.style.opacity = '0';
-    img.style.transition = 'opacity 0.5s ease';
     card.appendChild(img);
   }
   
@@ -303,10 +326,8 @@ function renderObjectSearchCard(card, data) {
   
   if (data.src) {
     card.addEventListener('click', () => {
-      // Find this item in filteredImages to show overlay
       const index = allData.objects.findIndex(p => p.src === data.src);
       if (index !== -1) {
-        // Set filteredImages to objects and show overlay
         filteredImages = allData.objects;
         showOverlay(index);
       }
@@ -327,10 +348,12 @@ function renderArticleSearchCard(card, data) {
   source.style.cssText = 'font-weight: bold; font-size: 14px; margin-bottom: 4px;';
   card.appendChild(source);
   
-  const details = document.createElement('div');
-  details.style.cssText = 'font-size: 12px; color: #666;';
-  if (data.date) details.textContent = data.date;
-  card.appendChild(details);
+  if (data.date) {
+    const details = document.createElement('div');
+    details.style.cssText = 'font-size: 12px; color: #666;';
+    details.textContent = data.date;
+    card.appendChild(details);
+  }
   
   if (data.src) {
     const link = document.createElement('div');
@@ -348,12 +371,10 @@ function renderPictureSearchCard(card, data) {
   if (data.src) {
     const img = document.createElement('img');
     img.src = data.src;
-    img.style.cssText = 'width: 100%; height: 120px; object-fit: contain; margin-bottom: 8px;';
+    img.style.cssText = 'width: 100%; height: 120px; object-fit: contain; margin-bottom: 8px; opacity: 0; transition: opacity 0.5s ease;';
     img.addEventListener('load', () => {
       img.style.opacity = '1';
     });
-    img.style.opacity = '0';
-    img.style.transition = 'opacity 0.5s ease';
     card.appendChild(img);
   }
   
@@ -362,10 +383,12 @@ function renderPictureSearchCard(card, data) {
   photographer.style.cssText = 'font-weight: bold; font-size: 14px; margin-bottom: 4px;';
   card.appendChild(photographer);
   
-  const details = document.createElement('div');
-  details.style.cssText = 'font-size: 12px; color: #666;';
-  if (data.date) details.textContent = data.date;
-  card.appendChild(details);
+  if (data.date) {
+    const details = document.createElement('div');
+    details.style.cssText = 'font-size: 12px; color: #666;';
+    details.textContent = data.date;
+    card.appendChild(details);
+  }
   
   if (data.note) {
     const note = document.createElement('div');
@@ -515,49 +538,48 @@ function renderFieldNoteSearchCard(card, data) {
 // Clear universal search and restore previous view
 function clearUniversalSearch() {
   if (universalSearchActive) {
+    console.log('Clearing universal search');
     universalSearchActive = false;
     universalSearchResults = [];
     
-    // Restore the appropriate view based on current mode selector value
     const currentModeValue = document.getElementById('modeSelector').value;
     const currentIndexValue = document.getElementById('indexSelector').value;
     
     if (currentModeValue === 'blog') {
-      // Restore blog view
       document.getElementById('blogContent').classList.add('active');
       document.getElementById('gallery').style.display = 'none';
       document.getElementById('photographersContent').classList.remove('active');
     } else {
-      // Restore archive view
       document.getElementById('blogContent').classList.remove('active');
       
       if (currentIndexValue === 'photographers') {
         document.getElementById('photographersContent').classList.add('active');
         document.getElementById('gallery').style.display = 'none';
-        renderPhotographers();
+        if (typeof renderPhotographers === 'function') {
+          renderPhotographers();
+        }
       } else {
         document.getElementById('photographersContent').classList.remove('active');
         document.getElementById('gallery').style.display = 'grid';
-        applyFilters();
+        if (typeof applyFilters === 'function') {
+          applyFilters();
+        }
       }
     }
   }
 }
 
 // ============================================================================
-// INITIALIZATION
-// Call this after loadAllData() completes
-// Add this line at the end of your loadAllData() function:
-// initUniversalSearch();
+// INITIALIZATION INSTRUCTIONS
+// ============================================================================
+// 1. Add this code to the END of your script.js file
+// 
+// 2. At the END of loadAllData() function, add:
+//    initUniversalSearch();
 //
-// IMPORTANT: Also update your switchMode() and switchIndex() functions to check
-// if a search is active and skip the switch if it is:
+// 3. At the START of switchMode() function, add:
+//    if (universalSearchActive) return;
 //
-// Add this at the START of switchMode():
-//   if (universalSearchActive) return;
-//
-// Add this at the START of switchIndex():
-//   if (universalSearchActive) return;
-//
-// This prevents mode/index changes from clearing active search results
+// 4. At the START of switchIndex() function, add:
+//    if (universalSearchActive) return;
 // ============================================================================
