@@ -495,8 +495,26 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
       updateImageCount(filteredImages.length);
     }
 
+    function ensureBlogDataLoaded() {
+      // Check if blog functions exist and trigger loading if data isn't available
+      if (typeof loadBlogPosts === 'function' && (typeof blogPostsData === 'undefined' || blogPostsData.length === 0)) {
+        loadBlogPosts();
+      }
+      
+      if (typeof loadInspoPosts === 'function' && (typeof inspoPostsData === 'undefined' || inspoPostsData.length === 0)) {
+        loadInspoPosts();
+      }
+      
+      if (typeof loadFieldNotes === 'function' && (typeof fieldNotesData === 'undefined' || fieldNotesData.length === 0)) {
+        loadFieldNotes();
+      }
+    }
+
     function performUniversalSearch(query) {
       const results = [];
+      
+      // Load blog data if not already loaded
+      ensureBlogDataLoaded();
       
       // Search Objects
       allData.objects.forEach(item => {
@@ -533,6 +551,36 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
           results.push({ type: 'photographer', data: item });
         }
       });
+      
+      // Search Blog Posts (if loaded)
+      if (typeof blogPostsData !== 'undefined' && blogPostsData.length > 0) {
+        blogPostsData.forEach(item => {
+          const searchText = [item.title, item.date, item.text].join(' ').toLowerCase();
+          if (searchText.includes(query)) {
+            results.push({ type: 'blog-post', data: item });
+          }
+        });
+      }
+      
+      // Search Inspo Posts (if loaded)
+      if (typeof inspoPostsData !== 'undefined' && inspoPostsData.length > 0) {
+        inspoPostsData.forEach(item => {
+          const searchText = [item.name, item.date, item.text, item.link].join(' ').toLowerCase();
+          if (searchText.includes(query)) {
+            results.push({ type: 'inspo', data: item });
+          }
+        });
+      }
+      
+      // Search Field Notes (if loaded)
+      if (typeof fieldNotesData !== 'undefined' && fieldNotesData.length > 0) {
+        fieldNotesData.forEach(item => {
+          const searchText = [item.title, item.date, item.number].join(' ').toLowerCase();
+          if (searchText.includes(query)) {
+            results.push({ type: 'field-note', data: item });
+          }
+        });
+      }
       
       console.log('Found', results.length, 'results');
       
@@ -633,6 +681,83 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
         card.appendChild(name);
         
         card.onclick = () => window.open(result.data.website, '_blank');
+      } else if (result.type === 'blog-post') {
+        if (result.data.pictures) {
+          const img = document.createElement('img');
+          img.src = result.data.pictures;
+          img.style.cssText = 'width: 100%; height: 120px; object-fit: cover; margin-bottom: 8px;';
+          card.appendChild(img);
+        }
+        
+        const title = document.createElement('div');
+        title.style.cssText = 'font-weight: bold; font-size: 14px;';
+        title.textContent = result.data.title || 'Blog Post';
+        card.appendChild(title);
+        
+        const date = document.createElement('div');
+        date.style.cssText = 'font-size: 12px; color: #666;';
+        date.textContent = result.data.date;
+        card.appendChild(date);
+        
+        if (result.data.text) {
+          const text = document.createElement('div');
+          text.style.cssText = 'font-size: 12px; color: #333; margin-top: 4px;';
+          text.textContent = result.data.text.substring(0, 100) + (result.data.text.length > 100 ? '...' : '');
+          card.appendChild(text);
+        }
+        
+        card.onclick = () => {
+          if (result.data.link) {
+            window.open(result.data.link, '_blank');
+          }
+        };
+      } else if (result.type === 'inspo') {
+        const name = document.createElement('div');
+        name.style.cssText = 'font-weight: bold; font-size: 14px;';
+        name.textContent = result.data.name || 'Inspo';
+        card.appendChild(name);
+        
+        const date = document.createElement('div');
+        date.style.cssText = 'font-size: 12px; color: #666;';
+        date.textContent = result.data.date;
+        card.appendChild(date);
+        
+        if (result.data.text) {
+          const text = document.createElement('div');
+          text.style.cssText = 'font-size: 12px; color: #333; margin-top: 4px;';
+          text.textContent = result.data.text.substring(0, 80) + (result.data.text.length > 80 ? '...' : '');
+          card.appendChild(text);
+        }
+        
+        card.onclick = () => {
+          if (result.data.link) {
+            window.open(result.data.link, '_blank');
+          }
+        };
+      } else if (result.type === 'field-note') {
+        if (result.data.image) {
+          const img = document.createElement('img');
+          img.src = result.data.image;
+          img.style.cssText = 'width: 100%; height: 120px; object-fit: cover; margin-bottom: 8px;';
+          card.appendChild(img);
+        }
+        
+        const title = document.createElement('div');
+        title.style.cssText = 'font-weight: bold; font-size: 14px;';
+        const titleText = result.data.number ? `${result.data.number} - ${result.data.title}` : result.data.title;
+        title.textContent = titleText || 'Field Note';
+        card.appendChild(title);
+        
+        const date = document.createElement('div');
+        date.style.cssText = 'font-size: 12px; color: #666;';
+        date.textContent = result.data.date;
+        card.appendChild(date);
+        
+        card.onclick = () => {
+          if (result.data.url) {
+            window.open(result.data.url, '_blank');
+          }
+        };
       }
       
       card.onmouseenter = () => {
