@@ -1,1267 +1,552 @@
-const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4QAkAIideMvvWDNWq2Aj_Nx6m4QG9snhFkpqqOGX8gU09X6uUQdkfuOj9yLIybn0iPIFoZbK-/pub?output=csv';
-    const objectsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRPknkbhkxJidsCcMnFmvdB2gKx4miqtuECGc5udX7hEAY9IQeTCpNDGMkh31uGuSS1NcODADU_jcRT/pub?output=csv';
-    const articlesURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTo8ua4UreD9MUP4CI6OOXkt8LeagGX9w85veJfgi9DKJnHc2-dbCMvq5cx8DtlUO0YcV5RMPzcJ_KG/pub?output=csv';
-    const picturesURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ5j1OVFnwB19xVA3ZVM46C8tNKvGHimyElwIAgMFDzurSEFA0m_8iHBIvD1_TKbtlfWw2MaDAirm47/pub?output=csv';
-    const photographersListURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR4UTNOg8d2LIrCU8A9ebfkYOMV2V3E7egroQgliVc4v6mp7Xi9fdmPaxN3k3YUmeW123C8UvwdiNmy/pub?output=csv';
+body {
+  margin: 0;
+  background: white;
+  font-family: Helvetica, sans-serif;
+  overflow-x: hidden;
+}
 
-    let allData = {
-      objects: [],
-      articles: [],
-      pictures: []
-    };
-    let photographersData = [];
-    let filteredPhotographers = [];
-    let currentIndex = 'objects';
-    let filteredImages = [];
-    let currentImageIndex = -1;
-    
-    // Universal search variables
-    let universalSearchActive = false;
-    let universalSearchResults = [];
-    let blogDataLoaded = false;
+a {
+  color: inherit;
+  text-decoration: none;
+}
 
-    function toggleSidebar() {
-      document.getElementById('sidebar').classList.toggle('open');
-    }
-    
-    function toggleSearch() {
-      const searchInput = document.getElementById('topSearchInput');
-      searchInput.classList.toggle('active');
-      if (searchInput.classList.contains('active')) {
-        searchInput.focus();
-      }
-    }
+#red-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: white;
+  z-index: 1000;
+}
 
-    function parseDate(dateStr) {
-      if (!dateStr) return '';
-      
-      // Handle YYYY.MM.DD format
-      if (dateStr.includes('.')) {
-        const parts = dateStr.split('.');
-        if (parts.length === 3) {
-          const year = parts[0];
-          const month = parts[1].padStart(2, '0');
-          const day = parts[2].padStart(2, '0');
-          return `${year}-${month}-${day}`;
-        }
-      }
-      
-      // Handle YYYY-MM-DD format
-      if (dateStr.includes('-')) {
-        const parts = dateStr.split('-');
-        if (parts.length === 3 && parts[0].length === 4) {
-          return dateStr;
-        }
-      }
-      
-      // Handle YYYY/MM/DD or MM/DD/YYYY
-      if (dateStr.includes('/')) {
-        const parts = dateStr.split('/');
-        if (parts.length === 3) {
-          if (parts[0].length === 4) {
-            return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
-          } else {
-            return `${parts[2]}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
-          }
-        }
-      }
-      
-      // Handle timestamp format (YYYY-MM-DD HH:MM:SS)
-      if (dateStr.includes(' ')) {
-        return dateStr.split(' ')[0];
-      }
-      
-      // Just return year if only year is provided
-      if (dateStr.length === 4 && !isNaN(dateStr)) {
-        return dateStr;
-      }
-      
-      return dateStr;
-    }
+/* Top Navigation */
+.top-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  color: #333;
+  border-bottom: 1px solid #ddd;
+  z-index: 1003;
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  justify-content: space-between;
+}
 
-    async function fetchCSV(url) {
-      const response = await fetch(url);
-      const text = await response.text();
-      const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
-      return parsed.data;
-    }
+.left-nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
 
-    async function loadAllData() {
-      try {
-        const [americanismsData, objectsData, articlesData, picturesData, photographersListData] = await Promise.all([
-          fetchCSV(americanismsURL),
-          fetchCSV(objectsURL),
-          fetchCSV(articlesURL),
-          fetchCSV(picturesURL),
-          fetchCSV(photographersListURL)
-        ]);
+.right-nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
 
-        // Process Americanisms and Objects (combined into Objects)
-        const americanismsProcessed = americanismsData.map(row => ({
-          src: row.src || row.Src || "",
-          date: row.date || row.Date || "",
-          sortDate: parseDate(row.date || row.Date || ""),
-          location_card: (row.location_card || row.Location_card || "").replace(/\\n/g, '\n'),
-          location_overlay: (row.location_overlay || row.Location_overlay || "").replace(/\\n/g, '\n'),
-          medium: row.medium || row.Medium || "",
-          artist: row.artist || row.Artist || "",
-          keywords: row.keywords || row.Keywords || "",
-          title: "",
-          note: "",
-          source: "Americanisms",
-          type: "objects"
-        })).filter(img => img.src);
+.mode-selector {
+  padding: 8px 16px;
+  font-size: 16px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  background: white;
+  color: #333;
+  cursor: pointer;
+  font-family: Helvetica, sans-serif;
+}
 
-        const objectsProcessed = objectsData.map(row => ({
-          src: row.Image || row.image || "",
-          date: row.Date || row.date || "",
-          sortDate: parseDate(row.Date || row.date || ""),
-          location_card: "",
-          location_overlay: "",
-          medium: "",
-          artist: "",
-          keywords: "",
-          title: row.Title || row.title || "",
-          note: row.Note || row.note || "",
-          source: "Objects",
-          type: "objects"
-        })).filter(img => img.src);
+.search-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+}
 
-        allData.objects = [...americanismsProcessed, ...objectsProcessed];
+.search-icon {
+  cursor: pointer;
+  font-size: 20px;
+  color: #333;
+  padding: 8px;
+}
 
-        // Process Articles (as links, not images)
-        allData.articles = articlesData.map(row => ({
-          src: row.src || row.Src || "",
-          photo: row.photo || row.Photo || "",
-          date: row.date || row.Date || "",
-          sortDate: parseDate(row.date || row.Date || ""),
-          source: row.test || row.Test || "",
-          type: "articles"
-        })).filter(img => img.src);
+.search-input {
+  width: 0;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  opacity: 0;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
 
-        // Process Pictures
-        allData.pictures = picturesData.map(row => ({
-          src: row.Link || row.link || "",
-          date: row.Date || row.date || "",
-          sortDate: parseDate(row.Date || row.date || ""),
-          photographer: row.Photographer || row.photographer || "",
-          note: row.Note || row.note || "",
-          type: "pictures"
-        })).filter(img => img.src);
-        
-        // Process Photographers List
-        console.log('Raw CSV data sample:', photographersListData.slice(0, 3));
-        console.log('CSV headers:', photographersListData[0] ? Object.keys(photographersListData[0]) : 'No data');
-        console.log('Total raw rows:', photographersListData.length);
-        
-        // Get all rows with first and last names (trim whitespace)
-        const allPeople = photographersListData
-          .filter(row => {
-            const hasFirst = row['First Name'] && row['First Name'].trim();
-            const hasLast = row['Last Name'] && row['Last Name'].trim();
-            return hasFirst && hasLast;
-          })
-          .map(row => ({
-            firstName: (row['First Name'] || '').trim(),
-            lastName: (row['Last Name'] || '').trim(),
-            website: (row['Website'] || '').trim(),
-            className: (row['Class'] || '').trim(),
-            dateAdded: (row['Date Added'] || '').trim()
-          }));
-        
-        console.log('Total people with names:', allPeople.length);
-        
-        // Filter for photographers (case-insensitive, trimmed)
-        const allPhotographers = allPeople.filter(person => {
-          const classLower = person.className.toLowerCase();
-          return classLower.includes('photographer');
-        });
-        
-        console.log('Total photographers (with or without website):', allPhotographers.length);
-        
-        // Only keep photographers with actual websites
-        photographersData = allPhotographers.filter(person => person.website !== '');
+.search-input.active {
+  width: 250px;
+  opacity: 1;
+  pointer-events: auto;
+}
 
-        console.log('Photographers with websites:', photographersData.length);
-        
-        // Show some examples of what we're filtering out
-        const photographersWithoutWebsite = allPhotographers.filter(person => person.website === '');
-        console.log('Photographers WITHOUT websites:', photographersWithoutWebsite.length);
-        console.log('Sample photographers without websites:', photographersWithoutWebsite.slice(0, 5));
+.index-selector {
+  padding: 8px 16px;
+  font-size: 16px;
+  border-radius: 4px;
+  border: none;
+  background: white;
+  color: #333;
+  cursor: pointer;
+  font-family: Helvetica, sans-serif;
+}
 
-        // Sort photographers by last name
-        photographersData.sort((a, b) => a.lastName.localeCompare(b.lastName));
+.filter-toggle {
+  padding: 8px 16px;
+  background: #333;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
 
-        // Sort all by date (newest first)
-        Object.keys(allData).forEach(key => {
-          allData[key].sort((a, b) => b.sortDate.localeCompare(a.sortDate));
-        });
+.filter-toggle:hover {
+  background: #555;
+}
 
-        switchIndex();
-        
-        // Initialize universal search after data is loaded
-        initUniversalSearch();
-      } catch (error) {
-        console.error('Error loading data:', error);
-      }
-    }
+/* Sidebar Styles */
+.sidebar {
+  position: fixed;
+  top: 60px;
+  width: 280px;
+  height: calc(100vh - 60px);
+  background: #f5f5f5;
+  transition: transform 0.3s ease;
+  z-index: 1002;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  transform: translateX(-100%);
+}
 
-    function switchIndex() {
-      // Don't switch if universal search is active
-      if (universalSearchActive) return;
-      
-      currentIndex = document.getElementById('indexSelector').value;
-      
-      if (currentIndex === 'photographers') {
-        // Show photographers view, hide gallery
-        document.getElementById('photographersContent').classList.add('active');
-        document.getElementById('gallery').style.display = 'none';
-        document.getElementById('rightSidebar').classList.remove('open');
-        renderPhotographers();
-        updateImageCount(photographersData.length);
-      } else {
-        // Show gallery view, hide photographers
-        document.getElementById('photographersContent').classList.remove('active');
-        document.getElementById('gallery').style.display = 'grid';
-        updateFilterVisibility();
-        applyFilters();
-      }
-    }
+.sidebar.left {
+  left: 0;
+  border-right: 1px solid #ddd;
+}
 
-    function updateFilterVisibility() {
-      // Hide all filter sections
-      document.getElementById('mediumFilter').style.display = 'none';
-      document.getElementById('photographerFilter').style.display = 'none';
-      document.getElementById('sourceFilter').style.display = 'none';
+.sidebar.right {
+  right: 0;
+  border-left: 1px solid #ddd;
+  transform: translateX(100%);
+}
 
-      // Show relevant filters
-      if (currentIndex === 'objects') {
-        document.getElementById('mediumFilter').style.display = 'block';
-        document.getElementById('sourceFilter').style.display = 'block';
-        createMediumCheckboxes();
-        createObjectSourceCheckboxes();
-      } else if (currentIndex === 'pictures') {
-        document.getElementById('photographerFilter').style.display = 'block';
-        createPhotographerCheckboxes();
-      } else if (currentIndex === 'articles') {
-        document.getElementById('sourceFilter').style.display = 'block';
-        createArticleSourceCheckboxes();
-      }
-    }
+.sidebar.open {
+  transform: translateX(0);
+}
 
-    function createMediumCheckboxes() {
-      const container = document.getElementById('mediumCheckboxes');
-      container.innerHTML = '';
-      
-      const mediums = new Set();
-      allData.objects.forEach(img => {
-        if (img.medium) mediums.add(img.medium);
-      });
-      
-      if (mediums.size === 0) {
-        container.innerHTML = '<p style="font-size: 12px; color: #999;">No mediums available</p>';
-        return;
-      }
-      
-      Array.from(mediums).sort().forEach(medium => {
-        const item = document.createElement('div');
-        item.className = 'checkbox-item';
-        
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.id = 'medium_' + medium.replace(/\s/g, '_');
-        checkbox.value = medium;
-        checkbox.checked = true;
-        checkbox.onchange = applyFilters;
-        
-        const label = document.createElement('label');
-        label.htmlFor = checkbox.id;
-        label.textContent = medium;
-        
-        item.appendChild(checkbox);
-        item.appendChild(label);
-        container.appendChild(item);
-      });
-    }
-    
-    function createObjectSourceCheckboxes() {
-      const container = document.getElementById('sourceCheckboxes');
-      container.innerHTML = '';
-      
-      const sources = new Set();
-      allData.objects.forEach(img => {
-        if (img.source) sources.add(img.source);
-      });
-      
-      Array.from(sources).sort().forEach(source => {
-        const item = document.createElement('div');
-        item.className = 'checkbox-item';
-        
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.id = 'objsource_' + source.replace(/\s/g, '_');
-        checkbox.value = source;
-        checkbox.checked = true;
-        checkbox.onchange = applyFilters;
-        
-        const label = document.createElement('label');
-        label.htmlFor = checkbox.id;
-        label.textContent = source;
-        
-        item.appendChild(checkbox);
-        item.appendChild(label);
-        container.appendChild(item);
-      });
-    }
+.sidebar h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 18px;
+  color: #333;
+}
 
-    function createPhotographerCheckboxes() {
-      const container = document.getElementById('photographerCheckboxes');
-      container.innerHTML = '';
-      
-      const photographers = new Set();
-      allData.pictures.forEach(img => {
-        if (img.photographer) photographers.add(img.photographer);
-      });
-      
-      if (photographers.size === 0) {
-        container.innerHTML = '<p style="font-size: 12px; color: #999;">No photographers available</p>';
-        return;
-      }
-      
-      Array.from(photographers).sort().forEach(photographer => {
-        const item = document.createElement('div');
-        item.className = 'checkbox-item';
-        
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.id = 'photographer_' + photographer.replace(/\s/g, '_');
-        checkbox.value = photographer;
-        checkbox.checked = true;
-        checkbox.onchange = applyFilters;
-        
-        const label = document.createElement('label');
-        label.htmlFor = checkbox.id;
-        label.textContent = photographer;
-        
-        item.appendChild(checkbox);
-        item.appendChild(label);
-        container.appendChild(item);
-      });
-    }
+.filter-section {
+  margin-bottom: 24px;
+}
 
-    function createArticleSourceCheckboxes() {
-      const container = document.getElementById('sourceCheckboxes');
-      container.innerHTML = '';
-      
-      const sources = new Set();
-      allData.articles.forEach(img => {
-        if (img.source) sources.add(img.source);
-      });
-      
-      if (sources.size === 0) {
-        container.innerHTML = '<p style="font-size: 12px; color: #999;">No sources available</p>';
-        return;
-      }
-      
-      Array.from(sources).sort().forEach(source => {
-        const item = document.createElement('div');
-        item.className = 'checkbox-item';
-        
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.id = 'source_' + source.replace(/\s/g, '_');
-        checkbox.value = source;
-        checkbox.checked = true;
-        checkbox.onchange = applyFilters;
-        
-        const label = document.createElement('label');
-        label.htmlFor = checkbox.id;
-        label.textContent = source;
-        
-        item.appendChild(checkbox);
-        item.appendChild(label);
-        container.appendChild(item);
-      });
-    }
+.filter-section label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #666;
+}
 
-    function applyFilters() {
-      // Skip if we're in photographers view
-      if (currentIndex === 'photographers') return;
-      
-      const keyword = document.getElementById('topSearchInput').value.toLowerCase();
-      const dateFrom = document.getElementById('dateFrom').value;
-      const dateTo = document.getElementById('dateTo').value;
-      
-      let currentData = allData[currentIndex];
-      
-      filteredImages = currentData.filter(img => {
-        // Keyword filter
-        if (keyword) {
-          const searchText = Object.values(img).join(' ').toLowerCase();
-          if (!searchText.includes(keyword)) return false;
-        }
+.filter-section input,
+.filter-section select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
 
-        // Date filter
-        if (dateFrom && img.sortDate < dateFrom) return false;
-        if (dateTo && img.sortDate > dateTo) return false;
+.checkbox-group {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 8px;
+}
 
-        // Type-specific filters
-        if (currentIndex === 'objects') {
-          const selectedMediums = Array.from(document.querySelectorAll('#mediumCheckboxes input:checked'))
-            .map(cb => cb.value);
-          const selectedSources = Array.from(document.querySelectorAll('#sourceCheckboxes input:checked'))
-            .map(cb => cb.value);
-          
-          if (selectedMediums.length > 0 && img.medium && !selectedMediums.includes(img.medium)) {
-            return false;
-          }
-          if (selectedSources.length > 0 && img.source && !selectedSources.includes(img.source)) {
-            return false;
-          }
-        } else if (currentIndex === 'pictures') {
-          const selectedPhotographers = Array.from(document.querySelectorAll('#photographerCheckboxes input:checked'))
-            .map(cb => cb.value);
-          if (selectedPhotographers.length > 0 && img.photographer && !selectedPhotographers.includes(img.photographer)) {
-            return false;
-          }
-        } else if (currentIndex === 'articles') {
-          const selectedSources = Array.from(document.querySelectorAll('#sourceCheckboxes input:checked'))
-            .map(cb => cb.value);
-          if (selectedSources.length > 0 && img.source && !selectedSources.includes(img.source)) {
-            return false;
-          }
-        }
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
 
-        return true;
-      });
+.checkbox-item input {
+  width: auto;
+  margin-right: 8px;
+}
 
-      renderImages(filteredImages);
-      updateImageCount(filteredImages.length);
-    }
+.checkbox-item label {
+  margin: 0;
+  font-size: 13px;
+  color: #333;
+}
 
-    function clearFilters() {
-      document.getElementById('topSearchInput').value = '';
-      document.getElementById('dateFrom').value = '';
-      document.getElementById('dateTo').value = '';
-      document.querySelectorAll('.checkbox-group input').forEach(cb => cb.checked = true);
-      applyFilters();
-    }
+.clear-filters {
+  width: 100%;
+  padding: 10px;
+  background: #333;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 16px;
+}
 
-    function updateImageCount(count) {
-      document.getElementById('imageCount').textContent = `${count} items`;
-    }
+.clear-filters:hover {
+  background: #555;
+}
 
-    function renderImages(imageArray) {
-      const gallery = document.getElementById("gallery");
-      gallery.innerHTML = "";
-      
-      // Update gallery class based on current index
-      gallery.className = '';
-      if (currentIndex === 'objects') {
-        gallery.classList.add('objects-view');
-      } else if (currentIndex === 'articles') {
-        gallery.classList.add('articles-view');
-      }
-      
-      imageArray.forEach((img, index) => {
-        // Render articles as links
-        if (img.type === 'articles') {
-          const card = document.createElement("div");
-          card.className = "article-card";
-          
-          const link = document.createElement("a");
-          link.href = img.src;
-          link.target = "_blank";
-          
-          const thumbnail = document.createElement("img");
-          thumbnail.src = img.photo;
-          thumbnail.alt = img.source;
-          
-          const info = document.createElement("div");
-          info.className = "article-info";
-          info.innerHTML = `
-            <div class="article-date">${img.date}</div>
-            <div class="article-source">${img.source}</div>
-          `;
-          
-          link.appendChild(thumbnail);
-          link.appendChild(info);
-          card.appendChild(link);
-          gallery.appendChild(card);
-        } else {
-          // Render as image card
-          const card = document.createElement("div");
-          card.className = "image-card";
+#content-wrapper {
+  position: relative;
+  margin-top: 60px;
+  z-index: 1001;
+}
 
-          const imageEl = document.createElement("img");
-          imageEl.src = img.src;
-          imageEl.alt = img.title || "Image";
+#gallery {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 16px;
+  padding: 10px;
+}
 
-          imageEl.addEventListener('load', () => {
-            imageEl.classList.add('loaded');
-          });
+#gallery.objects-view {
+  grid-template-columns: repeat(6, 1fr);
+}
 
-          const metadata = document.createElement("div");
-          metadata.className = "metadata";
-          
-          // Different metadata for different types
-          let metadataHTML = `<strong>Date:</strong> ${img.date}<br>`;
-          
-          if (img.source === "Americanisms") {
-            metadataHTML += `<strong>Location:</strong><br>${img.location_card.replace(/\n/g, "<br>")}<br>`;
-            metadataHTML += `<strong>Medium:</strong> ${img.medium}`;
-          } else if (img.source === "Objects") {
-            metadataHTML += `<strong>Title:</strong> ${img.title}<br>`;
-            if (img.note) metadataHTML += `<strong>Note:</strong> ${img.note}`;
-          } else if (img.type === "pictures") {
-            metadataHTML += `<strong>Photographer:</strong> ${img.photographer}<br>`;
-            if (img.note) metadataHTML += `<strong>Note:</strong> ${img.note}`;
-          }
-          
-          metadata.innerHTML = metadataHTML;
+#gallery.articles-view {
+  grid-template-columns: repeat(4, 1fr);
+}
 
-          card.appendChild(imageEl);
-          card.appendChild(metadata);
-          gallery.appendChild(card);
+@media (max-width: 1400px) { 
+  #gallery { grid-template-columns: repeat(5, 1fr); }
+  #gallery.objects-view { grid-template-columns: repeat(4, 1fr); }
+  #gallery.articles-view { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 1200px) { 
+  #gallery { grid-template-columns: repeat(4, 1fr); }
+  #gallery.objects-view { grid-template-columns: repeat(3, 1fr); }
+  #gallery.articles-view { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 900px)  { 
+  #gallery { grid-template-columns: repeat(3, 1fr); }
+  #gallery.objects-view { grid-template-columns: repeat(2, 1fr); }
+  #gallery.articles-view { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px)  { 
+  #gallery { grid-template-columns: repeat(2, 1fr); }
+  #gallery.objects-view { grid-template-columns: repeat(2, 1fr); }
+  #gallery.articles-view { grid-template-columns: 1fr; }
+}
+@media (max-width: 400px)  { #gallery { grid-template-columns: 1fr; } }
 
-          card.addEventListener("click", () => showOverlay(index));
-        }
-      });
-    }
+.image-card {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
 
-    function renderPhotographers() {
-      const searchTerm = document.getElementById('photographersSearch').value.toLowerCase();
-      
-      // Filter photographers by search term
-      filteredPhotographers = photographersData.filter(p => 
-        `${p.firstName} ${p.lastName}`.toLowerCase().includes(searchTerm)
-      );
-      
-      const list = document.getElementById('photographersList');
-      list.innerHTML = '';
-      
-      if (filteredPhotographers.length === 0) {
-        list.innerHTML = '<p style="font-size: 18px; color: #666;">No photographers found</p>';
-        document.getElementById('highlightCount').textContent = '0';
-        return;
-      }
-      
-      // Group by first letter of last name
-      const groupedByLetter = {};
-      filteredPhotographers.forEach(p => {
-        const firstLetter = p.lastName[0].toUpperCase();
-        if (!groupedByLetter[firstLetter]) {
-          groupedByLetter[firstLetter] = [];
-        }
-        groupedByLetter[firstLetter].push(p);
-      });
-      
-      // Sort letters
-      const letters = Object.keys(groupedByLetter).sort();
-      
-      const today = new Date();
-      
-      // Render each letter group
-      letters.forEach(letter => {
-        const divider = document.createElement('div');
-        divider.className = 'section-divider';
-        list.appendChild(divider);
-        
-        const header = document.createElement('div');
-        header.className = 'letter-header';
-        header.textContent = letter;
-        list.appendChild(header);
-        
-        const grid = document.createElement('div');
-        grid.className = 'two-column';
-        
-        groupedByLetter[letter].forEach(photographer => {
-          const nameItem = document.createElement('div');
-          nameItem.className = 'name-item';
-          
-          const link = document.createElement('a');
-          link.href = photographer.website;
-          link.target = '_blank';
-          link.textContent = `${photographer.firstName} ${photographer.lastName}`;
-          
-          // Highlight recent additions (within 7 days)
-          if (photographer.dateAdded) {
-            const addedDate = parsePhotographerDate(photographer.dateAdded);
-            if (addedDate) {
-              const diff = (today - addedDate) / (1000 * 60 * 60 * 24);
-              if (diff <= 7 && diff >= 0) {
-                link.style.backgroundColor = "#ffff66";
-                link.style.fontWeight = "bold";
-              }
-            }
-          }
-          
-          nameItem.appendChild(link);
-          grid.appendChild(nameItem);
-        });
-        
-        list.appendChild(grid);
-      });
-      
-      document.getElementById('highlightCount').textContent = filteredPhotographers.length;
-      updateImageCount(filteredPhotographers.length);
-    }
-    
-    function parsePhotographerDate(dateStr) {
-      if (!dateStr) return null;
-      
-      const native = new Date(dateStr);
-      if (!isNaN(native)) return native;
-      
-      const parts = dateStr.split(/[\/\-]/);
-      if (parts.length === 3) {
-        let year, month, day;
-        if (parts[0].length === 4) {
-          year = parts[0];
-          month = parts[1];
-          day = parts[2];
-        } else {
-          month = parts[0];
-          day = parts[1];
-          year = parts[2];
-        }
-        return new Date(`${year}-${month}-${day}`);
-      }
-      
-      return null;
-    }
+.image-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: contain;
+  border-radius: 0px;
+  display: block;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
 
-    function showOverlay(index) {
-      currentImageIndex = index;
-      const img = filteredImages[index];
-      
-      // Skip overlay for articles
-      if (img.type === 'articles') return;
-      
-      document.getElementById("overlayImg").src = img.src;
-      document.getElementById("overlay").style.display = "flex";
-      
-      let overlayHTML = `<strong>Date:</strong> ${img.date}<br>`;
-      
-      if (img.source === "Americanisms") {
-        overlayHTML += `<strong>Location:</strong><br>${img.location_overlay.replace(/\n/g, "<br>")}<br>`;
-        overlayHTML += `<strong>Medium:</strong> ${img.medium}<br>`;
-        if (img.artist) overlayHTML += `<strong>Artist:</strong> ${img.artist}`;
-      } else if (img.source === "Objects") {
-        overlayHTML += `<strong>Title:</strong> ${img.title}<br>`;
-        if (img.note) overlayHTML += `<strong>Note:</strong> ${img.note}`;
-      } else if (img.type === "pictures") {
-        overlayHTML += `<strong>Photographer:</strong> ${img.photographer}<br>`;
-        if (img.note) overlayHTML += `<strong>Note:</strong> ${img.note}`;
-      }
-      
-      document.getElementById("overlayMetadata").innerHTML = overlayHTML;
-    }
+.image-card img.loaded {
+  opacity: 1;
+}
 
-    function hideOverlay() {
-      document.getElementById("overlay").style.display = "none";
-      document.getElementById("overlayImg").src = "";
-      if (document.fullscreenElement) {
-        document.exitFullscreen();
-      }
-    }
-    
-    async function toggleFullscreen() {
-      const overlay = document.getElementById("overlay");
-      
-      try {
-        if (!document.fullscreenElement) {
-          await overlay.requestFullscreen();
-        } else {
-          await document.exitFullscreen();
-        }
-      } catch (err) {
-        console.log('Fullscreen error:', err);
-        alert('Fullscreen failed. Try pressing F11 or use the F key.');
-      }
-    }
+.image-card .metadata {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: rgba(255, 255, 255, 0.85);
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  padding: 16px;
+  box-sizing: border-box;
+  pointer-events: none;
+  font-size: 13px;
+}
 
-    document.getElementById("overlay").addEventListener("click", (e) => {
-      if (e.target === document.getElementById("overlay")) {
-        hideOverlay();
-      }
-    });
-    
-    document.getElementById("fullscreenBtn").addEventListener("click", (e) => {
-      e.stopPropagation();
-      toggleFullscreen();
-    });
-    
-    document.getElementById("closeBtn").addEventListener("click", (e) => {
-      e.stopPropagation();
-      hideOverlay();
-    });
+.image-card:hover .metadata {
+  opacity: 1;
+  pointer-events: auto;
+}
 
-    document.addEventListener('keydown', (e) => {
-      if (document.getElementById("overlay").style.display === "flex") {
-        if (e.key === "ArrowLeft" && currentImageIndex > 0) {
-          showOverlay(currentImageIndex - 1);
-        } else if (e.key === "ArrowRight" && currentImageIndex < filteredImages.length - 1) {
-          showOverlay(currentImageIndex + 1);
-        } else if (e.key === "Escape") {
-          hideOverlay();
-        } else if (e.key === "f" || e.key === "F") {
-          toggleFullscreen();
-        }
-      }
-    });
-    
-    // Photographers search functionality
-    document.getElementById('photographersSearch').addEventListener('input', renderPhotographers);
-    
-    // All photographers button
-    document.getElementById('allPhotographers').addEventListener('click', function() {
-      document.getElementById('photographersSearch').value = '';
-      this.classList.add('active');
-      document.getElementById('randomPhotographer').classList.remove('active');
-      renderPhotographers();
-    });
-    
-    // Random photographer button
-    document.getElementById('randomPhotographer').addEventListener('click', function() {
-      if (photographersData.length > 0) {
-        const randomPhotographer = photographersData[Math.floor(Math.random() * photographersData.length)];
-        window.open(randomPhotographer.website, '_blank');
-      }
-      this.classList.add('active');
-      document.getElementById('allPhotographers').classList.remove('active');
-    });
+.image-card:hover {
+  transform: scale(1);
+}
 
-    // ============================================================================
-    // UNIVERSAL SEARCH MODULE
-    // ============================================================================
+.article-card {
+  position: relative;
+  width: 100%;
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
 
-    function initUniversalSearch() {
-      const searchInput = document.getElementById('topSearchInput');
-      
-      if (searchInput) {
-        console.log('Initializing universal search...');
-        
-        // Remove the existing event listener by cloning
-        const newSearchInput = searchInput.cloneNode(true);
-        searchInput.parentNode.replaceChild(newSearchInput, searchInput);
-        
-        // Add new event listener for universal search
-        newSearchInput.addEventListener('input', (e) => {
-          const query = e.target.value.trim();
-          
-          console.log('Search input:', query);
-          
-          if (query.length > 0) {
-            performUniversalSearch(query);
-          } else {
-            clearUniversalSearch();
-          }
-        });
-      }
-      
-      // Load blog data in background
-      loadAllBlogData();
-    }
+.article-card:hover {
+  background: #f0f0f0;
+}
 
-    async function loadAllBlogData() {
-      if (blogDataLoaded) return;
-      
-      try {
-        console.log('Loading blog data for search...');
-        
-        if (typeof loadBlogPosts === 'function') {
-          if (typeof blogPostsData === 'undefined' || blogPostsData.length === 0) {
-            await loadBlogPosts();
-          }
-        }
-        
-        if (typeof loadInspoPosts === 'function') {
-          if (typeof inspoPostsData === 'undefined' || inspoPostsData.length === 0) {
-            await loadInspoPosts();
-          }
-        }
-        
-        if (typeof loadFieldNotes === 'function') {
-          if (typeof fieldNotesData === 'undefined' || fieldNotesData.length === 0) {
-            await loadFieldNotes();
-          }
-        }
-        
-        blogDataLoaded = true;
-        console.log('Blog data loaded for search');
-      } catch (error) {
-        console.error('Error loading blog data:', error);
-      }
-    }
+.article-card a {
+  color: #333;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
 
-    function performUniversalSearch(query) {
-      universalSearchActive = true;
-      universalSearchResults = [];
-      
-      const lowerQuery = query.toLowerCase();
-      
-      console.log('Searching for:', lowerQuery);
-      console.log('Available data:', {
-        objects: allData.objects?.length || 0,
-        articles: allData.articles?.length || 0,
-        pictures: allData.pictures?.length || 0,
-        photographers: photographersData.length || 0,
-        blogPosts: typeof blogPostsData !== 'undefined' ? blogPostsData.length : 0,
-        inspo: typeof inspoPostsData !== 'undefined' ? inspoPostsData.length : 0,
-        fieldNotes: typeof fieldNotesData !== 'undefined' ? fieldNotesData.length : 0
-      });
-      
-      // Search Objects
-      if (allData.objects && allData.objects.length > 0) {
-        allData.objects.forEach(item => {
-          if (matchesQuery(item, lowerQuery, ['title', 'date', 'medium', 'artist', 'location_card', 'location_overlay', 'keywords', 'note', 'source'])) {
-            universalSearchResults.push({
-              type: 'object',
-              data: item,
-              source: 'Objects'
-            });
-          }
-        });
-      }
-      
-      // Search Articles
-      if (allData.articles && allData.articles.length > 0) {
-        allData.articles.forEach(item => {
-          if (matchesQuery(item, lowerQuery, ['date', 'source', 'src'])) {
-            universalSearchResults.push({
-              type: 'article',
-              data: item,
-              source: 'Articles'
-            });
-          }
-        });
-      }
-      
-      // Search Pictures
-      if (allData.pictures && allData.pictures.length > 0) {
-        allData.pictures.forEach(item => {
-          if (matchesQuery(item, lowerQuery, ['date', 'photographer', 'note'])) {
-            universalSearchResults.push({
-              type: 'picture',
-              data: item,
-              source: 'Pictures'
-            });
-          }
-        });
-      }
-      
-      // Search Photographers
-      if (photographersData && photographersData.length > 0) {
-        photographersData.forEach(item => {
-          const fullName = `${item.firstName} ${item.lastName}`.toLowerCase();
-          const website = (item.website || '').toLowerCase();
-          
-          if (fullName.includes(lowerQuery) || website.includes(lowerQuery)) {
-            universalSearchResults.push({
-              type: 'photographer',
-              data: item,
-              source: 'Photographers'
-            });
-          }
-        });
-      }
-      
-      // Search Blog Posts
-      if (typeof blogPostsData !== 'undefined' && blogPostsData.length > 0) {
-        blogPostsData.forEach(item => {
-          if (matchesQuery(item, lowerQuery, ['title', 'date', 'text'])) {
-            universalSearchResults.push({
-              type: 'blog-post',
-              data: item,
-              source: 'Blog Posts'
-            });
-          }
-        });
-      }
-      
-      // Search Inspo Posts
-      if (typeof inspoPostsData !== 'undefined' && inspoPostsData.length > 0) {
-        inspoPostsData.forEach(item => {
-          if (matchesQuery(item, lowerQuery, ['name', 'date', 'text', 'link'])) {
-            universalSearchResults.push({
-              type: 'inspo',
-              data: item,
-              source: 'Inspo'
-            });
-          }
-        });
-      }
-      
-      // Search Field Notes
-      if (typeof fieldNotesData !== 'undefined' && fieldNotesData.length > 0) {
-        fieldNotesData.forEach(item => {
-          if (matchesQuery(item, lowerQuery, ['title', 'date', 'number'])) {
-            universalSearchResults.push({
-              type: 'field-note',
-              data: item,
-              source: 'Field Notes'
-            });
-          }
-        });
-      }
-      
-      console.log('Found', universalSearchResults.length, 'results');
-      renderUniversalSearchResults();
-    }
+.article-card img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  display: block;
+}
 
-    function matchesQuery(item, query, fields) {
-      return fields.some(field => {
-        const value = item[field];
-        return value && value.toString().toLowerCase().includes(query);
-      });
-    }
+.article-card .article-info {
+  padding: 12px;
+  flex: 1;
+}
 
-    function renderUniversalSearchResults() {
-      const gallery = document.getElementById('gallery');
-      const photographersContent = document.getElementById('photographersContent');
-      const blogContent = document.getElementById('blogContent');
-      const imageCount = document.getElementById('imageCount');
-      
-      console.log('Rendering', universalSearchResults.length, 'search results');
-      
-      // Force search view
-      photographersContent.classList.remove('active');
-      blogContent.classList.remove('active');
-      gallery.style.display = 'grid';
-      gallery.className = '';
-      gallery.innerHTML = '';
-      
-      imageCount.textContent = `${universalSearchResults.length} results`;
-      
-      if (universalSearchResults.length === 0) {
-        gallery.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #666; font-size: 18px;">No results found</div>';
-        return;
-      }
-      
-      universalSearchResults.forEach(result => {
-        const card = createSearchResultCard(result);
-        gallery.appendChild(card);
-      });
-    }
+.article-card .article-date {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 6px;
+}
 
-    function createSearchResultCard(result) {
-      const card = document.createElement('div');
-      card.className = 'search-result-card';
-      card.style.cssText = `
-        background: #f9f9f9;
-        border: 2px solid #000;
-        padding: 16px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        position: relative;
-        min-height: 200px;
-      `;
-      
-      const sourceBadge = document.createElement('div');
-      sourceBadge.textContent = result.source;
-      sourceBadge.style.cssText = `
-        font-size: 11px;
-        font-weight: bold;
-        text-transform: uppercase;
-        color: #666;
-        letter-spacing: 0.5px;
-      `;
-      card.appendChild(sourceBadge);
-      
-      switch(result.type) {
-        case 'object':
-          renderObjectSearchCard(card, result.data);
-          break;
-        case 'article':
-          renderArticleSearchCard(card, result.data);
-          break;
-        case 'picture':
-          renderPictureSearchCard(card, result.data);
-          break;
-        case 'photographer':
-          renderPhotographerSearchCard(card, result.data);
-          break;
-        case 'blog-post':
-          renderBlogPostSearchCard(card, result.data);
-          break;
-        case 'inspo':
-          renderInspoSearchCard(card, result.data);
-          break;
-        case 'field-note':
-          renderFieldNoteSearchCard(card, result.data);
-          break;
-      }
-      
-      card.addEventListener('mouseenter', () => {
-        card.style.backgroundColor = '#fff';
-        card.style.transform = 'translateY(-2px)';
-        card.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
-      });
-      
-      card.addEventListener('mouseleave', () => {
-        card.style.backgroundColor = '#f9f9f9';
-        card.style.transform = 'translateY(0)';
-        card.style.boxShadow = 'none';
-      });
-      
-      return card;
-    }
+.article-card .article-source {
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+}
 
-    function renderObjectSearchCard(card, data) {
-      if (data.src) {
-        const img = document.createElement('img');
-        img.src = data.src;
-        img.style.cssText = 'width: 100%; height: 120px; object-fit: contain; margin-bottom: 8px; opacity: 0; transition: opacity 0.5s ease;';
-        img.addEventListener('load', () => { img.style.opacity = '1'; });
-        card.appendChild(img);
-      }
-      
-      const title = document.createElement('div');
-      title.textContent = data.title || data.location_card || 'Object';
-      title.style.cssText = 'font-weight: bold; font-size: 14px; margin-bottom: 4px; line-height: 1.3;';
-      card.appendChild(title);
-      
-      const details = document.createElement('div');
-      details.style.cssText = 'font-size: 12px; color: #666;';
-      const detailParts = [];
-      if (data.date) detailParts.push(data.date);
-      if (data.medium) detailParts.push(data.medium);
-      if (data.artist) detailParts.push(data.artist);
-      details.textContent = detailParts.join(' • ');
-      card.appendChild(details);
-      
-      if (data.src) {
-        card.addEventListener('click', () => {
-          const index = allData.objects.findIndex(p => p.src === data.src);
-          if (index !== -1) {
-            filteredImages = allData.objects;
-            showOverlay(index);
-          }
-        });
-      }
-    }
+/* Photographers List Styles */
+#photographersContent {
+  display: none;
+  padding: 20px;
+  font-size: 20px;
+  line-height: 1;
+}
 
-    function renderArticleSearchCard(card, data) {
-      if (data.photo) {
-        const img = document.createElement('img');
-        img.src = data.photo;
-        img.style.cssText = 'width: 100%; height: 120px; object-fit: cover; margin-bottom: 8px;';
-        card.appendChild(img);
-      }
-      
-      const source = document.createElement('div');
-      source.textContent = data.source || 'Article';
-      source.style.cssText = 'font-weight: bold; font-size: 14px; margin-bottom: 4px;';
-      card.appendChild(source);
-      
-      if (data.date) {
-        const details = document.createElement('div');
-        details.style.cssText = 'font-size: 12px; color: #666;';
-        details.textContent = data.date;
-        card.appendChild(details);
-      }
-      
-      if (data.src) {
-        const link = document.createElement('div');
-        link.textContent = '→ Read article';
-        link.style.cssText = 'font-size: 12px; color: #0066cc; margin-top: 8px;';
-        card.appendChild(link);
-        
-        card.addEventListener('click', () => { window.open(data.src, '_blank'); });
-      }
-    }
+#photographersContent.active {
+  display: block;
+}
 
-    function renderPictureSearchCard(card, data) {
-      if (data.src) {
-        const img = document.createElement('img');
-        img.src = data.src;
-        img.style.cssText = 'width: 100%; height: 120px; object-fit: contain; margin-bottom: 8px; opacity: 0; transition: opacity 0.5s ease;';
-        img.addEventListener('load', () => { img.style.opacity = '1'; });
-        card.appendChild(img);
-      }
-      
-      const photographer = document.createElement('div');
-      photographer.textContent = data.photographer || 'Picture';
-      photographer.style.cssText = 'font-weight: bold; font-size: 14px; margin-bottom: 4px;';
-      card.appendChild(photographer);
-      
-      if (data.date) {
-        const details = document.createElement('div');
-        details.style.cssText = 'font-size: 12px; color: #666;';
-        details.textContent = data.date;
-        card.appendChild(details);
-      }
-      
-      if (data.note) {
-        const note = document.createElement('div');
-        note.textContent = data.note;
-        note.style.cssText = 'font-size: 12px; color: #333; margin-top: 4px; line-height: 1.4;';
-        card.appendChild(note);
-      }
-      
-      if (data.src) {
-        card.addEventListener('click', () => {
-          const index = allData.pictures.findIndex(p => p.src === data.src);
-          if (index !== -1) {
-            filteredImages = allData.pictures;
-            showOverlay(index);
-          }
-        });
-      }
-    }
+#highlightLegend {
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: #555;
+  font-style: italic;
+}
 
-    function renderPhotographerSearchCard(card, data) {
-      const name = document.createElement('div');
-      name.textContent = `${data.firstName} ${data.lastName}`;
-      name.style.cssText = 'font-weight: bold; font-size: 18px; margin-bottom: 8px;';
-      card.appendChild(name);
-      
-      if (data.website) {
-        const website = document.createElement('div');
-        website.textContent = data.website;
-        website.style.cssText = 'font-size: 12px; color: #0066cc; text-decoration: underline; word-break: break-all;';
-        card.appendChild(website);
-        
-        const visitLink = document.createElement('div');
-        visitLink.textContent = '→ Visit website';
-        visitLink.style.cssText = 'font-size: 12px; color: #0066cc; margin-top: 8px;';
-        card.appendChild(visitLink);
-        
-        card.addEventListener('click', () => { window.open(data.website, '_blank'); });
-      }
-    }
+#highlightLegend mark {
+  background-color: #ffff66;
+  padding: 2px 4px;
+}
 
-    function renderBlogPostSearchCard(card, data) {
-      if (data.pictures) {
-        const img = document.createElement('img');
-        img.src = data.pictures;
-        img.style.cssText = 'width: 100%; height: 120px; object-fit: cover; margin-bottom: 8px;';
-        card.appendChild(img);
-      }
-      
-      const title = document.createElement('div');
-      title.textContent = data.title || 'Blog Post';
-      title.style.cssText = 'font-weight: bold; font-size: 14px; margin-bottom: 4px; line-height: 1.3;';
-      card.appendChild(title);
-      
-      if (data.date) {
-        const date = document.createElement('div');
-        date.textContent = data.date;
-        date.style.cssText = 'font-size: 12px; color: #666; margin-bottom: 4px;';
-        card.appendChild(date);
-      }
-      
-      if (data.text) {
-        const text = document.createElement('div');
-        text.textContent = data.text.substring(0, 100) + (data.text.length > 100 ? '...' : '');
-        text.style.cssText = 'font-size: 12px; color: #333; line-height: 1.4;';
-        card.appendChild(text);
-      }
-      
-      const viewPost = document.createElement('div');
-      viewPost.textContent = '→ View post';
-      viewPost.style.cssText = 'font-size: 12px; color: #0066cc; margin-top: 8px;';
-      card.appendChild(viewPost);
-      
-      card.addEventListener('click', () => {
-        document.getElementById('modeSelector').value = 'blog';
-        switchMode();
-        showBlogSection('posts');
-      });
-    }
+#photographersSearch {
+  width: 100%;
+  padding: 10px;
+  font-size: 60px;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: inherit;
+  font-family: inherit;
+  margin-bottom: 20px;
+  padding-left: 0;
+}
 
-    function renderInspoSearchCard(card, data) {
-      const name = document.createElement('div');
-      name.textContent = data.name || 'Inspo';
-      name.style.cssText = 'font-weight: bold; font-size: 14px; margin-bottom: 4px;';
-      card.appendChild(name);
-      
-      if (data.date) {
-        const date = document.createElement('div');
-        date.textContent = data.date;
-        date.style.cssText = 'font-size: 12px; color: #666; margin-bottom: 4px;';
-        card.appendChild(date);
-      }
-      
-      if (data.text) {
-        const text = document.createElement('div');
-        text.textContent = data.text.substring(0, 80) + (data.text.length > 80 ? '...' : '');
-        text.style.cssText = 'font-size: 12px; color: #333; line-height: 1.4; margin-bottom: 8px;';
-        card.appendChild(text);
-      }
-      
-      if (data.link) {
-        const link = document.createElement('div');
-        link.textContent = '→ View link';
-        link.style.cssText = 'font-size: 12px; color: #0066cc;';
-        card.appendChild(link);
-        
-        card.addEventListener('click', () => { window.open(data.link, '_blank'); });
-      }
-    }
+#photographersButtons {
+  margin-bottom: 30px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
 
-    function renderFieldNoteSearchCard(card, data) {
-      if (data.image) {
-        const img = document.createElement('img');
-        img.src = data.image;
-        img.style.cssText = 'width: 100%; height: 120px; object-fit: cover; margin-bottom: 8px;';
-        card.appendChild(img);
-      }
-      
-      const title = document.createElement('div');
-      const titleText = data.number ? `${data.number} - ${data.title}` : data.title;
-      title.textContent = titleText || 'Field Note';
-      title.style.cssText = 'font-weight: bold; font-size: 14px; margin-bottom: 4px; line-height: 1.3;';
-      card.appendChild(title);
-      
-      if (data.date) {
-        const date = document.createElement('div');
-        date.textContent = data.date;
-        date.style.cssText = 'font-size: 12px; color: #666;';
-        card.appendChild(date);
-      }
-      
-      if (data.url) {
-        const link = document.createElement('div');
-        link.textContent = '→ Read note';
-        link.style.cssText = 'font-size: 12px; color: #0066cc; margin-top: 8px;';
-        card.appendChild(link);
-        
-        card.addEventListener('click', () => { window.open(data.url, '_blank'); });
-      }
-    }
+#photographersButtons button {
+  font-size: 20px;
+  padding: 10px 20px;
+  cursor: pointer;
+  background-color: white;
+  color: black;
+  border: 2px solid black;
+  border-radius: 0;
+  transition: background-color 0.2s, color 0.2s;
+}
 
-    function clearUniversalSearch() {
-      if (universalSearchActive) {
-        console.log('Clearing universal search');
-        universalSearchActive = false;
-        universalSearchResults = [];
-        
-        const currentModeValue = document.getElementById('modeSelector').value;
-        const currentIndexValue = document.getElementById('indexSelector').value;
-        
-        if (currentModeValue === 'blog') {
-          document.getElementById('blogContent').classList.add('active');
-          document.getElementById('gallery').style.display = 'none';
-          document.getElementById('photographersContent').classList.remove('active');
-        } else {
-          document.getElementById('blogContent').classList.remove('active');
-          
-          if (currentIndexValue === 'photographers') {
-            document.getElementById('photographersContent').classList.add('active');
-            document.getElementById('gallery').style.display = 'none';
-            renderPhotographers();
-          } else {
-            document.getElementById('photographersContent').classList.remove('active');
-            document.getElementById('gallery').style.display = 'grid';
-            applyFilters();
-          }
-        }
-      }
-    }
+#photographersButtons button:hover {
+  background-color: black;
+  color: white;
+}
 
-    loadAllData();
+#photographersButtons button.active {
+  background-color: black;
+  color: white;
+}
+
+.section-divider {
+  border-top: 2px solid black;
+  margin: 30px 0 10px 0;
+  width: 100%;
+}
+
+.letter-header {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.two-column {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  column-gap: 50px;
+  row-gap: 10px;
+  margin-bottom: 30px;
+}
+
+@media (max-width: 700px) {
+  .two-column {
+    grid-template-columns: 1fr;
+    column-gap: 0;
+  }
+}
+
+.name-item {
+  font-size: 24px;
+  line-height: 1.3;
+}
+
+.name-item a {
+  text-decoration: none;
+  color: inherit;
+  display: inline-block;
+  text-transform: lowercase;
+  margin: 0 0.5px;
+  transition: transform 0.2s ease-in-out;
+}
+
+.name-item a:hover {
+  transform: scale(1.6);
+  background-color: #ffff66;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: white;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+#overlayContainer {
+  background: transparent;
+}
+
+.overlay img {
+  max-height: 90vh;
+  max-width: 90vw;
+  object-fit: contain;
+}
+
+.fullscreen-mode {
+  width: 100vw !important;
+  height: 100vh !important;
+}
+
+.fullscreen-mode img {
+  max-height: 100vh !important;
+  max-width: 100vw !important;
+}
+
+.metadata-overlay {
+  position: absolute;
+  bottom: 30px;
+  left: 30px;
+  color: black;
+  background: rgba(255, 255, 255, 0.9);
+  font-family: Helvetica, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  padding: 12px 16px;
+  border-radius: 10px;
+  max-width: 300px;
+}
+
+.overlay-close {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  font-size: 32px;
+  color: black;
+  cursor: pointer;
+  z-index: 10001;
+}
+
+.fullscreen-btn {
+  position: absolute;
+  top: 20px;
+  right: 80px;
+  font-size: 24px;
+  color: black;
+  cursor: pointer;
+  z-index: 10001;
+  padding: 5px 10px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 5px;
+}
+
+.fullscreen-btn:hover {
+  background: rgba(255, 255, 255, 1);
+}
+
+@media (max-width: 600px) {
+  .metadata-overlay {
+    font-size: 14px;
+    max-width: 90vw;
+    left: 20px;
+    bottom: 20px;
+  }
+  
+  .sidebar {
+    width: 100%;
+  }
+}
