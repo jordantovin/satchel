@@ -169,8 +169,8 @@ function createArticleSourceCheckboxes() {
 }
 
 function applyFilters() {
-  // Skip if we're in photographers view or universal search mode
-  if (currentIndex === 'photographers' || universalSearchMode) return;
+  // Skip if we're in photographers view
+  if (currentIndex === 'photographers') return;
   
   const keyword = document.getElementById('topSearchInput').value.toLowerCase();
   const dateFrom = document.getElementById('dateFrom').value;
