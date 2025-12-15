@@ -205,7 +205,7 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
           type: "pictures"
         })).filter(img => img.src);
         
-        // Process Photographers List
+        // Process Photographers List - capture ALL columns dynamically
         console.log('Raw CSV data sample:', photographersListData.slice(0, 3));
         console.log('CSV headers:', photographersListData[0] ? Object.keys(photographersListData[0]) : 'No data');
         console.log('Total raw rows:', photographersListData.length);
@@ -217,13 +217,25 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
             const hasLast = row['Last Name'] && row['Last Name'].trim();
             return hasFirst && hasLast;
           })
-          .map(row => ({
-            firstName: (row['First Name'] || '').trim(),
-            lastName: (row['Last Name'] || '').trim(),
-            website: (row['Website'] || '').trim(),
-            className: (row['Class'] || '').trim(),
-            dateAdded: (row['Date Added'] || '').trim()
-          }));
+          .map(row => {
+            // Capture ALL columns from the CSV
+            const person = {
+              firstName: (row['First Name'] || '').trim(),
+              lastName: (row['Last Name'] || '').trim(),
+              website: (row['Website'] || '').trim(),
+              className: (row['Class'] || '').trim(),
+              dateAdded: (row['Date Added'] || '').trim(),
+              // Store all other columns for searchability
+              allColumns: {}
+            };
+            
+            // Add all columns to allColumns object for comprehensive search
+            Object.keys(row).forEach(key => {
+              person.allColumns[key] = (row[key] || '').trim();
+            });
+            
+            return person;
+          });
         
         console.log('Total people with names:', allPeople.length);
         
@@ -544,9 +556,26 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
         }
       });
       
-      // Search Photographers
+      // Search Photographers - NOW SEARCHES ALL COLUMNS
       photographersData.forEach(item => {
-        const searchText = `${item.firstName} ${item.lastName} ${item.website}`.toLowerCase();
+        // Build comprehensive search string from all columns
+        const searchableFields = [
+          item.firstName,
+          item.lastName,
+          item.website,
+          item.className,
+          item.dateAdded
+        ];
+        
+        // Add all other columns from allColumns object
+        if (item.allColumns) {
+          Object.values(item.allColumns).forEach(value => {
+            searchableFields.push(value);
+          });
+        }
+        
+        const searchText = searchableFields.join(' ').toLowerCase();
+        
         if (searchText.includes(query)) {
           results.push({ type: 'photographer', data: item });
         }
@@ -869,10 +898,27 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
     function renderPhotographers() {
       const searchTerm = document.getElementById('photographersSearch').value.toLowerCase();
       
-      // Filter photographers by search term
-      filteredPhotographers = photographersData.filter(p => 
-        `${p.firstName} ${p.lastName}`.toLowerCase().includes(searchTerm)
-      );
+      // Filter photographers by search term - SEARCH ALL COLUMNS
+      filteredPhotographers = photographersData.filter(p => {
+        // Build comprehensive search string from all known fields
+        const searchableFields = [
+          p.firstName,
+          p.lastName,
+          p.website,
+          p.className,
+          p.dateAdded
+        ];
+        
+        // Add all other columns from allColumns object
+        if (p.allColumns) {
+          Object.values(p.allColumns).forEach(value => {
+            searchableFields.push(value);
+          });
+        }
+        
+        const searchableText = searchableFields.join(' ').toLowerCase();
+        return searchableText.includes(searchTerm);
+      });
       
       const list = document.getElementById('photographersList');
       list.innerHTML = '';
