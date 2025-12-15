@@ -790,7 +790,7 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
       }
       
       card.onmouseenter = () => {
-        card.style.backgroundColor = '#f5f5f5';
+        card.style.backgroundColor = 'white';
         card.style.transform = 'translateY(-2px)';
         card.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
       };
