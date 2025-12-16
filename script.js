@@ -15,7 +15,6 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
     let filteredImages = [];
     let currentImageIndex = -1;
     let universalSearchMode = false;
-    let currentSortMode = 'newest'; // 'newest', 'oldest', 'alphabetical'
 
     function toggleSidebar() {
       document.getElementById('sidebar').classList.toggle('open');
@@ -27,60 +26,6 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
       if (searchInput.classList.contains('active')) {
         searchInput.focus();
       }
-    }
-
-    function cycleSortMode() {
-      // Skip if in photographers view
-      if (currentIndex === 'photographers') return;
-      
-      const modes = ['newest', 'oldest', 'alphabetical'];
-      const currentIdx = modes.indexOf(currentSortMode);
-      currentSortMode = modes[(currentIdx + 1) % modes.length];
-      
-      // Update button text with shorter labels
-      const sortBtn = document.getElementById('sortButton');
-      if (sortBtn) {
-        const labels = {
-          'newest': 'Newest',
-          'oldest': 'Oldest',
-          'alphabetical': 'A-Z'
-        };
-        sortBtn.textContent = labels[currentSortMode];
-      }
-      
-      // Re-apply filters to trigger re-render with new sort
-      applyFilters();
-    }
-
-    function sortFilteredImages(images) {
-      const sorted = [...images];
-      
-      if (currentSortMode === 'newest') {
-        sorted.sort((a, b) => b.sortDate.localeCompare(a.sortDate));
-      } else if (currentSortMode === 'oldest') {
-        sorted.sort((a, b) => a.sortDate.localeCompare(b.sortDate));
-      } else if (currentSortMode === 'alphabetical') {
-        // Sort alphabetically based on type
-        sorted.sort((a, b) => {
-          let aKey = '';
-          let bKey = '';
-          
-          if (currentIndex === 'objects') {
-            aKey = (a.title || a.location_card || '').toLowerCase();
-            bKey = (b.title || b.location_card || '').toLowerCase();
-          } else if (currentIndex === 'articles') {
-            aKey = (a.source || '').toLowerCase();
-            bKey = (b.source || '').toLowerCase();
-          } else if (currentIndex === 'pictures') {
-            aKey = (a.photographer || '').toLowerCase();
-            bKey = (b.photographer || '').toLowerCase();
-          }
-          
-          return aKey.localeCompare(bKey);
-        });
-      }
-      
-      return sorted;
     }
 
     function formatArticleDate(dateStr) {
@@ -329,14 +274,9 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
     function switchIndex() {
       currentIndex = document.getElementById('indexSelector').value;
       
-      // Show/hide sort button based on current index
-      const sortBtn = document.getElementById('sortButton');
-      if (sortBtn) {
-        if (currentIndex === 'photographers') {
-          sortBtn.style.display = 'none';
-        } else {
-          sortBtn.style.display = 'block';
-        }
+      // Update sort button visibility
+      if (typeof updateSortButtonVisibility === 'function') {
+        updateSortButtonVisibility();
       }
       
       if (currentIndex === 'photographers') {
@@ -568,8 +508,10 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
         return true;
       });
 
-      // Apply sorting
-      filteredImages = sortFilteredImages(filteredImages);
+      // Apply sorting (function defined in sort.js)
+      if (typeof sortFilteredImages === 'function') {
+        filteredImages = sortFilteredImages(filteredImages);
+      }
 
       renderImages(filteredImages);
       updateImageCount(filteredImages.length);
