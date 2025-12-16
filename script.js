@@ -37,13 +37,13 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
       const currentIdx = modes.indexOf(currentSortMode);
       currentSortMode = modes[(currentIdx + 1) % modes.length];
       
-      // Update button text
+      // Update button text with shorter labels
       const sortBtn = document.getElementById('sortButton');
       if (sortBtn) {
         const labels = {
-          'newest': 'Newest First',
-          'oldest': 'Oldest First',
-          'alphabetical': 'Alphabetical'
+          'newest': 'Newest',
+          'oldest': 'Oldest',
+          'alphabetical': 'A-Z'
         };
         sortBtn.textContent = labels[currentSortMode];
       }
