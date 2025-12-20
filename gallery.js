@@ -1097,6 +1097,66 @@
   // NAVIGATION & MODE SWITCHING
   // ============================================================================
   
+  window.navigateTo = function(mode, section) {
+    // Update active state on nav links
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.classList.remove('active');
+    });
+    
+    const activeLink = document.querySelector(`[data-section="${mode}-${section}"]`);
+    if (activeLink) {
+      activeLink.classList.add('active');
+    }
+    
+    // Update hidden selectors
+    document.getElementById('modeSelector').value = mode;
+    
+    if (mode === 'blog') {
+      document.getElementById('blogSelector').value = section;
+      currentMode = 'blog';
+      
+      document.getElementById('gallery').style.display = 'none';
+      document.getElementById('photographersContent').classList.remove('active');
+      document.getElementById('blogContent').classList.add('active');
+      document.getElementById('rightSidebar').classList.remove('open');
+      
+      showBlogSection(section);
+      updateBlogItemCount();
+      updateSortButtonVisibility();
+      
+      if (section === 'posts' && blogPostsData.length === 0) {
+        loadBlogPosts();
+      } else if (section === 'inspo' && inspoPostsData.length === 0) {
+        loadInspoPosts();
+      } else if (section === 'fieldNotes' && fieldNotesData.length === 0) {
+        loadFieldNotes();
+      }
+    } else {
+      // Archive mode
+      document.getElementById('indexSelector').value = section;
+      currentMode = 'archive';
+      currentIndex = section;
+      
+      document.getElementById('blogContent').classList.remove('active');
+      
+      if (section === 'photographers') {
+        document.getElementById('photographersContent').classList.add('active');
+        document.getElementById('gallery').style.display = 'none';
+        document.getElementById('rightSidebar').classList.remove('open');
+        renderPhotographers();
+        updateImageCount(photographersData.length);
+      } else {
+        document.getElementById('photographersContent').classList.remove('active');
+        document.getElementById('gallery').style.display = 'grid';
+        
+        updateFilterVisibility();
+        applyFilters();
+      }
+      
+      updateSortButtonVisibility();
+    }
+  };
+  
   window.switchMode = function() {
     if (universalSearchMode) return;
     
@@ -1106,8 +1166,6 @@
       document.getElementById('gallery').style.display = 'none';
       document.getElementById('photographersContent').classList.remove('active');
       document.getElementById('blogContent').classList.add('active');
-      document.getElementById('indexSelector').style.display = 'none';
-      document.getElementById('blogSelector').style.display = 'block';
       document.getElementById('rightSidebar').classList.remove('open');
       
       updateBlogItemCount();
@@ -1119,8 +1177,6 @@
     } else {
       document.getElementById('blogContent').classList.remove('active');
       document.getElementById('gallery').style.display = 'grid';
-      document.getElementById('indexSelector').style.display = 'block';
-      document.getElementById('blogSelector').style.display = 'none';
       switchIndex();
     }
   };
@@ -1553,6 +1609,12 @@
     initEventListeners();
     updateSortButtonVisibility();
     loadAllData();
+    
+    // Set default active nav link
+    const defaultLink = document.querySelector('[data-section="archive-objects"]');
+    if (defaultLink) {
+      defaultLink.classList.add('active');
+    }
   }
 
   // Wait for DOM and Papa Parse to be ready
