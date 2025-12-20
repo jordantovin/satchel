@@ -1,3 +1,8 @@
+/* ============================================================================
+   AMERICANISMS GALLERY - STYLES
+   ============================================================================ */
+
+/* ===== BASE STYLES ===== */
 body {
   margin: 0;
   background: white;
@@ -10,6 +15,13 @@ a {
   text-decoration: none;
 }
 
+a:hover,
+a:visited,
+a:active {
+  text-decoration: none;
+}
+
+/* ===== LOADING BACKGROUND ===== */
 #red-background {
   position: fixed;
   top: 0;
@@ -20,7 +32,7 @@ a {
   z-index: 1000;
 }
 
-/* Top Navigation */
+/* ===== TOP NAVIGATION ===== */
 .top-nav {
   position: fixed;
   top: 0;
@@ -28,7 +40,7 @@ a {
   right: 0;
   background: white;
   color: #333;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid black;
   z-index: 1003;
   padding: 15px 20px;
   display: flex;
@@ -47,76 +59,90 @@ a {
   display: flex;
   align-items: center;
   gap: 20px;
+  flex: 1;
+  justify-content: flex-end;
 }
 
-.mode-selector {
+.mode-selector,
+.index-selector {
   padding: 8px 16px;
   font-size: 16px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
+  border-radius: 0;
+  border: 1px solid #000;
   background: white;
-  color: #333;
+  color: #000;
   cursor: pointer;
   font-family: Helvetica, sans-serif;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23000' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 32px;
+  transition: background-color 0.2s;
 }
 
+.mode-selector:hover,
+.index-selector:hover {
+  background-color: #f5f5f5;
+}
+
+/* ===== SEARCH ===== */
 .search-container {
   display: flex;
   align-items: center;
   gap: 10px;
-  transition: all 0.3s ease;
+  flex: 1;
+  max-width: 400px;
 }
 
 .search-icon {
-  cursor: pointer;
-  font-size: 20px;
-  color: #333;
-  padding: 8px;
+  display: none;
 }
 
 .search-input {
-  width: 0;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-  opacity: 0;
-  transition: all 0.3s ease;
-  pointer-events: none;
+  width: 100%;
+  padding: 8px 16px;
+  border: 1px solid #000;
+  border-radius: 0;
+  font-size: 16px;
+  opacity: 1;
+  pointer-events: auto;
+  font-family: Helvetica, sans-serif;
+  transition: background-color 0.2s;
+}
+
+.search-input:focus {
+  outline: none;
+  background-color: #f5f5f5;
 }
 
 .search-input.active {
-  width: 250px;
+  width: 100%;
   opacity: 1;
   pointer-events: auto;
 }
 
-.index-selector {
+/* ===== SORT BUTTON ===== */
+#sortButton {
   padding: 8px 16px;
   font-size: 16px;
-  border-radius: 4px;
-  border: none;
+  border-radius: 0;
+  border: 1px solid #000;
   background: white;
-  color: #333;
+  color: #000;
   cursor: pointer;
   font-family: Helvetica, sans-serif;
+  transition: background-color 0.2s;
+  white-space: nowrap;
 }
 
-.filter-toggle {
-  padding: 8px 16px;
-  background: #333;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
+#sortButton:hover {
+  background-color: #f5f5f5;
 }
 
-.filter-toggle:hover {
-  background: #555;
-}
-
-/* Sidebar Styles */
+/* ===== SIDEBAR ===== */
 .sidebar {
   position: fixed;
   top: 60px;
@@ -153,6 +179,7 @@ a {
   color: #333;
 }
 
+/* ===== FILTERS ===== */
 .filter-section {
   margin-bottom: 24px;
 }
@@ -215,12 +242,14 @@ a {
   background: #555;
 }
 
+/* ===== CONTENT WRAPPER ===== */
 #content-wrapper {
   position: relative;
   margin-top: 60px;
   z-index: 1001;
 }
 
+/* ===== GALLERY GRID ===== */
 #gallery {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -234,30 +263,40 @@ a {
 
 #gallery.articles-view {
   grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  padding: 0;
 }
 
+/* Gallery responsive breakpoints */
 @media (max-width: 1400px) { 
   #gallery { grid-template-columns: repeat(5, 1fr); }
   #gallery.objects-view { grid-template-columns: repeat(4, 1fr); }
   #gallery.articles-view { grid-template-columns: repeat(3, 1fr); }
 }
+
 @media (max-width: 1200px) { 
   #gallery { grid-template-columns: repeat(4, 1fr); }
   #gallery.objects-view { grid-template-columns: repeat(3, 1fr); }
   #gallery.articles-view { grid-template-columns: repeat(2, 1fr); }
 }
-@media (max-width: 900px)  { 
+
+@media (max-width: 900px) { 
   #gallery { grid-template-columns: repeat(3, 1fr); }
   #gallery.objects-view { grid-template-columns: repeat(2, 1fr); }
   #gallery.articles-view { grid-template-columns: repeat(2, 1fr); }
 }
-@media (max-width: 600px)  { 
+
+@media (max-width: 600px) { 
   #gallery { grid-template-columns: repeat(2, 1fr); }
   #gallery.objects-view { grid-template-columns: repeat(2, 1fr); }
   #gallery.articles-view { grid-template-columns: 1fr; }
 }
-@media (max-width: 400px)  { #gallery { grid-template-columns: 1fr; } }
 
+@media (max-width: 400px) { 
+  #gallery { grid-template-columns: 1fr; }
+}
+
+/* ===== IMAGE CARDS ===== */
 .image-card {
   position: relative;
   width: 100%;
@@ -304,56 +343,94 @@ a {
   transform: scale(1);
 }
 
+/* ===== ARTICLE CARDS ===== */
 .article-card {
   position: relative;
   width: 100%;
-  background: #f9f9f9;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  aspect-ratio: 3 / 1.6;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: opacity 0.2s ease;
   overflow: hidden;
   display: flex;
-  flex-direction: column;
+  border: none;
+  background: none;
 }
 
 .article-card:hover {
-  background: #f0f0f0;
+  opacity: 0.8;
 }
 
 .article-card a {
-  color: #333;
-  text-decoration: none;
+  color: white;
+  text-decoration: none !important;
   display: flex;
-  flex-direction: column;
+  width: 100%;
   height: 100%;
+  position: relative;
+  border-bottom: none !important;
+  background-image: none !important;
+}
+
+.article-card a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60%;
+  background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 50%, transparent 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.article-card a:hover,
+.article-card a:visited,
+.article-card a:active,
+.article-card a:focus {
+  text-decoration: none !important;
+  border-bottom: none !important;
+  background-image: none !important;
 }
 
 .article-card img {
   width: 100%;
-  height: 150px;
+  height: 100%;
   object-fit: cover;
   display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .article-card .article-info {
-  padding: 12px;
-  flex: 1;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  z-index: 2;
+  background: none;
+  text-decoration: none !important;
+  border-bottom: none !important;
 }
 
 .article-card .article-date {
   font-size: 12px;
-  color: #999;
-  margin-bottom: 6px;
+  color: white;
+  margin-bottom: 4px;
+  text-decoration: none !important;
+  border-bottom: none !important;
 }
 
 .article-card .article-source {
   font-size: 14px;
   font-weight: bold;
-  color: #333;
+  color: white;
+  text-decoration: none !important;
+  border-bottom: none !important;
 }
 
-/* Photographers List Styles */
+/* ===== PHOTOGRAPHERS VIEW ===== */
 #photographersContent {
   display: none;
   padding: 20px;
@@ -363,18 +440,6 @@ a {
 
 #photographersContent.active {
   display: block;
-}
-
-#highlightLegend {
-  font-size: 16px;
-  margin-bottom: 10px;
-  color: #555;
-  font-style: italic;
-}
-
-#highlightLegend mark {
-  background-color: #ffff66;
-  padding: 2px 4px;
 }
 
 #photographersSearch {
@@ -416,6 +481,18 @@ a {
 #photographersButtons button.active {
   background-color: black;
   color: white;
+}
+
+#highlightLegend {
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: #555;
+  font-style: italic;
+}
+
+#highlightLegend mark {
+  background-color: #ffff66;
+  padding: 2px 4px;
 }
 
 .section-divider {
@@ -464,6 +541,142 @@ a {
   background-color: #ffff66;
 }
 
+/* ===== BLOG VIEW ===== */
+#blogContent {
+  display: none;
+  padding: 0px;
+  max-width: none;
+  margin: 0 auto;
+}
+
+#blogContent.active {
+  display: block;
+}
+
+.blog-section {
+  display: none;
+}
+
+.blog-section.active {
+  display: block;
+}
+
+.blog-post {
+  margin-bottom: 35px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid black;
+}
+
+.blog-post:last-child {
+  border-bottom: none;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.blog-post h2 {
+  font-size: 35px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  line-height: 1.2;
+  padding-left: 20px;
+  padding-right: 20px;
+  font-family: Helvetica;
+}
+
+.blog-post .date {
+  font-size: 20px;
+  color: #999;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.blog-post p {
+  font-size: 30px;
+  line-height: 1.0;
+  color: black;
+  margin: 5px 0;
+  margin-bottom: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+/* ===== FIELD NOTES ===== */
+.field-note-item {
+  margin: 0;
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.field-note-item:last-child {
+  border-bottom: none;
+}
+
+.field-note-title {
+  font-size: 28px;
+  font-weight: bold;
+  margin: 0;
+  padding: 0;
+  color: #000 !important;
+  text-decoration: none !important;
+  display: block;
+  line-height: 1.2;
+  border-bottom: none !important;
+  background-image: none !important;
+}
+
+.field-note-title:hover,
+.field-note-title:visited,
+.field-note-title:active {
+  text-decoration: none !important;
+  color: #000 !important;
+  border-bottom: none !important;
+}
+
+.field-note-date {
+  font-size: 14px;
+  color: #999;
+  margin: 2px 0 0 0;
+  padding: 0;
+}
+
+#fieldNoteHoverImage {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  width: 500px;
+  height: auto;
+  display: none;
+  z-index: 1004;
+  pointer-events: none;
+}
+
+/* ===== INSPO LINKS ===== */
+.inspo-link {
+  color: #000 !important;
+  text-decoration: none !important;
+  transition: background-color 0.2s, transform 0.2s;
+  border-bottom: none !important;
+  background-image: none !important;
+  display: inline-block;
+  line-height: 1.0;
+}
+
+.inspo-link:hover {
+  background-color: #ffff66;
+  text-decoration: none !important;
+  border-bottom: none !important;
+  transform: scale(1.6);
+}
+
+.inspo-link:visited,
+.inspo-link:active {
+  color: #000 !important;
+  text-decoration: none !important;
+}
+
+/* ===== OVERLAY ===== */
 .overlay {
   position: fixed;
   top: 0;
@@ -538,6 +751,7 @@ a {
   background: rgba(255, 255, 255, 1);
 }
 
+/* ===== MOBILE STYLES ===== */
 @media (max-width: 600px) {
   .metadata-overlay {
     font-size: 14px;
