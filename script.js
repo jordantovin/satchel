@@ -1,9 +1,17 @@
-const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4QAkAIideMvvWDNWq2Aj_Nx6m4QG9snhFkpqqOGX8gU09X6uUQdkfuOj9yLIybn0iPIFoZbK-/pub?output=csv';
+    let currentMode = 'archive';
+    let currentSortMode = 'date-desc';
+    let blogPostsData = [];
+    let inspoPostsData = [];
+    let fieldNotesData = [];
+    const blogPostsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vThaJ-Q5u7zUSy9DA5oMCUkajzPdkWpECZzQf7SYpi8SvSCqvRgzlQvAUI6xAtaumQEnsaHSbYLkHt_/pub?output=csv';
+    const inspoPostsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTtF8T2xKCyuDXq1_hyxL0Do2g8wfQ5AtrA-SlKSoUa5TlyuaKgekwK4j4ezU1z8dVjf5P8YYVnoXT9/pub?output=csv';
+    const fieldNotesURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTcOtzV-2ZVl1aaRXhnlXEDNmJ8y1pUArx3qjhV3AR66kKSMtR17702FGlrBdppy0YPI084PxrMu9uL/pub?output=csv';
+    
+    const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4QAkAIideMvvWDNWq2Aj_Nx6m4QG9snhFkpqqOGX8gU09X6uUQdkfuOj9yLIybn0iPIFoZbK-/pub?output=csv';
     const objectsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRPknkbhkxJidsCcMnFmvdB2gKx4miqtuECGc5udX7hEAY9IQeTCpNDGMkh31uGuSS1NcODADU_jcRT/pub?output=csv';
     const articlesURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTo8ua4UreD9MUP4CI6OOXkt8LeagGX9w85veJfgi9DKJnHc2-dbCMvq5cx8DtlUO0YcV5RMPzcJ_KG/pub?output=csv';
     const picturesURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ5j1OVFnwB19xVA3ZVM46C8tNKvGHimyElwIAgMFDzurSEFA0m_8iHBIvD1_TKbtlfWw2MaDAirm47/pub?output=csv';
     const photographersListURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR4UTNOg8d2LIrCU8A9ebfkYOMV2V3E7egroQgliVc4v6mp7Xi9fdmPaxN3k3YUmeW123C8UvwdiNmy/pub?output=csv';
-
     let allData = {
       objects: [],
       articles: [],
@@ -15,7 +23,356 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
     let filteredImages = [];
     let currentImageIndex = -1;
     let universalSearchMode = false;
-
+    
+    function applySorting() {
+      currentSortMode = document.getElementById('sortSelector').value;
+      applyFilters();
+    }
+    
+    function sortImages(imageArray) {
+      const sorted = [...imageArray];
+      
+      console.log('=== SORTING DEBUG ===');
+      console.log('Sorting with mode:', currentSortMode);
+      console.log('First 5 articles with dates:');
+      sorted.slice(0, 5).forEach((item, i) => {
+        console.log(`  ${i+1}. Display date: "${item.date}" | Sort date: "${item.sortDate}" | Source: ${item.source}`);
+      });
+      
+      if (currentSortMode === 'date-desc') {
+        sorted.sort((a, b) => b.sortDate.localeCompare(a.sortDate));
+      } else if (currentSortMode === 'date-asc') {
+        sorted.sort((a, b) => a.sortDate.localeCompare(b.sortDate));
+      } else if (currentSortMode === 'random') {
+        // Fisher-Yates shuffle
+        for (let i = sorted.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [sorted[i], sorted[j]] = [sorted[j], sorted[i]];
+        }
+      }
+      
+      console.log('After sorting, first 5:');
+      sorted.slice(0, 5).forEach((item, i) => {
+        console.log(`  ${i+1}. Display date: "${item.date}" | Sort date: "${item.sortDate}" | Source: ${item.source}`);
+      });
+      console.log('===================');
+      
+      return sorted;
+    }
+    
+    async function loadBlogPosts() {
+      try {
+        const response = await fetch(blogPostsURL);
+        const text = await response.text();
+        const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
+        
+        blogPostsData = parsed.data.map(row => ({
+          title: row.Title || row.title || '',
+          date: row.Date || row.date || '',
+          pictures: row.Pictures || row.pictures || '',
+          text: row.Text || row.text || '',
+          link: row.Link || row.link || ''
+        })).filter(post => post.title);
+        
+        console.log('Loaded blog posts:', blogPostsData);
+        renderBlogPosts();
+      } catch (error) {
+        console.error('Error loading blog posts:', error);
+      }
+    }
+    
+    async function loadInspoPosts() {
+      try {
+        const response = await fetch(inspoPostsURL);
+        const text = await response.text();
+        const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
+        
+        inspoPostsData = parsed.data.map(row => ({
+          name: row.Name || row.name || '',
+          date: row.Date || row.date || '',
+          pictures: row.Pictures || row.pictures || '',
+          text: row.Text || row.text || '',
+          link: row.Link || row.link || ''
+        })).filter(post => post.name && post.link);
+        
+        console.log('Loaded inspo posts:', inspoPostsData);
+        renderInspoPosts();
+      } catch (error) {
+        console.error('Error loading inspo posts:', error);
+      }
+    }
+    
+    async function loadFieldNotes() {
+      try {
+        const response = await fetch(fieldNotesURL);
+        const text = await response.text();
+        const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
+        
+        fieldNotesData = parsed.data.map(row => ({
+          date: row.date || row.Date || row.A || '',
+          title: row.title || row.Title || row.B || '',
+          url: row.url || row.URL || row.D || '',
+          image: row.image || row.Image || row.G || '',
+          number: row.number || row.Number || row.M || ''
+        })).filter(post => post.title);
+        
+        console.log('Loaded field notes:', fieldNotesData);
+        renderFieldNotes();
+      } catch (error) {
+        console.error('Error loading field notes:', error);
+      }
+    }
+    
+    function parseMonthYear(dateStr) {
+      if (!dateStr) return null;
+      
+      // Handle YYYY.MM.DD format
+      const parts = dateStr.split('.');
+      if (parts.length >= 2) {
+        const year = parts[0];
+        const month = parts[1];
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                           'July', 'August', 'September', 'October', 'November', 'December'];
+        return `${monthNames[parseInt(month) - 1]}, ${year}`;
+      }
+      return null;
+    }
+    
+    function renderInspoPosts() {
+      const inspoContainer = document.getElementById('inspoSection');
+      inspoContainer.innerHTML = '';
+      
+      if (inspoPostsData.length === 0) {
+        inspoContainer.innerHTML = '<p style="font-size: 16px; color: #666;">No inspo posts found.</p>';
+        return;
+      }
+      
+      // Group by month/year
+      const groupedByMonth = {};
+      inspoPostsData.forEach(post => {
+        const monthYear = parseMonthYear(post.date);
+        if (monthYear) {
+          if (!groupedByMonth[monthYear]) {
+            groupedByMonth[monthYear] = [];
+          }
+          groupedByMonth[monthYear].push(post);
+        }
+      });
+      
+      // Sort months (newest first)
+      const sortedMonths = Object.keys(groupedByMonth).sort((a, b) => {
+        const [monthA, yearA] = a.split(', ');
+        const [monthB, yearB] = b.split(', ');
+        if (yearB !== yearA) return yearB - yearA;
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                           'July', 'August', 'September', 'October', 'November', 'December'];
+        return monthNames.indexOf(monthB) - monthNames.indexOf(monthA);
+      });
+      
+      // Render each month
+      sortedMonths.forEach(monthYear => {
+        const monthDiv = document.createElement('div');
+        monthDiv.style.marginBottom = '40px';
+        
+const monthHeader = document.createElement('h2');
+monthHeader.textContent = monthYear;
+monthHeader.style.fontSize = '28px';  // or whatever size you want
+monthHeader.style.fontWeight = 'bold';
+monthHeader.style.fontFamily = 'Helvetica';  // or whatever font you want
+monthHeader.style.marginBottom = '15px';
+monthDiv.appendChild(monthHeader);
+        
+        // Sort posts alphabetically by name within the month
+        const sortedPosts = groupedByMonth[monthYear].sort((a, b) => 
+          a.name.localeCompare(b.name)
+        );
+        
+        // Create paragraph of links
+        const linksP = document.createElement('p');
+        linksP.style.fontSize = '16px';
+        linksP.style.lineHeight = '1.0';
+        
+        const linkTexts = sortedPosts.map(post => 
+          `<a href="${post.link}" target="_blank" class="inspo-link">${post.name}</a>`
+        );
+        
+        linksP.innerHTML = linkTexts.join(', ');
+        monthDiv.appendChild(linksP);
+        
+        inspoContainer.appendChild(monthDiv);
+      });
+      
+      // Update count if in blog mode
+      if (currentMode === 'blog') {
+        updateBlogItemCount();
+      }
+    }
+    
+    function renderFieldNotes() {
+      const fieldNotesContainer = document.getElementById('fieldNotesSection');
+      fieldNotesContainer.innerHTML = '';
+      
+      if (fieldNotesData.length === 0) {
+        fieldNotesContainer.innerHTML = '<p style="font-size: 16px; color: #666;">No field notes found.</p>';
+        return;
+      }
+      
+      // Add hover image element
+      let hoverImg = document.getElementById('fieldNoteHoverImage');
+      if (!hoverImg) {
+        hoverImg = document.createElement('img');
+        hoverImg.id = 'fieldNoteHoverImage';
+        document.body.appendChild(hoverImg);
+      }
+      
+      fieldNotesData.forEach(note => {
+        const noteDiv = document.createElement('div');
+        noteDiv.className = 'field-note-item';
+        
+        const titleLink = document.createElement('a');
+        titleLink.href = note.url || '#';
+        titleLink.target = '_blank';
+        titleLink.className = 'field-note-title';
+        titleLink.textContent = note.number ? `${note.number} - ${note.title}` : note.title;
+        
+        if (note.image) {
+          titleLink.addEventListener('mouseenter', () => {
+            hoverImg.src = note.image;
+            hoverImg.style.display = 'block';
+          });
+          titleLink.addEventListener('mouseleave', () => {
+            hoverImg.style.display = 'none';
+          });
+        }
+        
+        const dateDiv = document.createElement('div');
+        dateDiv.className = 'field-note-date';
+        dateDiv.textContent = note.date;
+        
+        noteDiv.appendChild(titleLink);
+        noteDiv.appendChild(dateDiv);
+        fieldNotesContainer.appendChild(noteDiv);
+      });
+      
+      // Update count if in blog mode
+      if (currentMode === 'blog') {
+        updateBlogItemCount();
+      }
+    }
+    
+    function renderBlogPosts() {
+      const postsContainer = document.getElementById('postsSection');
+      postsContainer.innerHTML = '';
+      
+      if (blogPostsData.length === 0) {
+        postsContainer.innerHTML = '<p style="font-size: 16px; color: #666;">No blog posts found.</p>';
+        return;
+      }
+      
+      blogPostsData.forEach(post => {
+        const postDiv = document.createElement('div');
+        postDiv.className = 'blog-post';
+        
+        let postHTML = `<h2>${post.title}</h2>`;
+        postHTML += `<div class="date">${post.date}</div>`;
+        
+        if (post.pictures) {
+          postHTML += `<div style="margin: 20px 0;"><img src="${post.pictures}" alt="${post.title}" style="max-width: 600px; width: 100%; height: auto; padding-left:20px; padding-right:20px; border-radius: 0px;"></div>`;
+        }
+        
+        if (post.text) {
+          // Render the text as-is, allowing HTML tags including links
+          postHTML += `<p>${post.text}</p>`;
+        }
+        
+        if (post.link) {
+          postHTML += `<p><a href="${post.link}" target="_blank" style="color: #0066cc; text-decoration: underline;">Read more →</a></p>`;
+        }
+        
+        postDiv.innerHTML = postHTML;
+        postsContainer.appendChild(postDiv);
+      });
+      
+      // Update count if in blog mode
+      if (currentMode === 'blog') {
+        updateBlogItemCount();
+      }
+    }
+    
+    function switchMode() {
+      currentMode = document.getElementById('modeSelector').value;
+      
+      if (currentMode === 'blog') {
+        document.getElementById('gallery').style.display = 'none';
+        document.getElementById('photographersContent').classList.remove('active');
+        document.getElementById('blogContent').classList.add('active');
+        document.getElementById('indexSelector').style.display = 'none';
+        document.getElementById('blogSelector').style.display = 'block';
+        document.getElementById('sortSelector').style.display = 'none';
+        document.getElementById('rightSidebar').classList.remove('open');
+        
+        // Update item count based on current blog section
+        updateBlogItemCount();
+        
+        if (blogPostsData.length === 0) {
+          loadBlogPosts();
+        }
+      } else {
+        document.getElementById('blogContent').classList.remove('active');
+        document.getElementById('gallery').style.display = 'grid';
+        document.getElementById('indexSelector').style.display = 'block';
+        document.getElementById('blogSelector').style.display = 'none';
+        switchIndex();
+      }
+    }
+    
+    function switchBlogSection() {
+      const section = document.getElementById('blogSelector').value;
+      showBlogSection(section);
+      updateBlogItemCount();
+    }
+    
+    function updateBlogItemCount() {
+      const currentSection = document.getElementById('blogSelector').value;
+      let count = 0;
+      
+      if (currentSection === 'posts') {
+        count = blogPostsData.length;
+      } else if (currentSection === 'inspo') {
+        count = inspoPostsData.length;
+      } else if (currentSection === 'fieldNotes') {
+        count = fieldNotesData.length;
+      }
+      
+      document.getElementById('imageCount').textContent = `${count} items`;
+    }
+    
+    function showBlogSection(section) {
+      document.querySelectorAll('.blog-section').forEach(s => s.classList.remove('active'));
+      
+      // Update dropdown to match
+      document.getElementById('blogSelector').value = section;
+      
+      if (section === 'posts') {
+        document.getElementById('postsSection').classList.add('active');
+      } else if (section === 'inspo') {
+        document.getElementById('inspoSection').classList.add('active');
+        if (inspoPostsData.length === 0) {
+          loadInspoPosts();
+        }
+      } else if (section === 'fieldNotes') {
+        document.getElementById('fieldNotesSection').classList.add('active');
+        if (fieldNotesData.length === 0) {
+          loadFieldNotes();
+        }
+      }
+      
+      // Update item count
+      if (currentMode === 'blog') {
+        updateBlogItemCount();
+      }
+    }
+    
     function toggleSidebar() {
       document.getElementById('sidebar').classList.toggle('open');
     }
@@ -27,7 +384,6 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
         searchInput.focus();
       }
     }
-
     function formatArticleDate(dateStr) {
       if (!dateStr) return '';
       
@@ -87,9 +443,69 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
       
       return `${month} ${day}, ${year}`;
     }
-
     function parseDate(dateStr) {
       if (!dateStr) return '';
+      
+      const original = dateStr;
+      dateStr = dateStr.trim();
+      
+      console.log('Parsing date:', original);
+      
+      // Handle timestamp format (YYYY-MM-DD HH:MM:SS) FIRST
+      if (dateStr.includes(' ')) {
+        const result = dateStr.split(' ')[0];
+        console.log('  -> Timestamp to:', result);
+        return result;
+      }
+      
+      // Handle text month formats: "September 19, 2024", "Nov. 3, 2020", "Aug. 25"
+      const monthMap = {
+        'january': '01', 'jan': '01',
+        'february': '02', 'feb': '02',
+        'march': '03', 'mar': '03',
+        'april': '04', 'apr': '04',
+        'may': '05',
+        'june': '06', 'jun': '06',
+        'july': '07', 'jul': '07',
+        'august': '08', 'aug': '08',
+        'september': '09', 'sept': '09', 'sep': '09',
+        'october': '10', 'oct': '10',
+        'november': '11', 'nov': '11',
+        'december': '12', 'dec': '12'
+      };
+      
+      // Check if it contains a text month
+      const lowerDate = dateStr.toLowerCase();
+      for (const [monthName, monthNum] of Object.entries(monthMap)) {
+        if (lowerDate.includes(monthName)) {
+          // Extract parts: "September 19, 2024" or "Nov. 3, 2020" or "Aug. 25"
+          const parts = dateStr.replace(/[.,]/g, '').split(/\s+/);
+          
+          if (parts.length >= 3) {
+            // Full format: Month Day, Year
+            const day = parts[1].padStart(2, '0');
+            const year = parts[2];
+            const result = `${year}-${monthNum}-${day}`;
+            console.log('  -> Text month (full) to:', result);
+            return result;
+          } else if (parts.length === 2) {
+            // Month Day (assume current year 2025)
+            const day = parts[1].padStart(2, '0');
+            const result = `2025-${monthNum}-${day}`;
+            console.log('  -> Text month (no year) to:', result);
+            return result;
+          }
+        }
+      }
+      
+      // Handle YYYY-MM-DD format (already correct)
+      if (dateStr.includes('-')) {
+        const parts = dateStr.split('-');
+        if (parts.length === 3 && parts[0].length === 4) {
+          console.log('  -> Already YYYY-MM-DD:', dateStr);
+          return dateStr;
+        }
+      }
       
       // Handle YYYY.MM.DD format
       if (dateStr.includes('.')) {
@@ -98,15 +514,9 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
           const year = parts[0];
           const month = parts[1].padStart(2, '0');
           const day = parts[2].padStart(2, '0');
-          return `${year}-${month}-${day}`;
-        }
-      }
-      
-      // Handle YYYY-MM-DD format
-      if (dateStr.includes('-')) {
-        const parts = dateStr.split('-');
-        if (parts.length === 3 && parts[0].length === 4) {
-          return dateStr;
+          const result = `${year}-${month}-${day}`;
+          console.log('  -> YYYY.MM.DD to:', result);
+          return result;
         }
       }
       
@@ -115,33 +525,34 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
         const parts = dateStr.split('/');
         if (parts.length === 3) {
           if (parts[0].length === 4) {
-            return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+            // YYYY/MM/DD
+            const result = `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+            console.log('  -> YYYY/MM/DD to:', result);
+            return result;
           } else {
-            return `${parts[2]}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
+            // MM/DD/YYYY
+            const result = `${parts[2]}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
+            console.log('  -> MM/DD/YYYY to:', result);
+            return result;
           }
         }
       }
       
-      // Handle timestamp format (YYYY-MM-DD HH:MM:SS)
-      if (dateStr.includes(' ')) {
-        return dateStr.split(' ')[0];
-      }
-      
       // Just return year if only year is provided
       if (dateStr.length === 4 && !isNaN(dateStr)) {
+        console.log('  -> Year only:', dateStr);
         return dateStr;
       }
       
+      console.log('  -> Could not parse, returning as-is:', dateStr);
       return dateStr;
     }
-
     async function fetchCSV(url) {
       const response = await fetch(url);
       const text = await response.text();
       const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
       return parsed.data;
     }
-
     async function loadAllData() {
       try {
         const [americanismsData, objectsData, articlesData, picturesData, photographersListData] = await Promise.all([
@@ -151,7 +562,6 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
           fetchCSV(picturesURL),
           fetchCSV(photographersListURL)
         ]);
-
         // Process Americanisms and Objects (combined into Objects)
         const americanismsProcessed = americanismsData.map(row => ({
           src: row.src || row.Src || "",
@@ -167,7 +577,6 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
           source: "Americanisms",
           type: "objects"
         })).filter(img => img.src);
-
         const objectsProcessed = objectsData.map(row => ({
           src: row.Image || row.image || "",
           date: row.Date || row.date || "",
@@ -182,19 +591,23 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
           source: "Objects",
           type: "objects"
         })).filter(img => img.src);
-
         allData.objects = [...americanismsProcessed, ...objectsProcessed];
-
         // Process Articles (as links, not images)
         allData.articles = articlesData.map(row => ({
           src: row.src || row.Src || "",
           photo: row.photo || row.Photo || "",
           date: row.date || row.Date || "",
-          sortDate: parseDate(row.date || row.Date || ""),
+          sortDate: parseDate(row.datereal || row.Datereal || row.date || row.Date || ""),
           source: row.test || row.Test || "",
           type: "articles"
         })).filter(img => img.src);
-
+        
+        console.log('Processed articles count:', allData.articles.length);
+        console.log('Sample articles with dates:', allData.articles.slice(0, 5).map(a => ({ 
+          date: a.date, 
+          sortDate: a.sortDate, 
+          source: a.source 
+        })));
         // Process Pictures
         allData.pictures = picturesData.map(row => ({
           src: row.Link || row.link || "",
@@ -249,28 +662,23 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
         
         // Only keep photographers with actual websites
         photographersData = allPhotographers.filter(person => person.website !== '');
-
         console.log('Photographers with websites:', photographersData.length);
         
         // Show some examples of what we're filtering out
         const photographersWithoutWebsite = allPhotographers.filter(person => person.website === '');
         console.log('Photographers WITHOUT websites:', photographersWithoutWebsite.length);
         console.log('Sample photographers without websites:', photographersWithoutWebsite.slice(0, 5));
-
         // Sort photographers by last name
         photographersData.sort((a, b) => a.lastName.localeCompare(b.lastName));
-
         // Sort all by date (newest first)
         Object.keys(allData).forEach(key => {
           allData[key].sort((a, b) => b.sortDate.localeCompare(a.sortDate));
         });
-
         switchIndex();
       } catch (error) {
         console.error('Error loading data:', error);
       }
     }
-
     function switchIndex() {
       currentIndex = document.getElementById('indexSelector').value;
       
@@ -278,6 +686,7 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
         // Show photographers view, hide gallery
         document.getElementById('photographersContent').classList.add('active');
         document.getElementById('gallery').style.display = 'none';
+        document.getElementById('sortSelector').style.display = 'none';
         document.getElementById('rightSidebar').classList.remove('open');
         renderPhotographers();
         updateImageCount(photographersData.length);
@@ -285,17 +694,20 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
         // Show gallery view, hide photographers
         document.getElementById('photographersContent').classList.remove('active');
         document.getElementById('gallery').style.display = 'grid';
+        document.getElementById('sortSelector').style.display = 'block';
+        
+        // Reset sort mode when switching indexes to ensure it applies
+        document.getElementById('sortSelector').value = currentSortMode;
+        
         updateFilterVisibility();
         applyFilters();
       }
     }
-
     function updateFilterVisibility() {
       // Hide all filter sections
       document.getElementById('mediumFilter').style.display = 'none';
       document.getElementById('photographerFilter').style.display = 'none';
       document.getElementById('sourceFilter').style.display = 'none';
-
       // Show relevant filters
       if (currentIndex === 'objects') {
         document.getElementById('mediumFilter').style.display = 'block';
@@ -310,7 +722,6 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
         createArticleSourceCheckboxes();
       }
     }
-
     function createMediumCheckboxes() {
       const container = document.getElementById('mediumCheckboxes');
       container.innerHTML = '';
@@ -375,7 +786,6 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
         container.appendChild(item);
       });
     }
-
     function createPhotographerCheckboxes() {
       const container = document.getElementById('photographerCheckboxes');
       container.innerHTML = '';
@@ -410,7 +820,6 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
         container.appendChild(item);
       });
     }
-
     function createArticleSourceCheckboxes() {
       const container = document.getElementById('sourceCheckboxes');
       container.innerHTML = '';
@@ -445,7 +854,6 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
         container.appendChild(item);
       });
     }
-
     function applyFilters() {
       const searchInput = document.getElementById('topSearchInput');
       const keyword = searchInput ? searchInput.value.toLowerCase().trim() : '';
@@ -490,7 +898,6 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
         // Date filter
         if (dateFrom && img.sortDate < dateFrom) return false;
         if (dateTo && img.sortDate > dateTo) return false;
-
         // Type-specific filters
         if (currentIndex === 'objects') {
           const selectedMediums = Array.from(document.querySelectorAll('#mediumCheckboxes input:checked'))
@@ -517,14 +924,15 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
             return false;
           }
         }
-
         return true;
       });
-
+      
+      // Apply sorting
+      filteredImages = sortImages(filteredImages);
+      
       renderImages(filteredImages);
       updateImageCount(filteredImages.length);
     }
-
     function ensureBlogDataLoaded() {
       // Check if blog functions exist and trigger loading if data isn't available
       if (typeof loadBlogPosts === 'function' && (typeof blogPostsData === 'undefined' || blogPostsData.length === 0)) {
@@ -539,7 +947,6 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
         loadFieldNotes();
       }
     }
-
     function performUniversalSearch(query) {
       const results = [];
       
@@ -634,6 +1041,7 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
       // Hide other content
       document.getElementById('photographersContent').classList.remove('active');
       document.getElementById('blogContent')?.classList.remove('active');
+      document.getElementById('sortSelector').style.display = 'none';
       
       // Show gallery
       const gallery = document.getElementById('gallery');
@@ -654,7 +1062,6 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
         gallery.appendChild(card);
       });
     }
-
     function createUniversalSearchCard(result) {
       const card = document.createElement('div');
       card.style.cssText = `
@@ -821,20 +1228,19 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
       
       return card;
     }
-
     function clearFilters() {
       document.getElementById('topSearchInput').value = '';
       document.getElementById('dateFrom').value = '';
       document.getElementById('dateTo').value = '';
       document.querySelectorAll('.checkbox-group input').forEach(cb => cb.checked = true);
+      document.getElementById('sortSelector').value = 'date-desc';
+      currentSortMode = 'date-desc';
       universalSearchMode = false;
       applyFilters();
     }
-
     function updateImageCount(count) {
       document.getElementById('imageCount').textContent = `${count} ${universalSearchMode ? 'results' : 'items'}`;
     }
-
     function renderImages(imageArray) {
       const gallery = document.getElementById("gallery");
       gallery.innerHTML = "";
@@ -876,15 +1282,12 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
           // Render as image card
           const card = document.createElement("div");
           card.className = "image-card";
-
           const imageEl = document.createElement("img");
           imageEl.src = img.src;
           imageEl.alt = img.title || "Image";
-
           imageEl.addEventListener('load', () => {
             imageEl.classList.add('loaded');
           });
-
           const metadata = document.createElement("div");
           metadata.className = "metadata";
           
@@ -903,16 +1306,13 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
           }
           
           metadata.innerHTML = metadataHTML;
-
           card.appendChild(imageEl);
           card.appendChild(metadata);
           gallery.appendChild(card);
-
           card.addEventListener("click", () => showOverlay(index));
         }
       });
     }
-
     function renderPhotographers() {
       const searchTerm = document.getElementById('photographersSearch').value.toLowerCase();
       
@@ -1031,7 +1431,6 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
       
       return null;
     }
-
     function showOverlay(index) {
       currentImageIndex = index;
       const img = filteredImages[index];
@@ -1058,7 +1457,6 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
       
       document.getElementById("overlayMetadata").innerHTML = overlayHTML;
     }
-
     function hideOverlay() {
       document.getElementById("overlay").style.display = "none";
       document.getElementById("overlayImg").src = "";
@@ -1081,7 +1479,6 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
         alert('Fullscreen failed. Try pressing F11 or use the F key.');
       }
     }
-
     document.getElementById("overlay").addEventListener("click", (e) => {
       if (e.target === document.getElementById("overlay")) {
         hideOverlay();
@@ -1097,7 +1494,6 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
       e.stopPropagation();
       hideOverlay();
     });
-
     document.addEventListener('keydown', (e) => {
       if (document.getElementById("overlay").style.display === "flex") {
         if (e.key === "ArrowLeft" && currentImageIndex > 0) {
@@ -1111,7 +1507,6 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
         }
       }
     });
-
     document.getElementById('topSearchInput').addEventListener('input', applyFilters);
     
     // Photographers search functionality
@@ -1134,5 +1529,4 @@ const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4
       this.classList.add('active');
       document.getElementById('allPhotographers').classList.remove('active');
     });
-
     loadAllData();
