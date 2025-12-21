@@ -1,12 +1,11 @@
 // Sort button functionality
-let currentSortMode = 'newest'; // 'newest', 'oldest', 'alphabetical'
-
+let currentSortMode = 'NEWEST'; // 'NEWEST', 'OLDEST', 'alphabetical'
 function cycleSortMode() {
   // Skip if in photographers view or blog mode
   if (typeof currentIndex !== 'undefined' && currentIndex === 'photographers') return;
   if (typeof currentMode !== 'undefined' && currentMode === 'blog') return;
   
-  const modes = ['newest', 'oldest', 'alphabetical'];
+  const modes = ['NEWEST', 'OLDEST', 'alphabetical'];
   const currentIdx = modes.indexOf(currentSortMode);
   currentSortMode = modes[(currentIdx + 1) % modes.length];
   
@@ -14,8 +13,8 @@ function cycleSortMode() {
   const sortBtn = document.getElementById('sortButton');
   if (sortBtn) {
     const labels = {
-      'newest': 'Newest',
-      'oldest': 'Oldest',
+      'NEWEST': 'Newest',
+      'OLDEST': 'Oldest',
       'alphabetical': 'A-Z'
     };
     sortBtn.textContent = labels[currentSortMode];
@@ -26,13 +25,12 @@ function cycleSortMode() {
     applyFilters();
   }
 }
-
 function sortFilteredImages(images) {
   const sorted = [...images];
   
-  if (currentSortMode === 'newest') {
+  if (currentSortMode === 'NEWEST') {
     sorted.sort((a, b) => b.sortDate.localeCompare(a.sortDate));
-  } else if (currentSortMode === 'oldest') {
+  } else if (currentSortMode === 'OLDEST') {
     sorted.sort((a, b) => a.sortDate.localeCompare(b.sortDate));
   } else if (currentSortMode === 'alphabetical') {
     // Sort alphabetically based on type
@@ -59,7 +57,6 @@ function sortFilteredImages(images) {
   
   return sorted;
 }
-
 // Show/hide sort button based on view
 function updateSortButtonVisibility() {
   const sortBtn = document.getElementById('sortButton');
@@ -80,7 +77,6 @@ function updateSortButtonVisibility() {
   // Show for objects, articles, and pictures
   sortBtn.style.display = 'flex';
 }
-
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
   updateSortButtonVisibility();
