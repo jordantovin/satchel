@@ -13,8 +13,8 @@ function cycleSortMode() {
   const sortBtn = document.getElementById('sortButton');
   if (sortBtn) {
     const labels = {
-      'NEWEST': 'Newest',
-      'OLDEST': 'Oldest',
+      'NEWEST': 'NEWEST',
+      'OLDEST': 'OLDEST',
       'alphabetical': 'A-Z'
     };
     sortBtn.textContent = labels[currentSortMode];
