@@ -38,7 +38,7 @@ a:active {
   top: 0;
   left: 0;
   right: 0;
-  background: #ffff00;
+  background: white;
   color: #000;
   border-bottom: 2px solid black;
   z-index: 1003;
