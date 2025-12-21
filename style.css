@@ -63,6 +63,19 @@ a:active {
   justify-content: flex-end;
 }
 
+.logotext{
+  font-size: 16px;
+  font-weight: bold;
+  color: #000;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 0;
+  border-bottom: 3px solid transparent;
+  transition: border-color 0.2s;
+  white-space: nowrap;
+}
+
 .nav-link {
   font-size: 16px;
   font-weight: bold;
