@@ -600,13 +600,13 @@ a:active {
 .blog-post {
   margin-bottom: 35px;
   padding-bottom: 20px;
+  padding-left: 20px;
+  padding-right: 20px;
   border-bottom: 1px solid black;
 }
 
 .blog-post:last-child {
   border-bottom: none;
-  padding-left: 20px;
-  padding-right: 20px;
 }
 
 .blog-post h2 {
@@ -614,8 +614,6 @@ a:active {
   margin-top: 0px;
   margin-bottom: 0px;
   line-height: 1.2;
-  padding-left: 20px;
-  padding-right: 20px;
   font-family: Helvetica;
 }
 
@@ -624,8 +622,6 @@ a:active {
   color: #999;
   margin-top: 0px;
   margin-bottom: 0px;
-  padding-left: 20px;
-  padding-right: 20px;
 }
 
 .blog-post p {
@@ -634,8 +630,6 @@ a:active {
   color: black;
   margin: 5px 0;
   margin-bottom: 10px;
-  padding-left: 20px;
-  padding-right: 20px;
 }
 
 /* Blog post text links styling - EXCLUDE the button */
