@@ -592,15 +592,23 @@ monthDiv.appendChild(monthHeader);
           type: "objects"
         })).filter(img => img.src);
         allData.objects = [...americanismsProcessed, ...objectsProcessed];
-        // Process Articles (as links, not images)
-        allData.articles = articlesData.map(row => ({
-          src: row.src || row.Src || "",
-          photo: row.photo || row.Photo || "",
-          date: row.date || row.Date || "",
-          sortDate: parseDate(row.datereal || row.Datereal || row.date || row.Date || ""),
-          source: row.test || row.Test || "",
-          type: "articles"
-        })).filter(img => img.src);
+// Process Articles (as links, not images)
+allData.articles = articlesData.map(row => {
+  // Debug: log the first row to see what Papa Parse is giving us
+  if (articlesData.indexOf(row) === 0) {
+    console.log('First article row keys:', Object.keys(row));
+    console.log('First article row data:', row);
+  }
+  
+  return {
+    src: row.src || row.Src || "",
+    photo: row.photo || row.Photo || "",
+    date: row.date || row.Date || "",
+    sortDate: parseDate(row.datereal || row.Datereal || row.date || row.Date || ""),
+    source: row.test || row.Test || "",
+    type: "articles"
+  };
+}).filter(img => img.src);
         
         console.log('Processed articles count:', allData.articles.length);
         console.log('Sample articles with dates:', allData.articles.slice(0, 5).map(a => ({ 
