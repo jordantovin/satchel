@@ -11,7 +11,7 @@
   // ============================================================================
   
   let currentMode = 'archive';
-  let currentSortMode = 'newest'; // 'newest', 'oldest', 'alphabetical'
+  let currentSortMode = 'NEWEST'; // 'NEWEST', 'OLDEST', 'alphabetical'
   let blogPostsData = [];
   let inspoPostsData = [];
   let fieldNotesData = [];
@@ -410,9 +410,9 @@
   function sortFilteredImages(images) {
     const sorted = [...images];
     
-    if (currentSortMode === 'newest') {
+    if (currentSortMode === 'NEWEST') {
       sorted.sort((a, b) => b.sortDate.localeCompare(a.sortDate));
-    } else if (currentSortMode === 'oldest') {
+    } else if (currentSortMode === 'OLDEST') {
       sorted.sort((a, b) => a.sortDate.localeCompare(b.sortDate));
     } else if (currentSortMode === 'alphabetical') {
       sorted.sort((a, b) => {
@@ -440,15 +440,15 @@
   window.cycleSortMode = function() {
     if (currentIndex === 'photographers' || currentMode === 'blog') return;
     
-    const modes = ['newest', 'oldest', 'alphabetical'];
+    const modes = ['NEWEST', 'OLDEST', 'alphabetical'];
     const currentIdx = modes.indexOf(currentSortMode);
     currentSortMode = modes[(currentIdx + 1) % modes.length];
     
     const sortBtn = document.getElementById('sortButton');
     if (sortBtn) {
       const labels = {
-        'newest': 'Newest',
-        'oldest': 'Oldest',
+        'NEWEST': 'NEWEST',
+        'OLDEST': 'OLDEST',
         'alphabetical': 'A-Z'
       };
       sortBtn.textContent = labels[currentSortMode];
@@ -1481,9 +1481,9 @@
     document.getElementById('dateFrom').value = '';
     document.getElementById('dateTo').value = '';
     document.querySelectorAll('.checkbox-group input').forEach(cb => cb.checked = true);
-    currentSortMode = 'newest';
+    currentSortMode = 'NEWEST';
     const sortBtn = document.getElementById('sortButton');
-    if (sortBtn) sortBtn.textContent = 'Newest';
+    if (sortBtn) sortBtn.textContent = 'NEWEST';
     universalSearchMode = false;
     applyFilters();
   };
