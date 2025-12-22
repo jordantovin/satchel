@@ -147,6 +147,11 @@
       return;
     }
     
+    // Allow all browser shortcuts (Ctrl, Cmd, Alt combinations)
+    if (e.ctrlKey || e.metaKey || e.altKey) {
+      return;
+    }
+    
     // Check if overlay is open
     const overlayOpen = document.getElementById("overlay")?.style.display === "flex";
     const helpOpen = document.getElementById('keyboardHelpOverlay')?.style.display === 'flex';
