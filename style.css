@@ -638,6 +638,19 @@ a:active {
   padding-right: 20px;
 }
 
+/* Blog post link styling */
+.blog-post p a {
+  color: #000 !important;
+  text-decoration: none !important;
+  border-bottom: 2px solid #000;
+  padding-bottom: 2px;
+  transition: opacity 0.2s;
+}
+
+.blog-post p a:hover {
+  opacity: 0.6;
+}
+
 /* ===== FIELD NOTES ===== */
 #fieldNotesSection {
   padding-left: 20px;
