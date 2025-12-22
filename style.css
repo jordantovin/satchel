@@ -628,26 +628,35 @@ a:active {
   padding-right: 20px;
 }
 
-.blog-post p {
-  font-size: 30px;
-  line-height: 1.0;
-  color: black;
-  margin: 5px 0;
-  margin-bottom: 10px;
-  padding-left: 20px;
-  padding-right: 20px;
-}
-
-.blog-post p a {
+/* Blog post text links styling - EXCLUDE the button */
+.blog-post p a:not(.blog-link-button) {
   color: #000 !important;
   text-decoration: none !important;
   border-bottom: 2px solid #000;
-  padding-bottom: -1px;  /* Changed from 2px to 0px */
+  padding-bottom: 0px;
   transition: opacity 0.2s;
 }
 
-.blog-post p a:hover {
+.blog-post p a:not(.blog-link-button):hover {
   opacity: 0.6;
+}
+
+/* LINK button styling - completely separate */
+.blog-link-button {
+  color: #000 !important;
+  background-color: #fff !important;
+  text-decoration: none !important;
+  border: 2px solid #000 !important;
+  padding: 4px 12px !important;
+  display: inline-block !important;
+  font-weight: bold !important;
+  transition: background-color 0.2s, color 0.2s !important;
+  border-bottom: none !important;
+}
+
+.blog-link-button:hover {
+  background-color: #000 !important;
+  color: #fff !important;
 }
 
 /* ===== FIELD NOTES ===== */
