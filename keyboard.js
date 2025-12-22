@@ -74,26 +74,40 @@
           
           <kbd style="background: #f5f5f5; padding: 4px 8px; border-radius: 4px; font-family: monospace;">s</kbd>
           <span>Cycle sort mode</span>
+          
+          <kbd style="background: #f5f5f5; padding: 4px 8px; border-radius: 4px; font-family: monospace;">c</kbd>
+          <span>Clear all filters</span>
         </div>
       </div>
       
       <div style="margin-bottom: 24px;">
-        <h3 style="font-size: 18px; margin-bottom: 12px; color: #666;">Navigation</h3>
+        <h3 style="font-size: 18px; margin-bottom: 12px; color: #666;">Navigation - Archive</h3>
         <div style="display: grid; grid-template-columns: 120px 1fr; gap: 8px; font-size: 14px;">
           <kbd style="background: #f5f5f5; padding: 4px 8px; border-radius: 4px; font-family: monospace;">1</kbd>
-          <span>Switch to Objects</span>
+          <span>Objects</span>
           
           <kbd style="background: #f5f5f5; padding: 4px 8px; border-radius: 4px; font-family: monospace;">2</kbd>
-          <span>Switch to Articles</span>
+          <span>Articles</span>
           
           <kbd style="background: #f5f5f5; padding: 4px 8px; border-radius: 4px; font-family: monospace;">3</kbd>
-          <span>Switch to Pictures</span>
+          <span>Pictures</span>
           
           <kbd style="background: #f5f5f5; padding: 4px 8px; border-radius: 4px; font-family: monospace;">4</kbd>
-          <span>Switch to Photographers</span>
-          
+          <span>Photographers</span>
+        </div>
+      </div>
+      
+      <div style="margin-bottom: 24px;">
+        <h3 style="font-size: 18px; margin-bottom: 12px; color: #666;">Navigation - Blog</h3>
+        <div style="display: grid; grid-template-columns: 120px 1fr; gap: 8px; font-size: 14px;">
           <kbd style="background: #f5f5f5; padding: 4px 8px; border-radius: 4px; font-family: monospace;">b</kbd>
-          <span>Toggle Blog mode</span>
+          <span>Blog Posts</span>
+          
+          <kbd style="background: #f5f5f5; padding: 4px 8px; border-radius: 4px; font-family: monospace;">i</kbd>
+          <span>Inspo</span>
+          
+          <kbd style="background: #f5f5f5; padding: 4px 8px; border-radius: 4px; font-family: monospace;">f</kbd>
+          <span>Field Notes</span>
         </div>
       </div>
       
@@ -111,14 +125,6 @@
           
           <kbd style="background: #f5f5f5; padding: 4px 8px; border-radius: 4px; font-family: monospace;">Escape</kbd>
           <span>Close overlay</span>
-        </div>
-      </div>
-      
-      <div>
-        <h3 style="font-size: 18px; margin-bottom: 12px; color: #666;">Filters</h3>
-        <div style="display: grid; grid-template-columns: 120px 1fr; gap: 8px; font-size: 14px;">
-          <kbd style="background: #f5f5f5; padding: 4px 8px; border-radius: 4px; font-family: monospace;">c</kbd>
-          <span>Clear all filters</span>
         </div>
       </div>
       
@@ -188,48 +194,53 @@
         
       case '1':
         e.preventDefault();
-        const selector = document.getElementById('indexSelector');
-        if (selector && selector.style.display !== 'none') {
-          selector.value = 'objects';
-          if (typeof window.switchIndex === 'function') window.switchIndex();
+        if (typeof window.navigateTo === 'function') {
+          window.navigateTo('archive', 'objects');
         }
         break;
         
       case '2':
         e.preventDefault();
-        const selector2 = document.getElementById('indexSelector');
-        if (selector2 && selector2.style.display !== 'none') {
-          selector2.value = 'articles';
-          if (typeof window.switchIndex === 'function') window.switchIndex();
+        if (typeof window.navigateTo === 'function') {
+          window.navigateTo('archive', 'articles');
         }
         break;
         
       case '3':
         e.preventDefault();
-        const selector3 = document.getElementById('indexSelector');
-        if (selector3 && selector3.style.display !== 'none') {
-          selector3.value = 'pictures';
-          if (typeof window.switchIndex === 'function') window.switchIndex();
+        if (typeof window.navigateTo === 'function') {
+          window.navigateTo('archive', 'pictures');
         }
         break;
         
       case '4':
         e.preventDefault();
-        const selector4 = document.getElementById('indexSelector');
-        if (selector4 && selector4.style.display !== 'none') {
-          selector4.value = 'photographers';
-          if (typeof window.switchIndex === 'function') window.switchIndex();
+        if (typeof window.navigateTo === 'function') {
+          window.navigateTo('archive', 'photographers');
         }
         break;
         
       case 'b':
       case 'B':
         e.preventDefault();
-        const modeSelector = document.getElementById('modeSelector');
-        if (modeSelector) {
-          const currentModeValue = modeSelector.value;
-          modeSelector.value = currentModeValue === 'blog' ? 'archive' : 'blog';
-          if (typeof window.switchMode === 'function') window.switchMode();
+        if (typeof window.navigateTo === 'function') {
+          window.navigateTo('blog', 'posts');
+        }
+        break;
+        
+      case 'i':
+      case 'I':
+        e.preventDefault();
+        if (typeof window.navigateTo === 'function') {
+          window.navigateTo('blog', 'inspo');
+        }
+        break;
+        
+      case 'f':
+      case 'F':
+        e.preventDefault();
+        if (typeof window.navigateTo === 'function') {
+          window.navigateTo('blog', 'fieldNotes');
         }
         break;
         
