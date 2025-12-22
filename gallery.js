@@ -493,11 +493,13 @@
       }
       
       if (post.text) {
-        postHTML += `<p>${post.text}</p>`;
+        // Make sure all links within the text have target="_blank"
+        let textWithTargetBlank = post.text.replace(/<a /g, '<a target="_blank" ');
+        postHTML += `<p>${textWithTargetBlank}</p>`;
       }
       
       if (post.link) {
-        postHTML += `<p><a href="${post.link}" target="_blank" style="color: #0066cc; text-decoration: underline;">Read more →</a></p>`;
+        postHTML += `<p><a href="${post.link}" target="_blank" style="color: #0066cc; text-decoration: underline;">Link</a></p>`;
       }
       
       postDiv.innerHTML = postHTML;
