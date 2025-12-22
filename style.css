@@ -639,6 +639,11 @@ a:active {
 }
 
 /* ===== FIELD NOTES ===== */
+#fieldNotesSection {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
 .field-note-item {
   margin: 0;
   padding: 10px 0;
@@ -689,6 +694,29 @@ a:active {
 }
 
 /* ===== INSPO LINKS ===== */
+#inspoSection {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+#inspoSection > div {
+  margin-bottom: 40px;
+}
+
+#inspoSection h2 {
+  font-size: 28px;
+  font-weight: bold;
+  font-family: Helvetica;
+  margin-bottom: 15px;
+  margin-top: 0;
+}
+
+#inspoSection p {
+  font-size: 16px;
+  line-height: 1.0;
+  margin: 0;
+}
+
 .inspo-link {
   color: #000 !important;
   text-decoration: none !important;
