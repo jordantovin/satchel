@@ -498,27 +498,12 @@ function renderBlogPosts() {
       postHTML += `<p>${textWithTargetBlank}</p>`;
     }
     
-if (post.link) {
-  postHTML += `<p style="margin-top: 20px;"><a href="${post.link}" target="_blank" class="blog-link-button">LINK</a></p>`;
-}
+    if (post.link) {
+      postHTML += `<p style="margin-top: 20px;"><a href="${post.link}" target="_blank" class="blog-link-button">LINK</a></p>`;
+    }
     
     postDiv.innerHTML = postHTML;
     postsContainer.appendChild(postDiv);
-    
-    // Add hover event listeners to the LINK button after it's been added to DOM
-    if (post.link) {
-      const linkButton = postDiv.querySelector('.blog-link-button');
-      if (linkButton) {
-        linkButton.addEventListener('mouseenter', function() {
-          this.style.backgroundColor = '#000';
-          this.style.color = '#fff';
-        });
-        linkButton.addEventListener('mouseleave', function() {
-          this.style.backgroundColor = '#fff';
-          this.style.color = '#000';
-        });
-      }
-    }
   });
   
   if (currentMode === 'blog') {
