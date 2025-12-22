@@ -498,9 +498,9 @@ function renderBlogPosts() {
       postHTML += `<p>${textWithTargetBlank}</p>`;
     }
     
-    if (post.link) {
-      postHTML += `<p style="margin-top: 20px;"><a href="${post.link}" target="_blank" class="blog-link-button" style="color: #000; background-color: #fff; text-decoration: none; border: 2px solid #000; padding: 4px 12px; display: inline-block; font-weight: bold; transition: background-color 0.2s, color 0.2s;">LINK</a></p>`;
-    }
+if (post.link) {
+  postHTML += `<p style="margin-top: 20px;"><a href="${post.link}" target="_blank" class="blog-link-button">LINK</a></p>`;
+}
     
     postDiv.innerHTML = postHTML;
     postsContainer.appendChild(postDiv);
