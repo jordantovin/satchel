@@ -630,6 +630,7 @@ a:active {
   color: black;
   margin: 5px 0;
   margin-bottom: 10px;
+border-bottom: none;
 }
 
 /* Blog post text links styling - EXCLUDE the button */
@@ -639,6 +640,7 @@ a:active {
   text-decoration-thickness: 1px !important;
   text-underline-offset: 1px !important;
   transition: opacity 0.2s;
+border-bottom: none;
 }
 
 .blog-post p a:not(.blog-link-button):hover {
