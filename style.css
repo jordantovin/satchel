@@ -628,6 +628,16 @@ a:active {
   padding-right: 20px;
 }
 
+.blog-post p {
+  font-size: 30px;
+  line-height: 1.0;
+  color: black;
+  margin: 5px 0;
+  margin-bottom: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
 /* Blog post text links styling - EXCLUDE the button */
 .blog-post p a:not(.blog-link-button) {
   color: #000 !important;
@@ -651,7 +661,6 @@ a:active {
   display: inline-block !important;
   font-weight: bold !important;
   transition: background-color 0.2s, color 0.2s !important;
-  border-bottom: none !important;
 }
 
 .blog-link-button:hover {
