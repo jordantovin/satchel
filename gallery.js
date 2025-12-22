@@ -472,7 +472,7 @@
   // RENDERING FUNCTIONS
   // ============================================================================
   
- function renderBlogPosts() {
+function renderBlogPosts() {
   const postsContainer = document.getElementById('postsSection');
   postsContainer.innerHTML = '';
   
@@ -499,7 +499,7 @@
     }
     
     if (post.link) {
-      postHTML += `<p><a href="${post.link}" target="_blank" style="color: #0066cc; text-decoration: underline;">Link</a></p>`;
+      postHTML += `<p><a href="${post.link}" target="_blank" style="color: #000; text-decoration: none; border: 2px solid #000; padding: 8px 16px; display: inline-block; font-weight: bold; transition: background-color 0.2s, color 0.2s;" onmouseover="this.style.backgroundColor='#000'; this.style.color='#fff';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#000';">LINK</a></p>`;
     }
     
     postDiv.innerHTML = postHTML;
@@ -510,7 +510,7 @@
     updateBlogItemCount();
   }
 }
-
+  
   function renderInspoPosts() {
     const inspoContainer = document.getElementById('inspoSection');
     inspoContainer.innerHTML = '';
