@@ -492,11 +492,11 @@
         postHTML += `<div style="margin: 20px 0;"><img src="${post.pictures}" alt="${post.title}" style="max-width: 600px; width: 100%; height: auto; padding-left:20px; padding-right:20px; border-radius: 0px;"></div>`;
       }
       
-      if (post.text) {
-        // Make sure all links within the text have target="_blank"
-        let textWithTargetBlank = post.text.replace(/<a /g, '<a target="_blank" ');
-        postHTML += `<p>${textWithTargetBlank}</p>`;
-      }
+if (post.text) {
+  // Make sure all links within the text have target="_blank"
+  let textWithTargetBlank = post.text.replace(/<a\s/gi, '<a target="_blank" ');
+  postHTML += `<p>${textWithTargetBlank}</p>`;
+}
       
       if (post.link) {
         postHTML += `<p><a href="${post.link}" target="_blank" style="color: #0066cc; text-decoration: underline;">Link</a></p>`;
