@@ -643,7 +643,7 @@ a:active {
   color: #000 !important;
   text-decoration: none !important;
   border-bottom: 2px solid #000;
-  padding-bottom: 1px;
+  padding-bottom: 0px;
   transition: opacity 0.2s;
 }
 
