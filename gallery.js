@@ -472,44 +472,44 @@
   // RENDERING FUNCTIONS
   // ============================================================================
   
-  function renderBlogPosts() {
-    const postsContainer = document.getElementById('postsSection');
-    postsContainer.innerHTML = '';
-    
-    if (blogPostsData.length === 0) {
-      postsContainer.innerHTML = '<p style="font-size: 16px; color: #666;">No blog posts found.</p>';
-      return;
-    }
-    
-    blogPostsData.forEach(post => {
-      const postDiv = document.createElement('div');
-      postDiv.className = 'blog-post';
-      
-      let postHTML = `<h2>${post.title}</h2>`;
-      postHTML += `<div class="date">${post.date}</div>`;
-      
-      if (post.pictures) {
-        postHTML += `<div style="margin: 20px 0;"><img src="${post.pictures}" alt="${post.title}" style="max-width: 600px; width: 100%; height: auto; padding-left:20px; padding-right:20px; border-radius: 0px;"></div>`;
-      }
-      
-if (post.text) {
-  // Make sure all links within the text have target="_blank"
-  let textWithTargetBlank = post.text.replace(/<a\s/gi, '<a target="_blank" ');
-  postHTML += `<p>${textWithTargetBlank}</p>`;
-}
-      
-      if (post.link) {
-        postHTML += `<p><a href="${post.link}" target="_blank" style="color: #0066cc; text-decoration: underline;">Link</a></p>`;
-      }
-      
-      postDiv.innerHTML = postHTML;
-      postsContainer.appendChild(postDiv);
-    });
-    
-    if (currentMode === 'blog') {
-      updateBlogItemCount();
-    }
+ function renderBlogPosts() {
+  const postsContainer = document.getElementById('postsSection');
+  postsContainer.innerHTML = '';
+  
+  if (blogPostsData.length === 0) {
+    postsContainer.innerHTML = '<p style="font-size: 16px; color: #666;">No blog posts found.</p>';
+    return;
   }
+  
+  blogPostsData.forEach(post => {
+    const postDiv = document.createElement('div');
+    postDiv.className = 'blog-post';
+    
+    let postHTML = `<h2>${post.title}</h2>`;
+    postHTML += `<div class="date">${post.date}</div>`;
+    
+    if (post.pictures) {
+      postHTML += `<div style="margin: 20px 0;"><img src="${post.pictures}" alt="${post.title}" style="max-width: 600px; width: 100%; height: auto; padding-left:20px; padding-right:20px; border-radius: 0px;"></div>`;
+    }
+    
+    if (post.text) {
+      // Make sure all links within the text have target="_blank"
+      let textWithTargetBlank = post.text.replace(/<a\s+href=/gi, '<a target="_blank" href=');
+      postHTML += `<p>${textWithTargetBlank}</p>`;
+    }
+    
+    if (post.link) {
+      postHTML += `<p><a href="${post.link}" target="_blank" style="color: #0066cc; text-decoration: underline;">Link</a></p>`;
+    }
+    
+    postDiv.innerHTML = postHTML;
+    postsContainer.appendChild(postDiv);
+  });
+  
+  if (currentMode === 'blog') {
+    updateBlogItemCount();
+  }
+}
 
   function renderInspoPosts() {
     const inspoContainer = document.getElementById('inspoSection');
