@@ -636,8 +636,8 @@ a:active {
 .blog-post p a:not(.blog-link-button) {
   color: #000 !important;
   text-decoration: underline !important;
-  text-decoration-thickness: 2px !important;
-  text-underline-offset: 2px !important;
+  text-decoration-thickness: 1px !important;
+  text-underline-offset: 1px !important;
   transition: opacity 0.2s;
 }
 
@@ -653,7 +653,7 @@ a:active {
   border: 2px solid #000 !important;
   padding: 4px 12px !important;
   display: inline-block !important;
-  font-weight: normal !important;
+  font-weight: 300 !important;
   transition: background-color 0.2s, color 0.2s !important;
 }
 
