@@ -42,7 +42,6 @@
   let currentImageIndex = -1;
   let universalSearchMode = false;
   let blogDataLoaded = false;
-  let currentClassFilter = 'all';
 
   // ============================================================================
   // DATE PARSING UTILITIES
@@ -289,7 +288,7 @@
         type: "pictures"
       })).filter(img => img.src);
 
-      // Process Photographers (now includes all people with classes)
+      // Process Photographers
       const allPeople = photographersListData
         .filter(row => {
           const hasFirst = row['First Name'] && row['First Name'].trim();
@@ -313,8 +312,12 @@
           return person;
         });
 
-      // Keep all people with websites, not just photographers
-      photographersData = allPeople.filter(person => person.website !== '');
+      const allPhotographers = allPeople.filter(person => {
+        const classLower = person.className.toLowerCase();
+        return classLower.includes('photographer');
+      });
+
+      photographersData = allPhotographers.filter(person => person.website !== '');
       photographersData.sort((a, b) => a.lastName.localeCompare(b.lastName));
 
       // Sort all by date
@@ -483,6 +486,19 @@
       sortBtn.style.display = 'none';
     } else {
       sortBtn.style.display = 'flex';
+    }
+  }
+
+  function updateFilterButtonsVisibility() {
+    const filterRow = document.getElementById('filterButtonsRow');
+    const contentWrapper = document.getElementById('content-wrapper');
+    
+    if (currentIndex === 'photographers' && currentMode === 'archive') {
+      filterRow.style.display = 'flex';
+      contentWrapper.classList.add('with-filters');
+    } else {
+      filterRow.style.display = 'none';
+      contentWrapper.classList.remove('with-filters');
     }
   }
 
@@ -786,35 +802,22 @@ function renderBlogPosts() {
     const searchTerm = document.getElementById('photographersSearch').value.toLowerCase();
     
     filteredPhotographers = photographersData.filter(p => {
-      // Apply class filter first
-      if (currentClassFilter !== 'all') {
-        const classLower = p.className.toLowerCase();
-        if (!classLower.includes(currentClassFilter)) {
-          return false;
-        }
+      const searchableFields = [
+        p.firstName,
+        p.lastName,
+        p.website,
+        p.className,
+        p.dateAdded
+      ];
+      
+      if (p.allColumns) {
+        Object.values(p.allColumns).forEach(value => {
+          searchableFields.push(value);
+        });
       }
       
-      // Then apply search filter
-      if (searchTerm) {
-        const searchableFields = [
-          p.firstName,
-          p.lastName,
-          p.website,
-          p.className,
-          p.dateAdded
-        ];
-        
-        if (p.allColumns) {
-          Object.values(p.allColumns).forEach(value => {
-            searchableFields.push(value);
-          });
-        }
-        
-        const searchableText = searchableFields.join(' ').toLowerCase();
-        return searchableText.includes(searchTerm);
-      }
-      
-      return true;
+      const searchableText = searchableFields.join(' ').toLowerCase();
+      return searchableText.includes(searchTerm);
     });
     
     const list = document.getElementById('photographersList');
@@ -1301,6 +1304,7 @@ function renderBlogPosts() {
       }
       
       updateSortButtonVisibility();
+      updateFilterButtonsVisibility();
     }
   };
   
@@ -1361,6 +1365,7 @@ function renderBlogPosts() {
     }
     
     updateSortButtonVisibility();
+    updateFilterButtonsVisibility();
   };
 
   window.switchBlogSection = function() {
@@ -1757,54 +1762,55 @@ function renderBlogPosts() {
       placesSearch.addEventListener('input', renderPlaces);
     }
     
-    // Filter buttons for Names
-    document.getElementById('allNames').addEventListener('click', function() {
-      currentClassFilter = 'all';
-      document.querySelectorAll('#photographersButtons button').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('allPhotographers').addEventListener('click', function() {
+      document.getElementById('photographersSearch').value = '';
       this.classList.add('active');
-      renderPhotographers();
-    });
-    
-    document.getElementById('filterPoets').addEventListener('click', function() {
-      currentClassFilter = 'poet';
-      document.querySelectorAll('#photographersButtons button').forEach(btn => btn.classList.remove('active'));
-      this.classList.add('active');
-      renderPhotographers();
-    });
-    
-    document.getElementById('filterFineArtists').addEventListener('click', function() {
-      currentClassFilter = 'fine artist';
-      document.querySelectorAll('#photographersButtons button').forEach(btn => btn.classList.remove('active'));
-      this.classList.add('active');
-      renderPhotographers();
-    });
-    
-    document.getElementById('filterDesigners').addEventListener('click', function() {
-      currentClassFilter = 'designer';
-      document.querySelectorAll('#photographersButtons button').forEach(btn => btn.classList.remove('active'));
-      this.classList.add('active');
-      renderPhotographers();
-    });
-    
-    document.getElementById('filterPhotographers').addEventListener('click', function() {
-      currentClassFilter = 'photographer';
-      document.querySelectorAll('#photographersButtons button').forEach(btn => btn.classList.remove('active'));
-      this.classList.add('active');
+      document.getElementById('randomPhotographer').classList.remove('active');
       renderPhotographers();
     });
     
     document.getElementById('randomPhotographer').addEventListener('click', function() {
-      if (filteredPhotographers.length > 0) {
-        const randomPerson = filteredPhotographers[Math.floor(Math.random() * filteredPhotographers.length)];
-        if (randomPerson && randomPerson.website) {
-          window.open(randomPerson.website, '_blank');
-        }
-      } else if (photographersData.length > 0) {
-        const randomPerson = photographersData[Math.floor(Math.random() * photographersData.length)];
-        if (randomPerson && randomPerson.website) {
-          window.open(randomPerson.website, '_blank');
+      if (photographersData.length > 0) {
+        const randomPhotographer = photographersData[Math.floor(Math.random() * photographersData.length)];
+        if (randomPhotographer && randomPhotographer.website) {
+          window.open(randomPhotographer.website, '_blank');
         }
       }
+      this.classList.add('active');
+      document.getElementById('allPhotographers').classList.remove('active');
+    });
+    
+    // Filter buttons row handlers
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    filterButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const filter = this.getAttribute('data-filter');
+        
+        if (filter === 'random') {
+          // Open random photographer
+          if (photographersData.length > 0) {
+            const randomPhotographer = photographersData[Math.floor(Math.random() * photographersData.length)];
+            if (randomPhotographer && randomPhotographer.website) {
+              window.open(randomPhotographer.website, '_blank');
+            }
+          }
+        } else {
+          // Apply filter via search
+          const searchInput = document.getElementById('photographersSearch');
+          if (filter === 'all') {
+            searchInput.value = '';
+          } else {
+            searchInput.value = filter;
+          }
+          
+          // Update active state
+          filterButtons.forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          
+          // Trigger search
+          renderPhotographers();
+        }
+      });
     });
   }
 
