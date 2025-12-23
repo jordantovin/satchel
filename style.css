@@ -568,6 +568,8 @@ a:active {
   color: inherit;
   display: inline-block;
   text-transform: lowercase;
+  border-bottom:none;
+  border:none;
   margin: 0 0.5px;
   transition: transform 0.2s ease-in-out;
 }
