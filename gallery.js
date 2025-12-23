@@ -491,14 +491,11 @@
 
   function updateFilterButtonsVisibility() {
     const filterRow = document.getElementById('filterButtonsRow');
-    const contentWrapper = document.getElementById('content-wrapper');
     
     if (currentIndex === 'photographers' && currentMode === 'archive') {
       filterRow.style.display = 'flex';
-      contentWrapper.classList.add('with-filters');
     } else {
       filterRow.style.display = 'none';
-      contentWrapper.classList.remove('with-filters');
     }
   }
 
@@ -1761,24 +1758,6 @@ function renderBlogPosts() {
     if (placesSearch) {
       placesSearch.addEventListener('input', renderPlaces);
     }
-    
-    document.getElementById('allPhotographers').addEventListener('click', function() {
-      document.getElementById('photographersSearch').value = '';
-      this.classList.add('active');
-      document.getElementById('randomPhotographer').classList.remove('active');
-      renderPhotographers();
-    });
-    
-    document.getElementById('randomPhotographer').addEventListener('click', function() {
-      if (photographersData.length > 0) {
-        const randomPhotographer = photographersData[Math.floor(Math.random() * photographersData.length)];
-        if (randomPhotographer && randomPhotographer.website) {
-          window.open(randomPhotographer.website, '_blank');
-        }
-      }
-      this.classList.add('active');
-      document.getElementById('allPhotographers').classList.remove('active');
-    });
     
     // Filter buttons row handlers
     const filterButtons = document.querySelectorAll('.filter-btn');
