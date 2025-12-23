@@ -658,28 +658,56 @@ function renderBlogPosts() {
     list.innerHTML = '';
     
     if (filteredPlaces.length === 0) {
-      list.innerHTML = '<p style="font-size: 18px; color: #666; padding: 20px;">No places found</p>';
+      list.innerHTML = '<p style="font-size: 18px; color: #666;">No places found</p>';
       updateImageCount(0);
       return;
     }
     
+    // Sort alphabetically by place name
+    filteredPlaces.sort((a, b) => a.test.localeCompare(b.test));
+    
+    // Group by first letter
+    const groupedByLetter = {};
     filteredPlaces.forEach(place => {
-      const placeItem = document.createElement('div');
-      placeItem.className = 'place-item';
+      const firstLetter = place.test[0].toUpperCase();
+      if (!groupedByLetter[firstLetter]) {
+        groupedByLetter[firstLetter] = [];
+      }
+      groupedByLetter[firstLetter].push(place);
+    });
+    
+    const letters = Object.keys(groupedByLetter).sort();
+    
+    letters.forEach(letter => {
+      // Section divider
+      const divider = document.createElement('div');
+      divider.className = 'section-divider';
+      list.appendChild(divider);
       
-      const titleLink = document.createElement('a');
-      titleLink.href = place.src;
-      titleLink.target = '_blank';
-      titleLink.className = 'place-title';
-      titleLink.textContent = place.test;
+      // Letter header
+      const header = document.createElement('div');
+      header.className = 'letter-header';
+      header.textContent = letter;
+      list.appendChild(header);
       
-      const dateDiv = document.createElement('div');
-      dateDiv.className = 'place-date';
-      dateDiv.textContent = place.date;
+      // Two-column grid
+      const grid = document.createElement('div');
+      grid.className = 'two-column';
       
-      placeItem.appendChild(titleLink);
-      placeItem.appendChild(dateDiv);
-      list.appendChild(placeItem);
+      groupedByLetter[letter].forEach(place => {
+        const nameItem = document.createElement('div');
+        nameItem.className = 'name-item';
+        
+        const link = document.createElement('a');
+        link.href = place.src;
+        link.target = '_blank';
+        link.textContent = place.test;
+        
+        nameItem.appendChild(link);
+        grid.appendChild(nameItem);
+      });
+      
+      list.appendChild(grid);
     });
     
     updateImageCount(filteredPlaces.length);
