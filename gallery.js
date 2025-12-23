@@ -1,6 +1,6 @@
 // ============================================================================
 // AMERICANISMS GALLERY - MAIN SCRIPT
-// Consolidated functionality for gallery, blog, photographers, and search
+// Consolidated functionality for gallery, blog, photographers, places, and search
 // ============================================================================
 
 (function() {
@@ -15,10 +15,12 @@
   let blogPostsData = [];
   let inspoPostsData = [];
   let fieldNotesData = [];
+  let placesData = [];
   
   const blogPostsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vThaJ-Q5u7zUSy9DA5oMCUkajzPdkWpECZzQf7SYpi8SvSCqvRgzlQvAUI6xAtaumQEnsaHSbYLkHt_/pub?output=csv';
   const inspoPostsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTtF8T2xKCyuDXq1_hyxL0Do2g8wfQ5AtrA-SlKSoUa5TlyuaKgekwK4j4ezU1z8dVjf5P8YYVnoXT9/pub?output=csv';
   const fieldNotesURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTcOtzV-2ZVl1aaRXhnlXEDNmJ8y1pUArx3qjhV3AR66kKSMtR17702FGlrBdppy0YPI084PxrMu9uL/pub?output=csv';
+  const placesURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSw2ES5awbVdygDc4yHNxEI5g7-bouiex1QmT4yIA94iNHtzGDRLtTNIP3GOl15myZX9yye8XDyaEXY/pub?output=csv';
   
   const americanismsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-tRe4QAkAIideMvvWDNWq2Aj_Nx6m4QG9snhFkpqqOGX8gU09X6uUQdkfuOj9yLIybn0iPIFoZbK-/pub?output=csv';
   const objectsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRPknkbhkxJidsCcMnFmvdB2gKx4miqtuECGc5udX7hEAY9IQeTCpNDGMkh31uGuSS1NcODADU_jcRT/pub?output=csv';
@@ -34,6 +36,7 @@
   
   let photographersData = [];
   let filteredPhotographers = [];
+  let filteredPlaces = [];
   let currentIndex = 'objects';
   let filteredImages = [];
   let currentImageIndex = -1;
@@ -329,6 +332,24 @@
     }
   }
 
+  async function loadPlaces() {
+    try {
+      const response = await fetch(placesURL);
+      const text = await response.text();
+      const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
+      
+      placesData = parsed.data.map(row => ({
+        src: row.src || '',
+        test: row.test || '',
+        date: row.date || ''
+      })).filter(place => place.src && place.test);
+      
+      renderPlaces();
+    } catch (error) {
+      console.error('Error loading places:', error);
+    }
+  }
+
   async function loadBlogPosts() {
     try {
       const response = await fetch(blogPostsURL);
@@ -438,7 +459,7 @@
   }
 
   window.cycleSortMode = function() {
-    if (currentIndex === 'photographers' || currentMode === 'blog') return;
+    if (currentIndex === 'photographers' || currentIndex === 'places' || currentMode === 'blog') return;
     
     const modes = ['NEWEST', 'OLDEST', 'alphabetical'];
     const currentIdx = modes.indexOf(currentSortMode);
@@ -461,7 +482,7 @@
     const sortBtn = document.getElementById('sortButton');
     if (!sortBtn) return;
     
-    if (currentIndex === 'photographers' || currentMode === 'blog') {
+    if (currentIndex === 'photographers' || currentIndex === 'places' || currentMode === 'blog') {
       sortBtn.style.display = 'none';
     } else {
       sortBtn.style.display = 'flex';
@@ -623,6 +644,45 @@ function renderBlogPosts() {
     if (currentMode === 'blog') {
       updateBlogItemCount();
     }
+  }
+
+  function renderPlaces() {
+    const searchTerm = document.getElementById('placesSearch').value.toLowerCase();
+    
+    filteredPlaces = placesData.filter(place => {
+      const searchableText = [place.test, place.date, place.src].join(' ').toLowerCase();
+      return searchableText.includes(searchTerm);
+    });
+    
+    const list = document.getElementById('placesList');
+    list.innerHTML = '';
+    
+    if (filteredPlaces.length === 0) {
+      list.innerHTML = '<p style="font-size: 18px; color: #666; padding: 20px;">No places found</p>';
+      updateImageCount(0);
+      return;
+    }
+    
+    filteredPlaces.forEach(place => {
+      const placeItem = document.createElement('div');
+      placeItem.className = 'place-item';
+      
+      const titleLink = document.createElement('a');
+      titleLink.href = place.src;
+      titleLink.target = '_blank';
+      titleLink.className = 'place-title';
+      titleLink.textContent = place.test;
+      
+      const dateDiv = document.createElement('div');
+      dateDiv.className = 'place-date';
+      dateDiv.textContent = place.date;
+      
+      placeItem.appendChild(titleLink);
+      placeItem.appendChild(dateDiv);
+      list.appendChild(placeItem);
+    });
+    
+    updateImageCount(filteredPlaces.length);
   }
 
   function renderImages(imageArray) {
@@ -865,6 +925,16 @@ function renderBlogPosts() {
       }
     });
     
+    // Search Places
+    if (placesData.length > 0) {
+      placesData.forEach(item => {
+        const searchText = [item.test, item.date, item.src].join(' ').toLowerCase();
+        if (searchText.includes(lowerQuery)) {
+          results.push({ type: 'place', data: item });
+        }
+      });
+    }
+    
     // Search Blog Posts
     if (blogPostsData.length > 0) {
       blogPostsData.forEach(item => {
@@ -901,9 +971,11 @@ function renderBlogPosts() {
   function renderUniversalSearchResults(results) {
     const gallery = document.getElementById('gallery');
     const photographersContent = document.getElementById('photographersContent');
+    const placesContent = document.getElementById('placesContent');
     const blogContent = document.getElementById('blogContent');
     
     photographersContent.classList.remove('active');
+    placesContent.classList.remove('active');
     blogContent.classList.remove('active');
     
     gallery.style.display = 'grid';
@@ -1003,6 +1075,20 @@ function renderBlogPosts() {
         card.onclick = () => window.open(result.data.website, '_blank');
         break;
         
+      case 'place':
+        const placeTitle = document.createElement('div');
+        placeTitle.style.cssText = 'font-weight: bold; font-size: 14px;';
+        placeTitle.textContent = result.data.test || 'Place';
+        card.appendChild(placeTitle);
+        
+        const placeDate = document.createElement('div');
+        placeDate.style.cssText = 'font-size: 12px; color: #666;';
+        placeDate.textContent = result.data.date;
+        card.appendChild(placeDate);
+        
+        card.onclick = () => window.open(result.data.src, '_blank');
+        break;
+        
       case 'blog-post':
         if (result.data.pictures) {
           const img = document.createElement('img');
@@ -1080,15 +1166,23 @@ function renderBlogPosts() {
       document.getElementById('blogContent').classList.add('active');
       document.getElementById('gallery').style.display = 'none';
       document.getElementById('photographersContent').classList.remove('active');
+      document.getElementById('placesContent').classList.remove('active');
     } else {
       document.getElementById('blogContent').classList.remove('active');
       
       if (currentIndexValue === 'photographers') {
         document.getElementById('photographersContent').classList.add('active');
+        document.getElementById('placesContent').classList.remove('active');
         document.getElementById('gallery').style.display = 'none';
         renderPhotographers();
+      } else if (currentIndexValue === 'places') {
+        document.getElementById('placesContent').classList.add('active');
+        document.getElementById('photographersContent').classList.remove('active');
+        document.getElementById('gallery').style.display = 'none';
+        renderPlaces();
       } else {
         document.getElementById('photographersContent').classList.remove('active');
+        document.getElementById('placesContent').classList.remove('active');
         document.getElementById('gallery').style.display = 'grid';
         applyFilters();
       }
@@ -1119,6 +1213,7 @@ function renderBlogPosts() {
       
       document.getElementById('gallery').style.display = 'none';
       document.getElementById('photographersContent').classList.remove('active');
+      document.getElementById('placesContent').classList.remove('active');
       document.getElementById('blogContent').classList.add('active');
       document.getElementById('rightSidebar').classList.remove('open');
       
@@ -1143,12 +1238,24 @@ function renderBlogPosts() {
       
       if (section === 'photographers') {
         document.getElementById('photographersContent').classList.add('active');
+        document.getElementById('placesContent').classList.remove('active');
         document.getElementById('gallery').style.display = 'none';
         document.getElementById('rightSidebar').classList.remove('open');
         renderPhotographers();
         updateImageCount(photographersData.length);
+      } else if (section === 'places') {
+        document.getElementById('placesContent').classList.add('active');
+        document.getElementById('photographersContent').classList.remove('active');
+        document.getElementById('gallery').style.display = 'none';
+        document.getElementById('rightSidebar').classList.remove('open');
+        if (placesData.length === 0) {
+          loadPlaces();
+        } else {
+          renderPlaces();
+        }
       } else {
         document.getElementById('photographersContent').classList.remove('active');
+        document.getElementById('placesContent').classList.remove('active');
         document.getElementById('gallery').style.display = 'grid';
         
         updateFilterVisibility();
@@ -1167,6 +1274,7 @@ function renderBlogPosts() {
     if (currentMode === 'blog') {
       document.getElementById('gallery').style.display = 'none';
       document.getElementById('photographersContent').classList.remove('active');
+      document.getElementById('placesContent').classList.remove('active');
       document.getElementById('blogContent').classList.add('active');
       document.getElementById('rightSidebar').classList.remove('open');
       
@@ -1190,12 +1298,24 @@ function renderBlogPosts() {
     
     if (currentIndex === 'photographers') {
       document.getElementById('photographersContent').classList.add('active');
+      document.getElementById('placesContent').classList.remove('active');
       document.getElementById('gallery').style.display = 'none';
       document.getElementById('rightSidebar').classList.remove('open');
       renderPhotographers();
       updateImageCount(photographersData.length);
+    } else if (currentIndex === 'places') {
+      document.getElementById('placesContent').classList.add('active');
+      document.getElementById('photographersContent').classList.remove('active');
+      document.getElementById('gallery').style.display = 'none';
+      document.getElementById('rightSidebar').classList.remove('open');
+      if (placesData.length === 0) {
+        loadPlaces();
+      } else {
+        renderPlaces();
+      }
     } else {
       document.getElementById('photographersContent').classList.remove('active');
+      document.getElementById('placesContent').classList.remove('active');
       document.getElementById('gallery').style.display = 'grid';
       
       updateFilterVisibility();
@@ -1420,18 +1540,28 @@ function renderBlogPosts() {
     
     if (currentIndex === 'photographers') {
       document.getElementById('photographersContent').classList.add('active');
+      document.getElementById('placesContent').classList.remove('active');
       document.getElementById('gallery').style.display = 'none';
       document.getElementById('blogContent')?.classList.remove('active');
       renderPhotographers();
+      return;
+    } else if (currentIndex === 'places') {
+      document.getElementById('placesContent').classList.add('active');
+      document.getElementById('photographersContent').classList.remove('active');
+      document.getElementById('gallery').style.display = 'none';
+      document.getElementById('blogContent')?.classList.remove('active');
+      renderPlaces();
       return;
     } else if (currentMode === 'blog') {
       document.getElementById('blogContent').classList.add('active');
       document.getElementById('gallery').style.display = 'none';
       document.getElementById('photographersContent').classList.remove('active');
+      document.getElementById('placesContent').classList.remove('active');
       return;
     }
     
     document.getElementById('photographersContent').classList.remove('active');
+    document.getElementById('placesContent').classList.remove('active');
     document.getElementById('blogContent')?.classList.remove('active');
     document.getElementById('gallery').style.display = 'grid';
     
@@ -1583,6 +1713,11 @@ function renderBlogPosts() {
     });
     
     document.getElementById('photographersSearch').addEventListener('input', renderPhotographers);
+    
+    const placesSearch = document.getElementById('placesSearch');
+    if (placesSearch) {
+      placesSearch.addEventListener('input', renderPlaces);
+    }
     
     document.getElementById('allPhotographers').addEventListener('click', function() {
       document.getElementById('photographersSearch').value = '';
