@@ -283,7 +283,7 @@
         padding: 8px 12px;
         font-size: 18px;
         font-weight: bold;
-        border: 1px solid #000;
+        border: 2px solid #000;
         background: white;
         color: #000;
         cursor: pointer;
