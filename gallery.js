@@ -312,12 +312,11 @@
           return person;
         });
 
-      const allPhotographers = allPeople.filter(person => {
-        const classLower = person.className.toLowerCase();
-        return classLower.includes('photographer');
+      // Include all people who have a class specified (photographers, poets, fine artists, designers, etc.)
+      photographersData = allPeople.filter(person => {
+        return person.className && person.className.trim() !== '';
       });
-
-      photographersData = allPhotographers.filter(person => person.website !== '');
+      
       photographersData.sort((a, b) => a.lastName.localeCompare(b.lastName));
 
       // Sort all by date
