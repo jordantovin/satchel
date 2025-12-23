@@ -695,16 +695,16 @@ function renderBlogPosts() {
       grid.className = 'two-column';
       
       groupedByLetter[letter].forEach(place => {
-        const nameItem = document.createElement('div');
-        nameItem.className = 'name-item';
+        const placeItem = document.createElement('div');
+        placeItem.className = 'place-item';
         
         const link = document.createElement('a');
         link.href = place.src;
         link.target = '_blank';
         link.textContent = place.test;
         
-        nameItem.appendChild(link);
-        grid.appendChild(nameItem);
+        placeItem.appendChild(link);
+        grid.appendChild(placeItem);
       });
       
       list.appendChild(grid);
