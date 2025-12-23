@@ -659,6 +659,7 @@ a:active {
 }
 
 .inspo-link {
+  font-size: 30px;
   color: #000 !important;
   text-decoration: none !important;
   transition: background-color 0.2s, transform 0.2s;
