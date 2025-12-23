@@ -1774,11 +1774,12 @@ function renderBlogPosts() {
             }
           }
         } else {
-          // Apply filter via search
+          // Apply filter via search - search in className (F column)
           const searchInput = document.getElementById('photographersSearch');
           if (filter === 'all') {
             searchInput.value = '';
           } else {
+            // Set search to the filter term which will search className
             searchInput.value = filter;
           }
           
