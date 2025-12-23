@@ -643,7 +643,7 @@ a:active {
 }
 
 #inspoSection h2 {
-  font-size: 28px;
+  font-size: 30px;
   font-weight: bold;
   font-family: Helvetica;
   margin-bottom: 15px;
@@ -651,7 +651,7 @@ a:active {
 }
 
 #inspoSection p {
-  font-size: 16px;
+  font-size: 30px;
   line-height: 1.0;
   margin: 0;
 }
