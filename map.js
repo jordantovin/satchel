@@ -23,7 +23,7 @@
     if (map) return; // Already initialized
 
     // Create map centered on Washington DC
-    map = L.map('mapContainer', {
+    map = L.map('map', {
       center: [38.9072, -77.0369], // Washington DC coordinates
       zoom: 12,
       zoomControl: true
@@ -109,54 +109,64 @@
       })
     });
 
-    // Function to create popup content for current item
-    function updatePopupContent() {
+    // Function to create and update popup content
+    function updatePopup() {
       const item = itemsArray[currentIndex];
       const popupContent = createPopupContent(item, currentIndex, itemsArray.length);
-      return popupContent;
-    }
-
-    // Create popup with cycling controls if multiple items
-    const initialContent = updatePopupContent();
-    
-    marker.bindPopup(initialContent, {
-      maxWidth: 400,
-      minWidth: 300,
-      className: 'map-popup'
-    });
-
-    // Add click handler
-    marker.on('click', function() {
-      marker.openPopup();
       
-      // Add event listeners after popup opens
+      // Set the popup content
+      if (marker.getPopup()) {
+        marker.getPopup().setContent(popupContent);
+      } else {
+        marker.bindPopup(popupContent, {
+          maxWidth: 400,
+          minWidth: 300,
+          className: 'map-popup'
+        });
+      }
+      
+      // Attach event listeners after a brief delay to ensure DOM is ready
       setTimeout(() => {
         attachPopupEventListeners(itemsArray, currentIndex);
+        attachNavigationListeners();
+      }, 50);
+    }
+
+    // Function to attach navigation button listeners
+    function attachNavigationListeners() {
+      if (itemsArray.length > 1) {
+        const prevBtn = document.querySelector('.popup-prev-btn');
+        const nextBtn = document.querySelector('.popup-next-btn');
         
-        // Cycling controls
-        if (itemsArray.length > 1) {
-          const prevBtn = document.querySelector('.popup-prev-btn');
-          const nextBtn = document.querySelector('.popup-next-btn');
-          
-          if (prevBtn) {
-            prevBtn.onclick = function(e) {
-              e.stopPropagation();
-              currentIndex = (currentIndex - 1 + itemsArray.length) % itemsArray.length;
-              marker.setPopupContent(updatePopupContent());
-              setTimeout(() => attachPopupEventListeners(itemsArray, currentIndex), 50);
-            };
-          }
-          
-          if (nextBtn) {
-            nextBtn.onclick = function(e) {
-              e.stopPropagation();
-              currentIndex = (currentIndex + 1) % itemsArray.length;
-              marker.setPopupContent(updatePopupContent());
-              setTimeout(() => attachPopupEventListeners(itemsArray, currentIndex), 50);
-            };
-          }
+        if (prevBtn) {
+          prevBtn.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            currentIndex = (currentIndex - 1 + itemsArray.length) % itemsArray.length;
+            updatePopup();
+          };
         }
-      }, 100);
+        
+        if (nextBtn) {
+          nextBtn.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            currentIndex = (currentIndex + 1) % itemsArray.length;
+            updatePopup();
+          };
+        }
+      }
+    }
+
+    // Initialize popup
+    updatePopup();
+
+    // Re-attach listeners when popup opens
+    marker.on('popupopen', function() {
+      setTimeout(() => {
+        attachPopupEventListeners(itemsArray, currentIndex);
+        attachNavigationListeners();
+      }, 50);
     });
 
     return marker;
@@ -170,7 +180,9 @@
       
       if (index !== -1) {
         popupImg.style.cursor = 'pointer';
-        popupImg.onclick = function() {
+        popupImg.onclick = function(e) {
+          e.preventDefault();
+          e.stopPropagation();
           // Don't toggle map - keep it open in background
           if (typeof window.showOverlay === 'function') {
             window.showOverlay(index);
@@ -200,7 +212,7 @@
       
       const prevBtn = document.createElement('button');
       prevBtn.className = 'popup-prev-btn';
-      prevBtn.textContent = '←';
+      prevBtn.innerHTML = '←';
       prevBtn.style.cssText = `
         background: white;
         border: 2px solid #000;
@@ -225,7 +237,7 @@
       
       const nextBtn = document.createElement('button');
       nextBtn.className = 'popup-next-btn';
-      nextBtn.textContent = '→';
+      nextBtn.innerHTML = '→';
       nextBtn.style.cssText = `
         background: white;
         border: 2px solid #000;
