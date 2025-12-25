@@ -800,6 +800,8 @@ a:active {
 
 #mapToggleBtn svg {
   transition: all 0.2s;
+  display: block;
+  margin: auto;
 }
 
 #mapToggleBtn:hover {
