@@ -43,6 +43,10 @@
   let universalSearchMode = false;
   let blogDataLoaded = false;
 
+  // Expose to window for map module
+  window.allData = allData;
+  window.filteredImages = filteredImages;
+
   // ============================================================================
   // DATE PARSING UTILITIES
   // ============================================================================
@@ -245,6 +249,7 @@
         medium: row.medium || row.Medium || "",
         artist: row.artist || row.Artist || "",
         keywords: row.keywords || row.Keywords || "",
+        coordinates: row.I || row.coordinates || row.Coordinates || "", // Column I for coordinates
         title: "",
         note: "",
         source: "Americanisms",
@@ -260,6 +265,7 @@
         medium: "",
         artist: "",
         keywords: "",
+        coordinates: "",
         title: row.Title || row.title || "",
         note: row.Note || row.note || "",
         source: "Objects",
@@ -323,6 +329,9 @@
       Object.keys(allData).forEach(key => {
         allData[key].sort((a, b) => b.sortDate.localeCompare(a.sortDate));
       });
+
+      // Update global references
+      window.allData = allData;
 
       initUniversalSearch();
       switchIndex();
@@ -495,6 +504,26 @@
       filterRow.style.display = 'flex';
     } else {
       filterRow.style.display = 'none';
+    }
+  }
+
+  function updateMapButtonVisibility() {
+    const mapBtn = document.getElementById('mapToggleBtn');
+    if (!mapBtn) return;
+    
+    // Show map button ONLY on Objects page in Archive mode
+    if (currentMode === 'archive' && currentIndex === 'objects') {
+      mapBtn.style.display = 'block';
+    } else {
+      mapBtn.style.display = 'none';
+      
+      // Close map if it's open and user navigates away
+      const mapContainer = document.getElementById('mapContainer');
+      if (mapContainer && mapContainer.style.display === 'block') {
+        if (typeof window.toggleMap === 'function') {
+          window.toggleMap();
+        }
+      }
     }
   }
 
@@ -1077,6 +1106,7 @@ function renderBlogPosts() {
           const index = sourceArray.findIndex(i => i.src === result.data.src);
           if (index !== -1) {
             filteredImages = sourceArray;
+            window.filteredImages = sourceArray;
             showOverlay(index);
           }
         };
@@ -1257,6 +1287,7 @@ function renderBlogPosts() {
       showBlogSection(section);
       updateBlogItemCount();
       updateSortButtonVisibility();
+      updateMapButtonVisibility();
       
       if (section === 'posts' && blogPostsData.length === 0) {
         loadBlogPosts();
@@ -1301,6 +1332,7 @@ function renderBlogPosts() {
       
       updateSortButtonVisibility();
       updateFilterButtonsVisibility();
+      updateMapButtonVisibility();
     }
   };
   
@@ -1318,6 +1350,7 @@ function renderBlogPosts() {
       
       updateBlogItemCount();
       updateSortButtonVisibility();
+      updateMapButtonVisibility();
       
       if (blogPostsData.length === 0) {
         loadBlogPosts();
@@ -1362,6 +1395,7 @@ function renderBlogPosts() {
     
     updateSortButtonVisibility();
     updateFilterButtonsVisibility();
+    updateMapButtonVisibility();
   };
 
   window.switchBlogSection = function() {
@@ -1643,6 +1677,7 @@ function renderBlogPosts() {
     });
     
     filteredImages = sortFilteredImages(filteredImages);
+    window.filteredImages = filteredImages; // Update global reference
     renderImages(filteredImages);
     updateImageCount(filteredImages.length);
   }
@@ -1692,6 +1727,9 @@ function renderBlogPosts() {
     
     document.getElementById("overlayMetadata").innerHTML = overlayHTML;
   }
+  
+  // Expose showOverlay to window for map module
+  window.showOverlay = showOverlay;
 
   function hideOverlay() {
     document.getElementById("overlay").style.display = "none";
@@ -1800,6 +1838,7 @@ function renderBlogPosts() {
   function init() {
     initEventListeners();
     updateSortButtonVisibility();
+    updateMapButtonVisibility();
     loadAllData();
     
     // Set default active nav link
