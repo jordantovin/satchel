@@ -757,6 +757,63 @@ a:active {
   background: rgba(255, 255, 255, 1);
 }
 
+/* ===== MAP STYLES ===== */
+#mapContainer {
+  display: none;
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9998;
+  background: white;
+  border-top: 2px solid #000;
+}
+
+#mapContainer #map {
+  width: 100%;
+  height: 100%;
+}
+
+#mapToggleBtn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 0;
+  border: 2px solid #000;
+  background: white;
+  color: #000;
+  cursor: pointer;
+  font-family: Helvetica, sans-serif;
+  transition: background-color 0.2s, color 0.2s;
+  z-index: 9999;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#mapToggleBtn svg {
+  transition: all 0.2s;
+}
+
+#mapToggleBtn:hover {
+  background-color: #000;
+  color: white;
+}
+
+#mapToggleBtn:hover svg {
+  transform: scale(1.1);
+}
+
+#mapToggleBtn.active {
+  background-color: #000;
+  color: white;
+}
+
 /* ===== MOBILE STYLES ===== */
 @media (max-width: 1200px) {
   .left-nav {
@@ -799,6 +856,18 @@ a:active {
     font-size: 13px;
     white-space: nowrap;
   }
+  
+  #mapToggleBtn {
+    bottom: 15px;
+    right: 15px;
+    padding: 10px;
+    font-size: 14px;
+  }
+  
+  #mapToggleBtn svg {
+    width: 18px;
+    height: 18px;
+  }
 }
 
 @media (max-width: 600px) {
@@ -821,7 +890,20 @@ a:active {
     font-size: 12px;
     padding: 6px 12px;
   }
+  
+  #mapToggleBtn {
+    bottom: 10px;
+    right: 10px;
+    padding: 8px;
+    font-size: 12px;
+  }
+  
+  #mapToggleBtn svg {
+    width: 16px;
+    height: 16px;
+  }
 }
+
 /* ===== BLOG VIEW ===== */
 #blogContent {
   display: none;
@@ -875,7 +957,7 @@ a:active {
   color: black;
   margin: 5px 0;
   margin-bottom: 10px;
-border-bottom: none;
+  border-bottom: none;
 }
 
 /* Blog post text links styling - EXCLUDE the button */
@@ -885,7 +967,7 @@ border-bottom: none;
   text-decoration-thickness: 1px !important;
   text-underline-offset: 1px !important;
   transition: opacity 0.2s;
-border-bottom: none;
+  border-bottom: none;
 }
 
 .blog-post p a:not(.blog-link-button):hover {
