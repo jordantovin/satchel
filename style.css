@@ -777,8 +777,8 @@ a:active {
 
 #mapToggleBtn {
   position: fixed;
-  top: 15px;
-  right: 135px;
+  bottom: 20px;
+  right: 20px;
   width: 45px;
   height: 45px;
   padding: 0;
@@ -862,8 +862,8 @@ a:active {
   }
   
   #mapToggleBtn {
-    top: 12px;
-    right: 120px;
+    bottom: 20px;
+    right: 20px;
     width: 40px;
     height: 40px;
     padding: 0;
@@ -897,8 +897,8 @@ a:active {
   }
   
   #mapToggleBtn {
-    top: 10px;
-    right: 110px;
+    bottom: 15px;
+    right: 15px;
     width: 36px;
     height: 36px;
     padding: 0;
