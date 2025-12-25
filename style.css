@@ -777,8 +777,8 @@ a:active {
 
 #mapToggleBtn {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  top: 15px;
+  right: 135px;
   width: 45px;
   height: 45px;
   padding: 0;
@@ -791,7 +791,7 @@ a:active {
   cursor: pointer;
   font-family: Helvetica, sans-serif;
   transition: background-color 0.2s, color 0.2s;
-  z-index: 9999;
+  z-index: 1004;
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   display: flex;
   align-items: center;
@@ -862,8 +862,8 @@ a:active {
   }
   
   #mapToggleBtn {
-    bottom: 15px;
-    right: 15px;
+    top: 12px;
+    right: 120px;
     width: 40px;
     height: 40px;
     padding: 0;
@@ -897,8 +897,8 @@ a:active {
   }
   
   #mapToggleBtn {
-    bottom: 10px;
-    right: 10px;
+    top: 10px;
+    right: 110px;
     width: 36px;
     height: 36px;
     padding: 0;
