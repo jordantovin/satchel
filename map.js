@@ -93,7 +93,11 @@
   // MARKER CREATION
   // ============================================================================
 
-  function createMarker(item, coords) {
+  function createMarker(items, coords) {
+    // items can be a single item or array of items at the same location
+    const itemsArray = Array.isArray(items) ? items : [items];
+    let currentIndex = 0;
+
     const marker = L.marker([coords.lat, coords.lon], {
       icon: L.icon({
         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-black.png',
@@ -105,36 +109,52 @@
       })
     });
 
-    // Create popup content
-    const popupContent = createPopupContent(item);
+    // Function to create popup content for current item
+    function updatePopupContent() {
+      const item = itemsArray[currentIndex];
+      const popupContent = createPopupContent(item, currentIndex, itemsArray.length);
+      return popupContent;
+    }
+
+    // Create popup with cycling controls if multiple items
+    const initialContent = updatePopupContent();
     
-    marker.bindPopup(popupContent, {
+    marker.bindPopup(initialContent, {
       maxWidth: 400,
       minWidth: 300,
       className: 'map-popup'
     });
 
-    // Add click handler to show full overlay
+    // Add click handler
     marker.on('click', function() {
-      // Find index in filteredImages if it exists
-      const index = window.filteredImages ? window.filteredImages.findIndex(img => img.src === item.src) : -1;
-      
-      // Open popup first
       marker.openPopup();
       
-      // Add click handler to image in popup after a short delay to ensure popup is rendered
+      // Add event listeners after popup opens
       setTimeout(() => {
-        const popupImg = document.querySelector('.map-popup-image');
-        if (popupImg && index !== -1) {
-          popupImg.style.cursor = 'pointer';
-          popupImg.onclick = function() {
-            // Close map
-            toggleMap();
-            // Show full overlay
-            if (typeof window.showOverlay === 'function') {
-              window.showOverlay(index);
-            }
-          };
+        attachPopupEventListeners(itemsArray, currentIndex);
+        
+        // Cycling controls
+        if (itemsArray.length > 1) {
+          const prevBtn = document.querySelector('.popup-prev-btn');
+          const nextBtn = document.querySelector('.popup-next-btn');
+          
+          if (prevBtn) {
+            prevBtn.onclick = function(e) {
+              e.stopPropagation();
+              currentIndex = (currentIndex - 1 + itemsArray.length) % itemsArray.length;
+              marker.setPopupContent(updatePopupContent());
+              setTimeout(() => attachPopupEventListeners(itemsArray, currentIndex), 50);
+            };
+          }
+          
+          if (nextBtn) {
+            nextBtn.onclick = function(e) {
+              e.stopPropagation();
+              currentIndex = (currentIndex + 1) % itemsArray.length;
+              marker.setPopupContent(updatePopupContent());
+              setTimeout(() => attachPopupEventListeners(itemsArray, currentIndex), 50);
+            };
+          }
         }
       }, 100);
     });
@@ -142,10 +162,93 @@
     return marker;
   }
 
-  function createPopupContent(item) {
+  function attachPopupEventListeners(itemsArray, currentIndex) {
+    const popupImg = document.querySelector('.map-popup-image');
+    if (popupImg) {
+      const item = itemsArray[currentIndex];
+      const index = window.filteredImages ? window.filteredImages.findIndex(img => img.src === item.src) : -1;
+      
+      if (index !== -1) {
+        popupImg.style.cursor = 'pointer';
+        popupImg.onclick = function() {
+          // Don't toggle map - keep it open in background
+          if (typeof window.showOverlay === 'function') {
+            window.showOverlay(index);
+          }
+        };
+      }
+    }
+  }
+
+  function createPopupContent(item, currentIndex, totalItems) {
     const div = document.createElement('div');
     div.className = 'map-popup-content';
     div.style.cssText = 'text-align: center;';
+
+    // Multiple items indicator and navigation
+    if (totalItems > 1) {
+      const nav = document.createElement('div');
+      nav.style.cssText = `
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        padding: 8px;
+        background: #f5f5f5;
+        border: 1px solid #000;
+      `;
+      
+      const prevBtn = document.createElement('button');
+      prevBtn.className = 'popup-prev-btn';
+      prevBtn.textContent = '←';
+      prevBtn.style.cssText = `
+        background: white;
+        border: 2px solid #000;
+        padding: 4px 12px;
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: bold;
+        transition: background-color 0.2s, color 0.2s;
+      `;
+      prevBtn.onmouseover = function() {
+        this.style.backgroundColor = '#000';
+        this.style.color = 'white';
+      };
+      prevBtn.onmouseout = function() {
+        this.style.backgroundColor = 'white';
+        this.style.color = '#000';
+      };
+      
+      const counter = document.createElement('span');
+      counter.textContent = `${currentIndex + 1} of ${totalItems}`;
+      counter.style.cssText = 'font-weight: bold; font-size: 14px;';
+      
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'popup-next-btn';
+      nextBtn.textContent = '→';
+      nextBtn.style.cssText = `
+        background: white;
+        border: 2px solid #000;
+        padding: 4px 12px;
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: bold;
+        transition: background-color 0.2s, color 0.2s;
+      `;
+      nextBtn.onmouseover = function() {
+        this.style.backgroundColor = '#000';
+        this.style.color = 'white';
+      };
+      nextBtn.onmouseout = function() {
+        this.style.backgroundColor = 'white';
+        this.style.color = '#000';
+      };
+      
+      nav.appendChild(prevBtn);
+      nav.appendChild(counter);
+      nav.appendChild(nextBtn);
+      div.appendChild(nav);
+    }
 
     // Image
     const img = document.createElement('img');
@@ -215,6 +318,8 @@
     markers.forEach(marker => marker.remove());
     markers = [];
 
+    // Group items by coordinates
+    const locationGroups = {};
     let validCount = 0;
     let invalidCount = 0;
 
@@ -226,9 +331,17 @@
         const coords = parseCoordinates(coordString);
         
         if (coords) {
-          const marker = createMarker(item, coords);
-          marker.addTo(map);
-          markers.push(marker);
+          // Create a key for this coordinate pair
+          const coordKey = `${coords.lat.toFixed(6)},${coords.lon.toFixed(6)}`;
+          
+          if (!locationGroups[coordKey]) {
+            locationGroups[coordKey] = {
+              coords: coords,
+              items: []
+            };
+          }
+          
+          locationGroups[coordKey].items.push(item);
           validCount++;
         } else {
           invalidCount++;
@@ -237,7 +350,14 @@
       }
     });
 
-    console.log(`Map loaded: ${validCount} valid markers, ${invalidCount} invalid coordinates`);
+    // Create markers for each location (with potentially multiple items)
+    Object.values(locationGroups).forEach(location => {
+      const marker = createMarker(location.items, location.coords);
+      marker.addTo(map);
+      markers.push(marker);
+    });
+
+    console.log(`Map loaded: ${validCount} items at ${markers.length} unique locations, ${invalidCount} invalid coordinates`);
 
     // Fit map to show all markers if any exist
     if (markers.length > 0) {
