@@ -262,7 +262,6 @@
 
     if (mapVisible) {
       mapContainer.style.display = 'block';
-      mapToggleBtn.textContent = '× CLOSE MAP';
       mapToggleBtn.classList.add('active');
       
       // Initialize map if needed
@@ -286,7 +285,6 @@
       }, 100);
     } else {
       mapContainer.style.display = 'none';
-      mapToggleBtn.textContent = '🗺 MAP';
       mapToggleBtn.classList.remove('active');
     }
   }
