@@ -268,32 +268,66 @@
 
     // Different content based on data source
     if (item.dataSource === 'secondary') {
-      // For secondary CSV: simple text-based display
-      const content = document.createElement('div');
-      content.style.cssText = `
-        padding: 20px;
+      // For secondary CSV: show image with simplified metadata
+      
+      // Image (Column C)
+      if (item.C) {
+        const img = document.createElement('img');
+        img.src = item.C;
+        img.className = 'map-popup-image';
+        img.style.cssText = `
+          width: 100%;
+          max-height: 250px;
+          object-fit: contain;
+          margin-bottom: 12px;
+          border: 2px solid #000;
+          cursor: pointer;
+        `;
+        
+        // Make image clickable to open in new tab
+        img.onclick = function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          window.open(item.C, '_blank');
+        };
+        
+        div.appendChild(img);
+      }
+
+      // Metadata
+      const metadata = document.createElement('div');
+      metadata.style.cssText = `
         text-align: left;
-        font-family: Helvetica, sans-serif;
         font-size: 14px;
-        line-height: 1.6;
-        border: 2px solid #000;
-        background: white;
+        line-height: 1.0;
+        font-family: Helvetica, sans-serif;
       `;
 
-      let html = '';
+      let metadataHTML = '';
       
       // Date found (Column A)
       if (item.A) {
-        html += `<div style="margin-bottom: 12px;"><strong>Date Found:</strong> ${item.A}</div>`;
+        metadataHTML += `<strong>Date Found:</strong> ${item.A}<br>`;
       }
       
       // Object name (Column B)
       if (item.B) {
-        html += `<div><strong>Object:</strong> ${item.B}</div>`;
+        metadataHTML += `<strong>Object:</strong> ${item.B}`;
       }
 
-      content.innerHTML = html;
-      div.appendChild(content);
+      metadata.innerHTML = metadataHTML;
+      div.appendChild(metadata);
+
+      // Click to expand hint
+      const hint = document.createElement('div');
+      hint.style.cssText = `
+        margin-top: 10px;
+        font-size: 12px;
+        color: #666;
+        font-style: italic;
+      `;
+      hint.textContent = 'Click image to open full size';
+      div.appendChild(hint);
       
     } else {
       // For Americanisms data: show image and full metadata
