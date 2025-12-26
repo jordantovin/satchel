@@ -270,10 +270,10 @@
     if (item.dataSource === 'secondary') {
       // For secondary CSV: show image with simplified metadata
       
-      // Image (Column C)
-      if (item.C) {
+      // Image (Column E)
+      if (item.E) {
         const img = document.createElement('img');
-        img.src = item.C;
+        img.src = item.E;
         img.className = 'map-popup-image';
         img.style.cssText = `
           width: 100%;
@@ -288,7 +288,7 @@
         img.onclick = function(e) {
           e.preventDefault();
           e.stopPropagation();
-          window.open(item.C, '_blank');
+          window.open(item.E, '_blank');
         };
         
         div.appendChild(img);
