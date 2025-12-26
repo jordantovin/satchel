@@ -176,18 +176,22 @@
     const popupImg = document.querySelector('.map-popup-image');
     if (popupImg) {
       const item = itemsArray[currentIndex];
-      const index = window.filteredImages ? window.filteredImages.findIndex(img => img.src === item.src) : -1;
       
-      if (index !== -1) {
-        popupImg.style.cursor = 'pointer';
-        popupImg.onclick = function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          // Don't toggle map - keep it open in background
-          if (typeof window.showOverlay === 'function') {
-            window.showOverlay(index);
-          }
-        };
+      // Only attach click handler for Americanisms items that have images
+      if (item.dataSource === 'americanisms' && item.src) {
+        const index = window.filteredImages ? window.filteredImages.findIndex(img => img.src === item.src) : -1;
+        
+        if (index !== -1) {
+          popupImg.style.cursor = 'pointer';
+          popupImg.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            // Don't toggle map - keep it open in background
+            if (typeof window.showOverlay === 'function') {
+              window.showOverlay(index);
+            }
+          };
+        }
       }
     }
   }
@@ -262,59 +266,90 @@
       div.appendChild(nav);
     }
 
-    // Image
-    const img = document.createElement('img');
-    img.src = item.src;
-    img.className = 'map-popup-image';
-    img.style.cssText = `
-      width: 100%;
-      max-height: 250px;
-      object-fit: contain;
-      margin-bottom: 12px;
-      border: 2px solid #000;
-    `;
-    div.appendChild(img);
+    // Different content based on data source
+    if (item.dataSource === 'secondary') {
+      // For secondary CSV: simple text-based display
+      const content = document.createElement('div');
+      content.style.cssText = `
+        padding: 20px;
+        text-align: left;
+        font-family: Helvetica, sans-serif;
+        font-size: 14px;
+        line-height: 1.6;
+        border: 2px solid #000;
+        background: white;
+      `;
 
-    // Metadata
-    const metadata = document.createElement('div');
-    metadata.style.cssText = `
-      text-align: left;
-      font-size: 14px;
-      line-height: 1.4;
-      font-family: Helvetica, sans-serif;
-    `;
+      let html = '';
+      
+      // Date found (Column A)
+      if (item.A) {
+        html += `<div style="margin-bottom: 12px;"><strong>Date Found:</strong> ${item.A}</div>`;
+      }
+      
+      // Object name (Column B)
+      if (item.B) {
+        html += `<div><strong>Object:</strong> ${item.B}</div>`;
+      }
 
-    let metadataHTML = '';
-    
-    if (item.date) {
-      metadataHTML += `<strong>Date:</strong> ${item.date}<br>`;
-    }
-    
-    if (item.location_card) {
-      metadataHTML += `<strong>Location:</strong><br>${item.location_card.replace(/\n/g, '<br>')}<br>`;
-    }
-    
-    if (item.medium) {
-      metadataHTML += `<strong>Medium:</strong> ${item.medium}<br>`;
-    }
-    
-    if (item.artist) {
-      metadataHTML += `<strong>Artist:</strong> ${item.artist}`;
-    }
+      content.innerHTML = html;
+      div.appendChild(content);
+      
+    } else {
+      // For Americanisms data: show image and full metadata
+      const img = document.createElement('img');
+      img.src = item.src;
+      img.className = 'map-popup-image';
+      img.style.cssText = `
+        width: 100%;
+        max-height: 250px;
+        object-fit: contain;
+        margin-bottom: 12px;
+        border: 2px solid #000;
+      `;
+      div.appendChild(img);
 
-    metadata.innerHTML = metadataHTML;
-    div.appendChild(metadata);
+      // Metadata
+      const metadata = document.createElement('div');
+      metadata.style.cssText = `
+        text-align: left;
+        font-size: 14px;
+        line-height: 1.4;
+        font-family: Helvetica, sans-serif;
+      `;
 
-    // Click to expand hint
-    const hint = document.createElement('div');
-    hint.style.cssText = `
-      margin-top: 10px;
-      font-size: 12px;
-      color: #666;
-      font-style: italic;
-    `;
-    hint.textContent = 'Click image to view full size';
-    div.appendChild(hint);
+      let metadataHTML = '';
+      
+      if (item.date) {
+        metadataHTML += `<strong>Date:</strong> ${item.date}<br>`;
+      }
+      
+      if (item.location_card) {
+        metadataHTML += `<strong>Location:</strong><br>${item.location_card.replace(/\n/g, '<br>')}<br>`;
+      }
+      
+      if (item.medium) {
+        metadataHTML += `<strong>Medium:</strong> ${item.medium}<br>`;
+      }
+      
+      if (item.artist) {
+        metadataHTML += `<strong>Artist:</strong> ${item.artist}`;
+      }
+
+      metadata.innerHTML = metadataHTML;
+      div.appendChild(metadata);
+
+      // Click to expand hint (only for images)
+      const hint = document.createElement('div');
+      hint.style.cssText = `
+        margin-top: 10px;
+        font-size: 12px;
+        color: #666;
+        font-style: italic;
+      `;
+      hint.textContent = 'Click image to view full size';
+      div.appendChild(hint);
+    }
 
     return div;
   }
@@ -323,7 +358,58 @@
   // LOAD MAP DATA
   // ============================================================================
 
-  function loadMapData(americanismsData) {
+  async function loadSecondaryCSV() {
+    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRPknkbhkxJidsCcMnFmvdB2gKx4miqtuECGc5udX7hEAY9IQeTCpNDGMkh31uGuSS1NcODADU_jcRT/pub?output=csv';
+    
+    try {
+      const response = await fetch(csvUrl);
+      const csvText = await response.text();
+      
+      // Parse CSV - handle quoted fields properly
+      const lines = csvText.split('\n');
+      const data = [];
+      
+      for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        
+        // Simple CSV parsing - split by comma but respect quotes
+        const values = [];
+        let current = '';
+        let inQuotes = false;
+        
+        for (let j = 0; j < lines[i].length; j++) {
+          const char = lines[i][j];
+          
+          if (char === '"') {
+            inQuotes = !inQuotes;
+          } else if (char === ',' && !inQuotes) {
+            values.push(current.trim());
+            current = '';
+          } else {
+            current += char;
+          }
+        }
+        values.push(current.trim());
+        
+        // Map to column letters (A, B, C, ... I)
+        const row = {};
+        const columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
+        columns.forEach((col, index) => {
+          row[col] = values[index] || '';
+        });
+        
+        data.push(row);
+      }
+      
+      console.log(`Loaded ${data.length} items from secondary CSV`);
+      return data;
+    } catch (error) {
+      console.error('Error loading secondary CSV:', error);
+      return [];
+    }
+  }
+
+  async function loadMapData(americanismsData) {
     if (!map) initMap();
 
     // Clear existing markers
@@ -335,6 +421,7 @@
     let validCount = 0;
     let invalidCount = 0;
 
+    // Process Americanisms data
     americanismsData.forEach(item => {
       // Column I should be the coordinates column
       const coordString = item.coordinates || item.Coordinates || item.I || '';
@@ -353,11 +440,44 @@
             };
           }
           
-          locationGroups[coordKey].items.push(item);
+          locationGroups[coordKey].items.push({
+            ...item,
+            dataSource: 'americanisms'
+          });
           validCount++;
         } else {
           invalidCount++;
           console.warn('Invalid coordinates:', coordString, 'for item:', item.src);
+        }
+      }
+    });
+
+    // Load and process secondary CSV data
+    const secondaryData = await loadSecondaryCSV();
+    secondaryData.forEach(item => {
+      // Column I contains coordinates
+      const coordString = item.I || '';
+      
+      if (coordString) {
+        const coords = parseCoordinates(coordString);
+        
+        if (coords) {
+          const coordKey = `${coords.lat.toFixed(6)},${coords.lon.toFixed(6)}`;
+          
+          if (!locationGroups[coordKey]) {
+            locationGroups[coordKey] = {
+              coords: coords,
+              items: []
+            };
+          }
+          
+          locationGroups[coordKey].items.push({
+            ...item,
+            dataSource: 'secondary'
+          });
+          validCount++;
+        } else {
+          invalidCount++;
         }
       }
     });
@@ -403,11 +523,11 @@
         // Load data from global allData if available
         if (window.allData && window.allData.objects) {
           const americanismsItems = window.allData.objects.filter(item => item.source === 'Americanisms');
-          const count = loadMapData(americanismsItems);
-          
-          if (count === 0) {
-            alert('No coordinates found in the data. Make sure column I contains coordinates in the format "latitude, longitude".');
-          }
+          loadMapData(americanismsItems).then(count => {
+            if (count === 0) {
+              alert('No coordinates found in the data. Make sure column I contains coordinates in the format "latitude, longitude".');
+            }
+          });
         }
       }
       
