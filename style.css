@@ -978,6 +978,7 @@ a:active {
   transition: opacity 0.2s;
   border-radius: 0;
   object-fit: contain;
+  border: 2px solid #000;
 }
 
 .blog-post-thumbnail:hover {
@@ -985,8 +986,8 @@ a:active {
 }
 
 .blog-post p {
-  font-size: 30px;
-  line-height: 1.0;
+  font-size: 20px;
+  line-height: 1.3;
   color: black;
   margin: 5px 0;
   margin-bottom: 10px;
@@ -1007,12 +1008,13 @@ a:active {
   opacity: 0.6;
 }
 
+/* LINK button styling - completely separate */
 .blog-link-button {
   color: #000 !important;
   background-color: #fff !important;
   text-decoration: none !important;
   border: 2px solid #000 !important;
-  padding: 0 12px !important;
+  padding: 8px 12px !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -1020,7 +1022,6 @@ a:active {
   font-size: 16px !important;
   transition: background-color 0.2s, color 0.2s !important;
   flex-shrink: 0;
-  height: 35px;
   box-sizing: border-box;
   line-height: 1;
 }
