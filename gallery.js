@@ -285,15 +285,15 @@
 
       allData.objects = [...americanismsProcessed, ...objectsProcessed];
 
-      // Process Articles
-      allData.articles = articlesData.map(row => ({
-        src: row.src || row.Src || "",
-        photo: row.photo || row.Photo || "",
-        date: row.date || row.Date || "",
-        sortDate: parseDate(row.datereal || row.Datereal || row.date || row.Date || ""),
-        source: row.test || row.Test || "",
-        type: "articles"
-      })).filter(img => img.src);
+// Process Articles
+allData.articles = articlesData.map(row => ({
+  src: row.src || row.Src || "",
+  photo: row.photo || row.Photo || "",
+  date: row.date || row.Date || "",
+  sortDate: parseDate(row.date || row.Date || ""),  // ✅ NEW - just use date column
+  source: row.test || row.Test || "",
+  type: "articles"
+})).filter(img => img.src);
 
       // Process Pictures
       allData.pictures = picturesData.map(row => ({
