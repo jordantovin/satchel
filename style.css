@@ -951,7 +951,7 @@ a:active {
 }
 
 .blog-post h2 {
-  font-size: 28px !important;
+  font-size: 22px !important;
   margin: 0;
   line-height: 1 !important;
   font-family: Helvetica;
@@ -959,7 +959,7 @@ a:active {
 }
 
 .blog-post .date {
-  font-size: 28px !important;
+  font-size: 22px !important;
   color: #999;
   margin: 0;
   line-height: 1 !important;
