@@ -961,7 +961,7 @@ a:active {
 }
 
 .blog-post .date {
-  font-size: 20px;
+  font-size: 35px;
   color: #999;
   margin: 0;
   line-height: 35px;
@@ -1007,20 +1007,22 @@ a:active {
   opacity: 0.6;
 }
 
-/* LINK button styling - completely separate */
 .blog-link-button {
   color: #000 !important;
   background-color: #fff !important;
   text-decoration: none !important;
   border: 2px solid #000 !important;
-  padding: 4px 12px !important;
+  padding: 0 12px !important;
   display: inline-flex !important;
   align-items: center !important;
+  justify-content: center !important;
   font-weight: 400 !important;
+  font-size: 16px !important;
   transition: background-color 0.2s, color 0.2s !important;
   flex-shrink: 0;
   height: 35px;
   box-sizing: border-box;
+  line-height: 1;
 }
 
 .blog-link-button:hover {
