@@ -951,7 +951,7 @@ a:active {
 }
 
 .blog-post h2 {
-  font-size: 22px !important;
+  font-size: 28px !important;
   margin: 0;
   line-height: 1 !important;
   font-family: Helvetica;
@@ -959,7 +959,7 @@ a:active {
 }
 
 .blog-post .date {
-  font-size: 22px !important;
+  font-size: 28px !important;
   color: #999;
   margin: 0;
   line-height: 1 !important;
@@ -1013,7 +1013,7 @@ a:active {
   border: 2px solid #000 !important;
   padding: 0 12px !important;
   display: inline-flex !important;
-  align-items: flex-start !important;
+  align-items: center !important;
   justify-content: center !important;
   font-weight: 400 !important;
   font-size: 16px !important;
@@ -1021,8 +1021,7 @@ a:active {
   flex-shrink: 0;
   height: 35px !important;
   box-sizing: border-box;
-  line-height: 35px !important;
-  padding-top: 2px !important;
+  line-height: 1 !important;
 }
 
 .blog-link-button:hover {
