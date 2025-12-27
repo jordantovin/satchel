@@ -719,9 +719,20 @@ allData.articles = articlesData.map(row => ({
       link.textContent = post.name;
       link.style.cssText = `
         font-size: 16px;
-        text-decoration: underline;
+        text-decoration: none;
         color: #000;
+        background-color: transparent;
+        transition: background-color 0.2s ease;
       `;
+      
+      // Hover effect
+      link.addEventListener('mouseenter', () => {
+        link.style.backgroundColor = '#ffff66'; // Yellow highlight
+      });
+      
+      link.addEventListener('mouseleave', () => {
+        link.style.backgroundColor = 'transparent';
+      });
       
       linkWrapper.appendChild(link);
       linksContainer.appendChild(linkWrapper);
@@ -746,7 +757,7 @@ allData.articles = articlesData.map(row => ({
     updateBlogItemCount();
   }
 }
-
+  
   function renderFieldNotes() {
     const fieldNotesContainer = document.getElementById('fieldNotesSection');
     fieldNotesContainer.innerHTML = '';
