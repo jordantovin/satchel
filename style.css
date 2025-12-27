@@ -575,7 +575,7 @@ a:active {
 }
 
 .name-item a:hover {
-  transform: scale(1.6);
+  transform: none;
   background-color: #ffff66;
 }
 
@@ -673,7 +673,7 @@ a:active {
   background-color: #ffff66;
   text-decoration: none !important;
   border-bottom: none !important;
-  transform: scale(1.3);
+  transform: none;
 }
 
 .inspo-link:visited,
