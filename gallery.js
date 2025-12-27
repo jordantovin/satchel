@@ -52,86 +52,93 @@
   // ============================================================================
   
   function parseDate(dateStr) {
-    if (!dateStr) return '';
-    
-    const original = dateStr;
-    dateStr = dateStr.trim();
-    
-    // Handle timestamp format (YYYY-MM-DD HH:MM:SS) FIRST
-    if (dateStr.includes(' ')) {
-      return dateStr.split(' ')[0];
-    }
-    
-    // Handle text month formats
-    const monthMap = {
-      'january': '01', 'jan': '01',
-      'february': '02', 'feb': '02',
-      'march': '03', 'mar': '03',
-      'april': '04', 'apr': '04',
-      'may': '05',
-      'june': '06', 'jun': '06',
-      'july': '07', 'jul': '07',
-      'august': '08', 'aug': '08',
-      'september': '09', 'sept': '09', 'sep': '09',
-      'october': '10', 'oct': '10',
-      'november': '11', 'nov': '11',
-      'december': '12', 'dec': '12'
-    };
-    
-    const lowerDate = dateStr.toLowerCase();
-    for (const [monthName, monthNum] of Object.entries(monthMap)) {
-      if (lowerDate.includes(monthName)) {
-        const parts = dateStr.replace(/[.,]/g, '').split(/\s+/);
-        
-        if (parts.length >= 3) {
-          const day = parts[1].padStart(2, '0');
-          const year = parts[2];
-          return `${year}-${monthNum}-${day}`;
-        } else if (parts.length === 2) {
-          const day = parts[1].padStart(2, '0');
-          return `2025-${monthNum}-${day}`;
-        }
+  if (!dateStr) return '';
+  
+  const original = dateStr;
+  dateStr = dateStr.trim();
+  
+  // Handle timestamp format (YYYY-MM-DD HH:MM:SS) FIRST
+  if (dateStr.includes(' ')) {
+    return dateStr.split(' ')[0];
+  }
+  
+  // Handle text month formats
+  const monthMap = {
+    'january': '01', 'jan': '01',
+    'february': '02', 'feb': '02',
+    'march': '03', 'mar': '03',
+    'april': '04', 'apr': '04',
+    'may': '05',
+    'june': '06', 'jun': '06',
+    'july': '07', 'jul': '07',
+    'august': '08', 'aug': '08',
+    'september': '09', 'sept': '09', 'sep': '09',
+    'october': '10', 'oct': '10',
+    'november': '11', 'nov': '11',
+    'december': '12', 'dec': '12'
+  };
+  
+  const lowerDate = dateStr.toLowerCase();
+  for (const [monthName, monthNum] of Object.entries(monthMap)) {
+    if (lowerDate.includes(monthName)) {
+      const parts = dateStr.replace(/[.,]/g, '').split(/\s+/);
+      
+      if (parts.length >= 3) {
+        const day = parts[1].padStart(2, '0');
+        const year = parts[2];
+        return `${year}-${monthNum}-${day}`;
+      } else if (parts.length === 2) {
+        const day = parts[1].padStart(2, '0');
+        return `2025-${monthNum}-${day}`;
       }
     }
-    
-    // Handle YYYY-MM-DD format
-    if (dateStr.includes('-')) {
-      const parts = dateStr.split('-');
-      if (parts.length === 3 && parts[0].length === 4) {
+  }
+  
+  // Handle YYYY.MM.DD format
+  if (dateStr.includes('.')) {
+    const parts = dateStr.split('.');
+    if (parts.length === 3) {
+      const year = parts[0];
+      const month = parts[1].padStart(2, '0');
+      const day = parts[2].padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+  }
+  
+  // Handle formats with dashes
+  if (dateStr.includes('-')) {
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      // Check if YYYY-MM-DD (year first)
+      if (parts[0].length === 4) {
         return dateStr;
       }
-    }
-    
-    // Handle YYYY.MM.DD format
-    if (dateStr.includes('.')) {
-      const parts = dateStr.split('.');
-      if (parts.length === 3) {
-        const year = parts[0];
-        const month = parts[1].padStart(2, '0');
-        const day = parts[2].padStart(2, '0');
-        return `${year}-${month}-${day}`;
+      // MM-DD-YYYY format (month first with dashes)
+      else if (parts[0].length <= 2 && parts[2].length === 4) {
+        return `${parts[2]}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
       }
     }
-    
-    // Handle YYYY/MM/DD or MM/DD/YYYY
-    if (dateStr.includes('/')) {
-      const parts = dateStr.split('/');
-      if (parts.length === 3) {
-        if (parts[0].length === 4) {
-          return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
-        } else {
-          return `${parts[2]}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
-        }
+  }
+  
+  // Handle formats with slashes: YYYY/MM/DD or MM/DD/YYYY
+  if (dateStr.includes('/')) {
+    const parts = dateStr.split('/');
+    if (parts.length === 3) {
+      if (parts[0].length === 4) {
+        return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+      } else {
+        return `${parts[2]}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
       }
     }
-    
-    // Just return year if only year is provided
-    if (dateStr.length === 4 && !isNaN(dateStr)) {
-      return dateStr;
-    }
-    
+  }
+  
+  // Just return year if only year is provided
+  if (dateStr.length === 4 && !isNaN(dateStr)) {
     return dateStr;
   }
+  
+  return dateStr;
+}
 
   function formatArticleDate(dateStr) {
     if (!dateStr) return '';
