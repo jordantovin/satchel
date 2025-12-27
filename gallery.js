@@ -52,93 +52,93 @@
   // ============================================================================
   
   function parseDate(dateStr) {
-  if (!dateStr) return '';
-  
-  const original = dateStr;
-  dateStr = dateStr.trim();
-  
-  // Handle timestamp format (YYYY-MM-DD HH:MM:SS) FIRST
-  if (dateStr.includes(' ')) {
-    return dateStr.split(' ')[0];
-  }
-  
-  // Handle text month formats
-  const monthMap = {
-    'january': '01', 'jan': '01',
-    'february': '02', 'feb': '02',
-    'march': '03', 'mar': '03',
-    'april': '04', 'apr': '04',
-    'may': '05',
-    'june': '06', 'jun': '06',
-    'july': '07', 'jul': '07',
-    'august': '08', 'aug': '08',
-    'september': '09', 'sept': '09', 'sep': '09',
-    'october': '10', 'oct': '10',
-    'november': '11', 'nov': '11',
-    'december': '12', 'dec': '12'
-  };
-  
-  const lowerDate = dateStr.toLowerCase();
-  for (const [monthName, monthNum] of Object.entries(monthMap)) {
-    if (lowerDate.includes(monthName)) {
-      const parts = dateStr.replace(/[.,]/g, '').split(/\s+/);
-      
-      if (parts.length >= 3) {
-        const day = parts[1].padStart(2, '0');
-        const year = parts[2];
-        return `${year}-${monthNum}-${day}`;
-      } else if (parts.length === 2) {
-        const day = parts[1].padStart(2, '0');
-        return `2025-${monthNum}-${day}`;
+    if (!dateStr) return '';
+    
+    const original = dateStr;
+    dateStr = dateStr.trim();
+    
+    // Handle timestamp format (YYYY-MM-DD HH:MM:SS) FIRST
+    if (dateStr.includes(' ')) {
+      return dateStr.split(' ')[0];
+    }
+    
+    // Handle text month formats
+    const monthMap = {
+      'january': '01', 'jan': '01',
+      'february': '02', 'feb': '02',
+      'march': '03', 'mar': '03',
+      'april': '04', 'apr': '04',
+      'may': '05',
+      'june': '06', 'jun': '06',
+      'july': '07', 'jul': '07',
+      'august': '08', 'aug': '08',
+      'september': '09', 'sept': '09', 'sep': '09',
+      'october': '10', 'oct': '10',
+      'november': '11', 'nov': '11',
+      'december': '12', 'dec': '12'
+    };
+    
+    const lowerDate = dateStr.toLowerCase();
+    for (const [monthName, monthNum] of Object.entries(monthMap)) {
+      if (lowerDate.includes(monthName)) {
+        const parts = dateStr.replace(/[.,]/g, '').split(/\s+/);
+        
+        if (parts.length >= 3) {
+          const day = parts[1].padStart(2, '0');
+          const year = parts[2];
+          return `${year}-${monthNum}-${day}`;
+        } else if (parts.length === 2) {
+          const day = parts[1].padStart(2, '0');
+          return `2025-${monthNum}-${day}`;
+        }
       }
     }
-  }
-  
-  // Handle YYYY.MM.DD format
-  if (dateStr.includes('.')) {
-    const parts = dateStr.split('.');
-    if (parts.length === 3) {
-      const year = parts[0];
-      const month = parts[1].padStart(2, '0');
-      const day = parts[2].padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    }
-  }
-  
-  // Handle formats with dashes
-  if (dateStr.includes('-')) {
-    const parts = dateStr.split('-');
-    if (parts.length === 3) {
-      // Check if YYYY-MM-DD (year first)
-      if (parts[0].length === 4) {
-        return dateStr;
-      }
-      // MM-DD-YYYY format (month first with dashes)
-      else if (parts[0].length <= 2 && parts[2].length === 4) {
-        return `${parts[2]}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
+    
+    // Handle YYYY.MM.DD format
+    if (dateStr.includes('.')) {
+      const parts = dateStr.split('.');
+      if (parts.length === 3) {
+        const year = parts[0];
+        const month = parts[1].padStart(2, '0');
+        const day = parts[2].padStart(2, '0');
+        return `${year}-${month}-${day}`;
       }
     }
-  }
-  
-  // Handle formats with slashes: YYYY/MM/DD or MM/DD/YYYY
-  if (dateStr.includes('/')) {
-    const parts = dateStr.split('/');
-    if (parts.length === 3) {
-      if (parts[0].length === 4) {
-        return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
-      } else {
-        return `${parts[2]}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
+    
+    // Handle formats with dashes
+    if (dateStr.includes('-')) {
+      const parts = dateStr.split('-');
+      if (parts.length === 3) {
+        // Check if YYYY-MM-DD (year first)
+        if (parts[0].length === 4) {
+          return dateStr;
+        }
+        // MM-DD-YYYY format (month first with dashes)
+        else if (parts[0].length <= 2 && parts[2].length === 4) {
+          return `${parts[2]}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
+        }
       }
     }
-  }
-  
-  // Just return year if only year is provided
-  if (dateStr.length === 4 && !isNaN(dateStr)) {
+    
+    // Handle formats with slashes: YYYY/MM/DD or MM/DD/YYYY
+    if (dateStr.includes('/')) {
+      const parts = dateStr.split('/');
+      if (parts.length === 3) {
+        if (parts[0].length === 4) {
+          return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+        } else {
+          return `${parts[2]}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
+        }
+      }
+    }
+    
+    // Just return year if only year is provided
+    if (dateStr.length === 4 && !isNaN(dateStr)) {
+      return dateStr;
+    }
+    
     return dateStr;
   }
-  
-  return dateStr;
-}
 
   function formatArticleDate(dateStr) {
     if (!dateStr) return '';
@@ -267,7 +267,7 @@
         medium: row.medium || row.Medium || "",
         artist: row.artist || row.Artist || "",
         keywords: row.keywords || row.Keywords || "",
-        coordinates: row.I || row.coordinates || row.Coordinates || "", // Column I for coordinates
+        coordinates: row.I || row.coordinates || row.Coordinates || "",
         title: "",
         note: "",
         source: "Americanisms",
@@ -292,15 +292,15 @@
 
       allData.objects = [...americanismsProcessed, ...objectsProcessed];
 
-// Process Articles
-allData.articles = articlesData.map(row => ({
-  src: row.src || row.Src || "",
-  photo: row.photo || row.Photo || "",
-  date: row.date || row.Date || "",
-  sortDate: parseDate(row.date || row.Date || ""),  // ✅ NEW - just use date column
-  source: row.test || row.Test || "",
-  type: "articles"
-})).filter(img => img.src);
+      // Process Articles
+      allData.articles = articlesData.map(row => ({
+        src: row.src || row.Src || "",
+        photo: row.photo || row.Photo || "",
+        date: row.date || row.Date || "",
+        sortDate: parseDate(row.date || row.Date || ""),
+        source: row.test || row.Test || "",
+        type: "articles"
+      })).filter(img => img.src);
 
       // Process Pictures
       allData.pictures = picturesData.map(row => ({
@@ -336,7 +336,6 @@ allData.articles = articlesData.map(row => ({
           return person;
         });
 
-      // Include all people who have a class specified (photographers, poets, fine artists, designers, etc.)
       photographersData = allPeople.filter(person => {
         return person.className && person.className.trim() !== '';
       });
@@ -348,7 +347,6 @@ allData.articles = articlesData.map(row => ({
         allData[key].sort((a, b) => b.sortDate.localeCompare(a.sortDate));
       });
 
-      // Update global references
       window.allData = allData;
 
       initUniversalSearch();
@@ -529,13 +527,11 @@ allData.articles = articlesData.map(row => ({
     const mapBtn = document.getElementById('mapToggleBtn');
     if (!mapBtn) return;
     
-    // Show map button ONLY on Objects page in Archive mode
     if (currentMode === 'archive' && currentIndex === 'objects') {
       mapBtn.style.display = 'block';
     } else {
       mapBtn.style.display = 'none';
       
-      // Close map if it's open and user navigates away
       const mapContainer = document.getElementById('mapContainer');
       if (mapContainer && mapContainer.style.display === 'block') {
         if (typeof window.toggleMap === 'function') {
@@ -558,7 +554,6 @@ allData.articles = articlesData.map(row => ({
       return;
     }
     
-    // Create image overlay if it doesn't exist
     let blogImageOverlay = document.getElementById('blogImageOverlay');
     if (!blogImageOverlay) {
       blogImageOverlay = document.createElement('div');
@@ -575,22 +570,18 @@ allData.articles = articlesData.map(row => ({
       const postDiv = document.createElement('div');
       postDiv.className = 'blog-post';
       
-      // Header section with date, title, link, and thumbnail all on same line
       const headerDiv = document.createElement('div');
       headerDiv.className = 'blog-post-header';
       
-      // Date
       const dateDiv = document.createElement('div');
       dateDiv.className = 'date';
       dateDiv.textContent = post.date;
       headerDiv.appendChild(dateDiv);
       
-      // Title
       const titleH2 = document.createElement('h2');
       titleH2.textContent = post.title;
       headerDiv.appendChild(titleH2);
       
-      // Link button
       if (post.link) {
         const linkButton = document.createElement('a');
         linkButton.href = post.link;
@@ -600,7 +591,6 @@ allData.articles = articlesData.map(row => ({
         headerDiv.appendChild(linkButton);
       }
       
-      // Thumbnail
       if (post.pictures) {
         const thumbnail = document.createElement('img');
         thumbnail.src = post.pictures;
@@ -620,10 +610,8 @@ allData.articles = articlesData.map(row => ({
       
       postDiv.appendChild(headerDiv);
       
-      // Text content
       if (post.text) {
         const textP = document.createElement('p');
-        // Make sure all links within the text have target="_blank"
         let textWithTargetBlank = post.text.replace(/<a\s+href=/gi, '<a target="_blank" href=');
         textP.innerHTML = textWithTargetBlank;
         postDiv.appendChild(textP);
@@ -637,126 +625,119 @@ allData.articles = articlesData.map(row => ({
     }
   }
 
- function renderInspoPosts() {
-  const inspoContainer = document.getElementById('inspoSection');
-  inspoContainer.innerHTML = '';
-  
-  if (inspoPostsData.length === 0) {
-    inspoContainer.innerHTML = '<p style="font-size: 16px; color: #666;">No inspo posts found.</p>';
-    return;
-  }
-  
-  // Group by month-year
-  const groupedByMonth = {};
-  inspoPostsData.forEach(post => {
-    const monthYear = parseMonthYear(post.date) || 'No Date';
-    if (!groupedByMonth[monthYear]) {
-      groupedByMonth[monthYear] = [];
+  function renderInspoPosts() {
+    const inspoContainer = document.getElementById('inspoSection');
+    inspoContainer.innerHTML = '';
+    
+    if (inspoPostsData.length === 0) {
+      inspoContainer.innerHTML = '<p style="font-size: 16px; color: #666;">No inspo posts found.</p>';
+      return;
     }
-    groupedByMonth[monthYear].push(post);
-  });
-  
-  // Sort month-year keys in reverse chronological order
-  const sortedMonths = Object.keys(groupedByMonth).sort((a, b) => {
-    if (a === 'No Date') return 1;
-    if (b === 'No Date') return -1;
-    return b.localeCompare(a);
-  });
-  
-  sortedMonths.forEach(monthYear => {
-    // Month header (collapsible) with arrow
-    const monthHeader = document.createElement('div');
-    monthHeader.className = 'inspo-month-header';
-    monthHeader.style.cssText = `
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 18px;
-      margin-top: 20px;
-      margin-bottom: 10px;
-      user-select: none;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    `;
     
-    // Arrow indicator
-    const arrow = document.createElement('span');
-    arrow.className = 'inspo-arrow';
-    arrow.textContent = '▶'; // Right arrow when collapsed
-    arrow.style.cssText = `
-      display: inline-block;
-      transition: transform 0.2s ease;
-      font-size: 14px;
-    `;
-    
-    const monthText = document.createElement('span');
-    monthText.textContent = monthYear;
-    
-    monthHeader.appendChild(arrow);
-    monthHeader.appendChild(monthText);
-    
-    // Links container (3 columns)
-    const linksContainer = document.createElement('div');
-    linksContainer.className = 'inspo-links-container';
-    linksContainer.style.cssText = `
-      display: none;
-      margin-left: 20px;
-      margin-bottom: 20px;
-      column-count: 3;
-      column-gap: 20px;
-    `;
-    
-    groupedByMonth[monthYear].forEach(post => {
-      const linkWrapper = document.createElement('div');
-      linkWrapper.style.cssText = `
-        margin-bottom: 8px;
-        break-inside: avoid;
-      `;
-      
-      const link = document.createElement('a');
-      link.href = post.link;
-      link.target = '_blank';
-      link.textContent = post.name;
-      link.style.cssText = `
-        font-size: 16px;
-        text-decoration: none;
-        color: #000;
-        background-color: transparent;
-        transition: background-color 0.2s ease;
-      `;
-      
-      // Hover effect
-      link.addEventListener('mouseenter', () => {
-        link.style.backgroundColor = '#ffff66'; // Yellow highlight
-      });
-      
-      link.addEventListener('mouseleave', () => {
-        link.style.backgroundColor = 'transparent';
-      });
-      
-      linkWrapper.appendChild(link);
-      linksContainer.appendChild(linkWrapper);
-    });
-    
-    // Toggle functionality
-    monthHeader.addEventListener('click', () => {
-      if (linksContainer.style.display === 'none') {
-        linksContainer.style.display = 'block';
-        arrow.style.transform = 'rotate(90deg)'; // Down arrow when expanded
-      } else {
-        linksContainer.style.display = 'none';
-        arrow.style.transform = 'rotate(0deg)'; // Right arrow when collapsed
+    const groupedByMonth = {};
+    inspoPostsData.forEach(post => {
+      const monthYear = parseMonthYear(post.date) || 'No Date';
+      if (!groupedByMonth[monthYear]) {
+        groupedByMonth[monthYear] = [];
       }
+      groupedByMonth[monthYear].push(post);
     });
     
-    inspoContainer.appendChild(monthHeader);
-    inspoContainer.appendChild(linksContainer);
-  });
-  
-  if (currentMode === 'blog') {
-    updateBlogItemCount();
+    const sortedMonths = Object.keys(groupedByMonth).sort((a, b) => {
+      if (a === 'No Date') return 1;
+      if (b === 'No Date') return -1;
+      return b.localeCompare(a);
+    });
+    
+    sortedMonths.forEach(monthYear => {
+      const monthHeader = document.createElement('div');
+      monthHeader.className = 'inspo-month-header';
+      monthHeader.style.cssText = `
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 18px;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        user-select: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      `;
+      
+      const arrow = document.createElement('span');
+      arrow.className = 'inspo-arrow';
+      arrow.textContent = '▶';
+      arrow.style.cssText = `
+        display: inline-block;
+        transition: transform 0.2s ease;
+        font-size: 14px;
+      `;
+      
+      const monthText = document.createElement('span');
+      monthText.textContent = monthYear;
+      
+      monthHeader.appendChild(arrow);
+      monthHeader.appendChild(monthText);
+      
+      const linksContainer = document.createElement('div');
+      linksContainer.className = 'inspo-links-container';
+      linksContainer.style.cssText = `
+        display: none;
+        margin-left: 20px;
+        margin-bottom: 20px;
+        column-count: 3;
+        column-gap: 20px;
+      `;
+      
+      groupedByMonth[monthYear].forEach(post => {
+        const linkWrapper = document.createElement('div');
+        linkWrapper.style.cssText = `
+          margin-bottom: 8px;
+          break-inside: avoid;
+        `;
+        
+        const link = document.createElement('a');
+        link.href = post.link;
+        link.target = '_blank';
+        link.textContent = post.name;
+        link.style.cssText = `
+          font-size: 16px;
+          text-decoration: none;
+          color: #000;
+          background-color: transparent;
+          transition: background-color 0.2s ease;
+        `;
+        
+        link.addEventListener('mouseenter', () => {
+          link.style.backgroundColor = '#ffff66';
+        });
+        
+        link.addEventListener('mouseleave', () => {
+          link.style.backgroundColor = 'transparent';
+        });
+        
+        linkWrapper.appendChild(link);
+        linksContainer.appendChild(linkWrapper);
+      });
+      
+      monthHeader.addEventListener('click', () => {
+        if (linksContainer.style.display === 'none') {
+          linksContainer.style.display = 'block';
+          arrow.style.transform = 'rotate(90deg)';
+        } else {
+          linksContainer.style.display = 'none';
+          arrow.style.transform = 'rotate(0deg)';
+        }
+      });
+      
+      inspoContainer.appendChild(monthHeader);
+      inspoContainer.appendChild(linksContainer);
+    });
+    
+    if (currentMode === 'blog') {
+      updateBlogItemCount();
+    }
   }
-}
   
   function renderFieldNotes() {
     const fieldNotesContainer = document.getElementById('fieldNotesSection');
@@ -821,80 +802,66 @@ allData.articles = articlesData.map(row => ({
   }
 
   function renderPlaces() {
-  const searchTerm = document.getElementById('placesSearch').value.toLowerCase();
-  
-  filteredPlaces = placesData.filter(place => {
-    const searchableText = [place.test, place.date, place.src].join(' ').toLowerCase();
-    return searchableText.includes(searchTerm);
-  });
-  
-  const list = document.getElementById('placesList');
-  list.innerHTML = '';
-  
-  if (filteredPlaces.length === 0) {
-    list.innerHTML = '<p style="font-size: 18px; color: #666;">No places found</p>';
-    updateImageCount(0);
-    return;
-  }
-  
-  // Sort alphabetically by place name
-  filteredPlaces.sort((a, b) => a.test.localeCompare(b.test));
-  
-  // Group by first letter
-  const groupedByLetter = {};
-  filteredPlaces.forEach(place => {
-    const firstLetter = place.test[0].toUpperCase();
-    if (!groupedByLetter[firstLetter]) {
-      groupedByLetter[firstLetter] = [];
-    }
-    groupedByLetter[firstLetter].push(place);
-  });
-  
-  const letters = Object.keys(groupedByLetter).sort();
-  
-  letters.forEach(letter => {
-    // Section divider
-    const divider = document.createElement('div');
-    divider.className = 'section-divider';
-    list.appendChild(divider);
+    const searchTerm = document.getElementById('placesSearch').value.toLowerCase();
     
-    // Letter header
-    const header = document.createElement('div');
-    header.className = 'letter-header';
-    header.textContent = letter;
-    list.appendChild(header);
-    
-    // Two-column grid
-    const grid = document.createElement('div');
-    grid.className = 'two-column';
-    
-    groupedByLetter[letter].forEach(place => {
-      const placeItem = document.createElement('div');
-      placeItem.className = 'place-item';
-      
-      const link = document.createElement('a');
-      link.href = place.src;
-      link.target = '_blank';
-      link.textContent = place.test;
-      
-      // Prevent size change on hover
-      link.addEventListener('mouseenter', function() {
-        this.style.fontSize = '16px';
-      });
-      
-      link.addEventListener('mouseleave', function() {
-        this.style.fontSize = '16px';
-      });
-      
-      placeItem.appendChild(link);
-      grid.appendChild(placeItem);
+    filteredPlaces = placesData.filter(place => {
+      const searchableText = [place.test, place.date, place.src].join(' ').toLowerCase();
+      return searchableText.includes(searchTerm);
     });
     
-    list.appendChild(grid);
-  });
-  
-  updateImageCount(filteredPlaces.length);
-}
+    const list = document.getElementById('placesList');
+    list.innerHTML = '';
+    
+    if (filteredPlaces.length === 0) {
+      list.innerHTML = '<p style="font-size: 18px; color: #666;">No places found</p>';
+      updateImageCount(0);
+      return;
+    }
+    
+    filteredPlaces.sort((a, b) => a.test.localeCompare(b.test));
+    
+    const groupedByLetter = {};
+    filteredPlaces.forEach(place => {
+      const firstLetter = place.test[0].toUpperCase();
+      if (!groupedByLetter[firstLetter]) {
+        groupedByLetter[firstLetter] = [];
+      }
+      groupedByLetter[firstLetter].push(place);
+    });
+    
+    const letters = Object.keys(groupedByLetter).sort();
+    
+    letters.forEach(letter => {
+      const divider = document.createElement('div');
+      divider.className = 'section-divider';
+      list.appendChild(divider);
+      
+      const header = document.createElement('div');
+      header.className = 'letter-header';
+      header.textContent = letter;
+      list.appendChild(header);
+      
+      const grid = document.createElement('div');
+      grid.className = 'two-column';
+      
+      groupedByLetter[letter].forEach(place => {
+        const placeItem = document.createElement('div');
+        placeItem.className = 'place-item';
+        
+        const link = document.createElement('a');
+        link.href = place.src;
+        link.target = '_blank';
+        link.textContent = place.test;
+        
+        placeItem.appendChild(link);
+        grid.appendChild(placeItem);
+      });
+      
+      list.appendChild(grid);
+    });
+    
+    updateImageCount(filteredPlaces.length);
+  }
 
   function renderImages(imageArray) {
     const gallery = document.getElementById("gallery");
@@ -969,100 +936,91 @@ allData.articles = articlesData.map(row => ({
   }
 
   function renderPhotographers() {
-  const searchTerm = document.getElementById('photographersSearch').value.toLowerCase();
-  
-  filteredPhotographers = photographersData.filter(p => {
-    const searchableFields = [
-      p.firstName,
-      p.lastName,
-      p.website,
-      p.className,
-      p.dateAdded
-    ];
+    const searchTerm = document.getElementById('photographersSearch').value.toLowerCase();
     
-    if (p.allColumns) {
-      Object.values(p.allColumns).forEach(value => {
-        searchableFields.push(value);
-      });
-    }
-    
-    const searchableText = searchableFields.join(' ').toLowerCase();
-    return searchableText.includes(searchTerm);
-  });
-  
-  const list = document.getElementById('photographersList');
-  list.innerHTML = '';
-  
-  if (filteredPhotographers.length === 0) {
-    list.innerHTML = '<p style="font-size: 18px; color: #666;">No photographers found</p>';
-    document.getElementById('highlightCount').textContent = '0';
-    return;
-  }
-  
-  const groupedByLetter = {};
-  filteredPhotographers.forEach(p => {
-    const firstLetter = p.lastName[0].toUpperCase();
-    if (!groupedByLetter[firstLetter]) {
-      groupedByLetter[firstLetter] = [];
-    }
-    groupedByLetter[firstLetter].push(p);
-  });
-  
-  const letters = Object.keys(groupedByLetter).sort();
-  const today = new Date();
-  
-  letters.forEach(letter => {
-    const divider = document.createElement('div');
-    divider.className = 'section-divider';
-    list.appendChild(divider);
-    
-    const header = document.createElement('div');
-    header.className = 'letter-header';
-    header.textContent = letter;
-    list.appendChild(header);
-    
-    const grid = document.createElement('div');
-    grid.className = 'two-column';
-    
-    groupedByLetter[letter].forEach(photographer => {
-      const nameItem = document.createElement('div');
-      nameItem.className = 'name-item';
+    filteredPhotographers = photographersData.filter(p => {
+      const searchableFields = [
+        p.firstName,
+        p.lastName,
+        p.website,
+        p.className,
+        p.dateAdded
+      ];
       
-      const link = document.createElement('a');
-      link.href = photographer.website;
-      link.target = '_blank';
-      link.textContent = `${photographer.firstName} ${photographer.lastName}`;
-      
-      // Prevent size change on hover
-      link.addEventListener('mouseenter', function() {
-        this.style.fontSize = '16px';
-      });
-      
-      link.addEventListener('mouseleave', function() {
-        this.style.fontSize = '16px';
-      });
-      
-      if (photographer.dateAdded) {
-        const addedDate = parsePhotographerDate(photographer.dateAdded);
-        if (addedDate) {
-          const diff = (today - addedDate) / (1000 * 60 * 60 * 24);
-          if (diff <= 7 && diff >= 0) {
-            link.style.backgroundColor = "#ffff66";
-            link.style.fontWeight = "bold";
-          }
-        }
+      if (p.allColumns) {
+        Object.values(p.allColumns).forEach(value => {
+          searchableFields.push(value);
+        });
       }
       
-      nameItem.appendChild(link);
-      grid.appendChild(nameItem);
+      const searchableText = searchableFields.join(' ').toLowerCase();
+      return searchableText.includes(searchTerm);
     });
     
-    list.appendChild(grid);
-  });
-  
-  document.getElementById('highlightCount').textContent = filteredPhotographers.length;
-  updateImageCount(filteredPhotographers.length);
-}
+    const list = document.getElementById('photographersList');
+    list.innerHTML = '';
+    
+    if (filteredPhotographers.length === 0) {
+      list.innerHTML = '<p style="font-size: 18px; color: #666;">No photographers found</p>';
+      document.getElementById('highlightCount').textContent = '0';
+      return;
+    }
+    
+    const groupedByLetter = {};
+    filteredPhotographers.forEach(p => {
+      const firstLetter = p.lastName[0].toUpperCase();
+      if (!groupedByLetter[firstLetter]) {
+        groupedByLetter[firstLetter] = [];
+      }
+      groupedByLetter[firstLetter].push(p);
+    });
+    
+    const letters = Object.keys(groupedByLetter).sort();
+    const today = new Date();
+    
+    letters.forEach(letter => {
+      const divider = document.createElement('div');
+      divider.className = 'section-divider';
+      list.appendChild(divider);
+      
+      const header = document.createElement('div');
+      header.className = 'letter-header';
+      header.textContent = letter;
+      list.appendChild(header);
+      
+      const grid = document.createElement('div');
+      grid.className = 'two-column';
+      
+      groupedByLetter[letter].forEach(photographer => {
+        const nameItem = document.createElement('div');
+        nameItem.className = 'name-item';
+        
+        const link = document.createElement('a');
+        link.href = photographer.website;
+        link.target = '_blank';
+        link.textContent = `${photographer.firstName} ${photographer.lastName}`;
+        
+        if (photographer.dateAdded) {
+          const addedDate = parsePhotographerDate(photographer.dateAdded);
+          if (addedDate) {
+            const diff = (today - addedDate) / (1000 * 60 * 60 * 24);
+            if (diff <= 7 && diff >= 0) {
+              link.style.backgroundColor = "#ffff66";
+              link.style.fontWeight = "bold";
+            }
+          }
+        }
+        
+        nameItem.appendChild(link);
+        grid.appendChild(nameItem);
+      });
+      
+      list.appendChild(grid);
+    });
+    
+    document.getElementById('highlightCount').textContent = filteredPhotographers.length;
+    updateImageCount(filteredPhotographers.length);
+  }
 
   // ============================================================================
   // UNIVERSAL SEARCH
@@ -1094,7 +1052,6 @@ allData.articles = articlesData.map(row => ({
     const results = [];
     const lowerQuery = query.toLowerCase();
     
-    // Search Objects
     allData.objects.forEach(item => {
       const searchText = [
         item.title, item.date, item.medium, item.artist,
@@ -1106,7 +1063,6 @@ allData.articles = articlesData.map(row => ({
       }
     });
     
-    // Search Articles
     allData.articles.forEach(item => {
       const searchText = [item.date, item.source, item.src].join(' ').toLowerCase();
       if (searchText.includes(lowerQuery)) {
@@ -1114,7 +1070,6 @@ allData.articles = articlesData.map(row => ({
       }
     });
     
-    // Search Pictures
     allData.pictures.forEach(item => {
       const searchText = [item.date, item.photographer, item.note].join(' ').toLowerCase();
       if (searchText.includes(lowerQuery)) {
@@ -1122,7 +1077,6 @@ allData.articles = articlesData.map(row => ({
       }
     });
     
-    // Search Photographers
     photographersData.forEach(item => {
       const searchableFields = [
         item.firstName,
@@ -1145,7 +1099,6 @@ allData.articles = articlesData.map(row => ({
       }
     });
     
-    // Search Places
     if (placesData.length > 0) {
       placesData.forEach(item => {
         const searchText = [item.test, item.date, item.src].join(' ').toLowerCase();
@@ -1155,7 +1108,6 @@ allData.articles = articlesData.map(row => ({
       });
     }
     
-    // Search Blog Posts
     if (blogPostsData.length > 0) {
       blogPostsData.forEach(item => {
         const searchText = [item.title, item.date, item.text].join(' ').toLowerCase();
@@ -1165,7 +1117,6 @@ allData.articles = articlesData.map(row => ({
       });
     }
     
-    // Search Inspo Posts
     if (inspoPostsData.length > 0) {
       inspoPostsData.forEach(item => {
         const searchText = [item.name, item.date, item.text, item.link].join(' ').toLowerCase();
@@ -1175,7 +1126,6 @@ allData.articles = articlesData.map(row => ({
       });
     }
     
-    // Search Field Notes
     if (fieldNotesData.length > 0) {
       fieldNotesData.forEach(item => {
         const searchText = [item.title, item.date, item.number].join(' ').toLowerCase();
@@ -1415,7 +1365,6 @@ allData.articles = articlesData.map(row => ({
   // ============================================================================
   
   window.navigateTo = function(mode, section) {
-    // Update active state on nav links
     document.querySelectorAll('.nav-link').forEach(link => {
       link.classList.remove('active');
     });
@@ -1425,7 +1374,6 @@ allData.articles = articlesData.map(row => ({
       activeLink.classList.add('active');
     }
     
-    // Update hidden selectors
     document.getElementById('modeSelector').value = mode;
     
     if (mode === 'blog') {
@@ -1451,7 +1399,6 @@ allData.articles = articlesData.map(row => ({
         loadFieldNotes();
       }
     } else {
-      // Archive mode
       document.getElementById('indexSelector').value = section;
       currentMode = 'archive';
       currentIndex = section;
@@ -1831,7 +1778,7 @@ allData.articles = articlesData.map(row => ({
     });
     
     filteredImages = sortFilteredImages(filteredImages);
-    window.filteredImages = filteredImages; // Update global reference
+    window.filteredImages = filteredImages;
     renderImages(filteredImages);
     updateImageCount(filteredImages.length);
   }
@@ -1882,7 +1829,6 @@ allData.articles = articlesData.map(row => ({
     document.getElementById("overlayMetadata").innerHTML = overlayHTML;
   }
   
-  // Expose showOverlay to window for map module
   window.showOverlay = showOverlay;
 
   function hideOverlay() {
@@ -1950,14 +1896,12 @@ allData.articles = articlesData.map(row => ({
       placesSearch.addEventListener('input', renderPlaces);
     }
     
-    // Filter buttons row handlers
     const filterButtons = document.querySelectorAll('.filter-btn');
     filterButtons.forEach(btn => {
       btn.addEventListener('click', function() {
         const filter = this.getAttribute('data-filter');
         
         if (filter === 'random') {
-          // Open random photographer
           if (photographersData.length > 0) {
             const randomPhotographer = photographersData[Math.floor(Math.random() * photographersData.length)];
             if (randomPhotographer && randomPhotographer.website) {
@@ -1965,20 +1909,16 @@ allData.articles = articlesData.map(row => ({
             }
           }
         } else {
-          // Apply filter via search - search in className (F column)
           const searchInput = document.getElementById('photographersSearch');
           if (filter === 'all') {
             searchInput.value = '';
           } else {
-            // Set search to the filter term which will search className
             searchInput.value = filter;
           }
           
-          // Update active state
           filterButtons.forEach(b => b.classList.remove('active'));
           this.classList.add('active');
           
-          // Trigger search
           renderPhotographers();
         }
       });
@@ -1995,14 +1935,12 @@ allData.articles = articlesData.map(row => ({
     updateMapButtonVisibility();
     loadAllData();
     
-    // Set default active nav link
     const defaultLink = document.querySelector('[data-section="archive-objects"]');
     if (defaultLink) {
       defaultLink.classList.add('active');
     }
   }
 
-  // Wait for DOM and Papa Parse to be ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
