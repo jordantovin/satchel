@@ -134,65 +134,62 @@
   }
 
   function formatArticleDate(dateStr) {
-    if (!dateStr) return '';
-    
-    let cleanDate = dateStr.split(' ')[0].trim();
-    let date;
-    
-    if (cleanDate.includes('-')) {
-      const parts = cleanDate.split('-');
-      if (parts.length === 3 && parts[0].length === 4) {
-        date = new Date(cleanDate);
-      } else if (parts.length === 3) {
-        date = new Date(`${parts[2]}-${parts[0]}-${parts[1]}`);
+  if (!dateStr) return '';
+  
+  let cleanDate = dateStr.split(' ')[0].trim();
+  let date;
+  
+  // Handle MM/DD/YYYY format (month-day-year)
+  if (cleanDate.includes('/')) {
+    const parts = cleanDate.split('/');
+    if (parts.length === 3) {
+      // Check if it's MM/DD/YYYY format (month first)
+      if (parts[0].length <= 2 && parts[2].length === 4) {
+        const month = parts[0].padStart(2, '0');
+        const day = parts[1].padStart(2, '0');
+        const year = parts[2];
+        date = new Date(`${year}-${month}-${day}`);
       }
-    } else if (cleanDate.includes('/')) {
-      const parts = cleanDate.split('/');
-      if (parts.length === 3) {
-        if (parts[0].length === 4) {
-          date = new Date(`${parts[0]}-${parts[1]}-${parts[2]}`);
-        } else {
-          date = new Date(`${parts[2]}-${parts[0]}-${parts[1]}`);
-        }
-      }
-    } else if (cleanDate.includes('.')) {
-      const parts = cleanDate.split('.');
-      if (parts.length === 3) {
+      // Or YYYY/MM/DD format (year first)
+      else if (parts[0].length === 4) {
         date = new Date(`${parts[0]}-${parts[1]}-${parts[2]}`);
       }
     }
-    
-    if (!date || isNaN(date.getTime())) {
-      date = new Date(dateStr);
-    }
-    
-    if (isNaN(date.getTime())) {
-      return dateStr;
-    }
-    
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                       'July', 'August', 'September', 'October', 'November', 'December'];
-    
-    const month = monthNames[date.getMonth()];
-    const day = date.getDate();
-    const year = date.getFullYear();
-    
-    return `${month} ${day}, ${year}`;
   }
-
-  function parseMonthYear(dateStr) {
-    if (!dateStr) return null;
-    
-    const parts = dateStr.split('.');
-    if (parts.length >= 2) {
-      const year = parts[0];
-      const month = parts[1];
-      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
-                         'July', 'August', 'September', 'October', 'November', 'December'];
-      return `${monthNames[parseInt(month) - 1]}, ${year}`;
+  // Handle YYYY-MM-DD format
+  else if (cleanDate.includes('-')) {
+    const parts = cleanDate.split('-');
+    if (parts.length === 3 && parts[0].length === 4) {
+      date = new Date(cleanDate);
     }
-    return null;
   }
+  // Handle YYYY.MM.DD format
+  else if (cleanDate.includes('.')) {
+    const parts = cleanDate.split('.');
+    if (parts.length === 3) {
+      date = new Date(`${parts[0]}-${parts[1]}-${parts[2]}`);
+    }
+  }
+  
+  // If parsing failed, try native Date parsing
+  if (!date || isNaN(date.getTime())) {
+    date = new Date(dateStr);
+  }
+  
+  // If still invalid, return original string
+  if (isNaN(date.getTime())) {
+    return dateStr;
+  }
+  
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                     'July', 'August', 'September', 'October', 'November', 'December'];
+  
+  const month = monthNames[date.getMonth()];
+  const day = date.getDate();
+  const year = date.getFullYear();
+  
+  return `${month} ${day}, ${year}`;
+}
 
   function parsePhotographerDate(dateStr) {
     if (!dateStr) return null;
@@ -378,60 +375,114 @@
     }
   }
 
-  async function loadInspoPosts() {
-    try {
-      const response = await fetch(inspoPostsURL);
-      const text = await response.text();
-      const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
-      
-      inspoPostsData = parsed.data.map(row => ({
-        name: row.Name || row.name || '',
-        date: row.Date || row.date || '',
-        pictures: row.Pictures || row.pictures || '',
-        text: row.Text || row.text || '',
-        link: row.Link || row.link || ''
-      })).filter(post => post.name && post.link);
-      
-      renderInspoPosts();
-    } catch (error) {
-      console.error('Error loading inspo posts:', error);
-    }
-  }
-
-  async function loadFieldNotes() {
-    try {
-      const response = await fetch(fieldNotesURL);
-      const text = await response.text();
-      const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
-      
-      fieldNotesData = parsed.data.map(row => ({
-        date: row.date || row.Date || row.A || '',
-        title: row.title || row.Title || row.B || '',
-        url: row.url || row.URL || row.D || '',
-        image: row.image || row.Image || row.G || '',
-        number: row.number || row.Number || row.M || ''
-      })).filter(post => post.title);
-      
-      renderFieldNotes();
-    } catch (error) {
-      console.error('Error loading field notes:', error);
-    }
-  }
-
-  async function loadAllBlogData() {
-    if (blogDataLoaded) return;
+async function loadInspoPosts() {
+  try {
+    const response = await fetch(inspoPostsURL);
+    const text = await response.text();
+    const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
     
-    try {
-      if (blogPostsData.length === 0) await loadBlogPosts();
-      if (inspoPostsData.length === 0) await loadInspoPosts();
-      if (fieldNotesData.length === 0) await loadFieldNotes();
-      
-      blogDataLoaded = true;
-    } catch (error) {
-      console.error('Error loading blog data:', error);
-    }
+    inspoPostsData = parsed.data.map(row => ({
+      name: row.Name || row.name || '',
+      date: row.Date || row.date || '',
+      pictures: row.Pictures || row.pictures || '',
+      text: row.Text || row.text || '',
+      link: row.Link || row.link || ''
+    })).filter(post => post.name && post.link);
+    
+    renderInspoPosts();  // ✅ Call the render function
+  } catch (error) {
+    console.error('Error loading inspo posts:', error);
   }
+}
 
+// ✅ CORRECT - function defined at the same level as other render functions
+function renderInspoPosts() {
+  const inspoContainer = document.getElementById('inspoSection');
+  inspoContainer.innerHTML = '';
+  
+  if (inspoPostsData.length === 0) {
+    inspoContainer.innerHTML = '<p style="font-size: 16px; color: #666;">No inspo posts found.</p>';
+    return;
+  }
+  
+  // Create image overlay if it doesn't exist
+  let inspoImageOverlay = document.getElementById('inspoImageOverlay');
+  if (!inspoImageOverlay) {
+    inspoImageOverlay = document.createElement('div');
+    inspoImageOverlay.id = 'inspoImageOverlay';
+    inspoImageOverlay.className = 'blog-image-overlay';
+    inspoImageOverlay.addEventListener('click', () => {
+      inspoImageOverlay.style.display = 'none';
+      inspoImageOverlay.innerHTML = '';
+    });
+    document.body.appendChild(inspoImageOverlay);
+  }
+  
+  inspoPostsData.forEach(post => {
+    const postDiv = document.createElement('div');
+    postDiv.className = 'blog-post';
+    
+    // Header section with date, name, link, and thumbnail all on same line
+    const headerDiv = document.createElement('div');
+    headerDiv.className = 'blog-post-header';
+    
+    // Date
+    const dateDiv = document.createElement('div');
+    dateDiv.className = 'date';
+    dateDiv.textContent = post.date;
+    headerDiv.appendChild(dateDiv);
+    
+    // Name
+    const nameH2 = document.createElement('h2');
+    nameH2.textContent = post.name;
+    headerDiv.appendChild(nameH2);
+    
+    // Link button
+    if (post.link) {
+      const linkButton = document.createElement('a');
+      linkButton.href = post.link;
+      linkButton.target = '_blank';
+      linkButton.className = 'blog-link-button';
+      linkButton.textContent = 'LINK';
+      headerDiv.appendChild(linkButton);
+    }
+    
+    // Thumbnail
+    if (post.pictures) {
+      const thumbnail = document.createElement('img');
+      thumbnail.src = post.pictures;
+      thumbnail.alt = post.name;
+      thumbnail.className = 'blog-post-thumbnail';
+      thumbnail.addEventListener('click', (e) => {
+        e.preventDefault();
+        const overlayImg = document.createElement('img');
+        overlayImg.src = post.pictures;
+        overlayImg.alt = post.name;
+        inspoImageOverlay.innerHTML = '';
+        inspoImageOverlay.appendChild(overlayImg);
+        inspoImageOverlay.style.display = 'flex';
+      });
+      headerDiv.appendChild(thumbnail);
+    }
+    
+    postDiv.appendChild(headerDiv);
+    
+    // Text content
+    if (post.text) {
+      const textP = document.createElement('p');
+      // Make sure all links within the text have target="_blank"
+      let textWithTargetBlank = post.text.replace(/<a\s+href=/gi, '<a target="_blank" href=');
+      textP.innerHTML = textWithTargetBlank;
+      postDiv.appendChild(textP);
+    }
+    
+    inspoContainer.appendChild(postDiv);
+  });
+  
+  if (currentMode === 'blog') {
+    updateBlogItemCount();
+  }
+}
   // ============================================================================
   // SORTING
   // ============================================================================
