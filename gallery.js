@@ -545,86 +545,95 @@
   // RENDERING FUNCTIONS
   // ============================================================================
   
-  function renderBlogPosts() {
-    const postsContainer = document.getElementById('postsSection');
-    postsContainer.innerHTML = '';
-    
-    if (blogPostsData.length === 0) {
-      postsContainer.innerHTML = '<p style="font-size: 16px; color: #666;">No blog posts found.</p>';
-      return;
-    }
-    
-    let blogImageOverlay = document.getElementById('blogImageOverlay');
-    if (!blogImageOverlay) {
-      blogImageOverlay = document.createElement('div');
-      blogImageOverlay.id = 'blogImageOverlay';
-      blogImageOverlay.className = 'blog-image-overlay';
-      blogImageOverlay.addEventListener('click', () => {
-        blogImageOverlay.style.display = 'none';
-        blogImageOverlay.innerHTML = '';
-      });
-      document.body.appendChild(blogImageOverlay);
-    }
-    
-    blogPostsData.forEach(post => {
-      const postDiv = document.createElement('div');
-      postDiv.className = 'blog-post';
-      
-      const headerDiv = document.createElement('div');
-      headerDiv.className = 'blog-post-header';
-      
-      const dateDiv = document.createElement('div');
-      dateDiv.className = 'date';
-      dateDiv.textContent = post.date;
-      headerDiv.appendChild(dateDiv);
-      
-      const titleH2 = document.createElement('h2');
-      titleH2.textContent = post.title;
-      headerDiv.appendChild(titleH2);
-      
-      if (post.link) {
-        const linkButton = document.createElement('a');
-        linkButton.href = post.link;
-        linkButton.target = '_blank';
-        linkButton.className = 'blog-link-button';
-        linkButton.textContent = 'LINK';
-        headerDiv.appendChild(linkButton);
-      }
-      
-      if (post.pictures) {
-        const thumbnail = document.createElement('img');
-        thumbnail.src = post.pictures;
-        thumbnail.alt = post.title;
-        thumbnail.className = 'blog-post-thumbnail';
-        thumbnail.addEventListener('click', (e) => {
-          e.preventDefault();
-          const overlayImg = document.createElement('img');
-          overlayImg.src = post.pictures;
-          overlayImg.alt = post.title;
-          blogImageOverlay.innerHTML = '';
-          blogImageOverlay.appendChild(overlayImg);
-          blogImageOverlay.style.display = 'flex';
-        });
-        headerDiv.appendChild(thumbnail);
-      }
-      
-      postDiv.appendChild(headerDiv);
-      
-      if (post.text) {
-        const textP = document.createElement('p');
-        let textWithTargetBlank = post.text.replace(/<a\s+href=/gi, '<a target="_blank" href=');
-        textP.innerHTML = textWithTargetBlank;
-        postDiv.appendChild(textP);
-      }
-      
-      postsContainer.appendChild(postDiv);
-    });
-    
-    if (currentMode === 'blog') {
-      updateBlogItemCount();
-    }
+ function renderBlogPosts() {
+  const postsContainer = document.getElementById('postsSection');
+  postsContainer.innerHTML = '';
+  
+  if (blogPostsData.length === 0) {
+    postsContainer.innerHTML = '<p style="font-size: 16px; color: #666;">No blog posts found.</p>';
+    return;
   }
-
+  
+  let blogImageOverlay = document.getElementById('blogImageOverlay');
+  if (!blogImageOverlay) {
+    blogImageOverlay = document.createElement('div');
+    blogImageOverlay.id = 'blogImageOverlay';
+    blogImageOverlay.className = 'blog-image-overlay';
+    blogImageOverlay.addEventListener('click', () => {
+      blogImageOverlay.style.display = 'none';
+      blogImageOverlay.innerHTML = '';
+    });
+    document.body.appendChild(blogImageOverlay);
+  }
+  
+  blogPostsData.forEach(post => {
+    const postDiv = document.createElement('div');
+    postDiv.className = 'blog-post';
+    
+    // Header section with date, title, link, and thumbnail all on same line (left-aligned)
+    const headerDiv = document.createElement('div');
+    headerDiv.className = 'blog-post-header';
+    headerDiv.style.justifyContent = 'flex-start';
+    
+    // Date
+    const dateDiv = document.createElement('div');
+    dateDiv.className = 'date';
+    dateDiv.textContent = post.date;
+    headerDiv.appendChild(dateDiv);
+    
+    // Title
+    const titleH2 = document.createElement('h2');
+    titleH2.textContent = post.title;
+    titleH2.style.flex = '0 1 auto';
+    titleH2.style.minWidth = 'auto';
+    headerDiv.appendChild(titleH2);
+    
+    // Link button (right next to title)
+    if (post.link) {
+      const linkButton = document.createElement('a');
+      linkButton.href = post.link;
+      linkButton.target = '_blank';
+      linkButton.className = 'blog-link-button';
+      linkButton.textContent = 'LINK';
+      headerDiv.appendChild(linkButton);
+    }
+    
+    // Thumbnail (right next to link)
+    if (post.pictures) {
+      const thumbnail = document.createElement('img');
+      thumbnail.src = post.pictures;
+      thumbnail.alt = post.title;
+      thumbnail.className = 'blog-post-thumbnail';
+      thumbnail.addEventListener('click', (e) => {
+        e.preventDefault();
+        const overlayImg = document.createElement('img');
+        overlayImg.src = post.pictures;
+        overlayImg.alt = post.title;
+        blogImageOverlay.innerHTML = '';
+        blogImageOverlay.appendChild(overlayImg);
+        blogImageOverlay.style.display = 'flex';
+      });
+      headerDiv.appendChild(thumbnail);
+    }
+    
+    postDiv.appendChild(headerDiv);
+    
+    // Text content
+    if (post.text) {
+      const textP = document.createElement('p');
+      let textWithTargetBlank = post.text.replace(/<a\s+href=/gi, '<a target="_blank" href=');
+      textP.innerHTML = textWithTargetBlank;
+      postDiv.appendChild(textP);
+    }
+    
+    postsContainer.appendChild(postDiv);
+  });
+  
+  if (currentMode === 'blog') {
+    updateBlogItemCount();
+  }
+}
+  
   function renderInspoPosts() {
     const inspoContainer = document.getElementById('inspoSection');
     inspoContainer.innerHTML = '';
