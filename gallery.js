@@ -536,7 +536,6 @@
 // ============================================================================
 
 // REPLACE THE EXISTING renderBlogPosts() FUNCTION WITH THIS VERSION:
-
 function renderBlogPosts() {
   const postsContainer = document.getElementById('postsSection');
   postsContainer.innerHTML = '';
@@ -563,7 +562,7 @@ function renderBlogPosts() {
     const postDiv = document.createElement('div');
     postDiv.className = 'blog-post';
     
-    // Header section with date, title, link, and thumbnail on same line
+    // Header section with date, title, link, and thumbnail all on same line
     const headerDiv = document.createElement('div');
     headerDiv.className = 'blog-post-header';
     
@@ -624,10 +623,6 @@ function renderBlogPosts() {
     updateBlogItemCount();
   }
 }
-
-// ============================================================================
-// END OF PATCH
-// ============================================================================
   function renderFieldNotes() {
     const fieldNotesContainer = document.getElementById('fieldNotesSection');
     fieldNotesContainer.innerHTML = '';
