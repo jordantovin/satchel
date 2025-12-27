@@ -531,6 +531,12 @@
   // RENDERING FUNCTIONS
   // ============================================================================
   
+// ============================================================================
+// PATCH FOR AMERICANISMS GALLERY - BLOG POSTS RENDERING
+// ============================================================================
+
+// REPLACE THE EXISTING renderBlogPosts() FUNCTION WITH THIS VERSION:
+
 function renderBlogPosts() {
   const postsContainer = document.getElementById('postsSection');
   postsContainer.innerHTML = '';
@@ -557,11 +563,7 @@ function renderBlogPosts() {
     const postDiv = document.createElement('div');
     postDiv.className = 'blog-post';
     
-    // Left column - content
-    const contentDiv = document.createElement('div');
-    contentDiv.className = 'blog-post-content';
-    
-    // Header section with date, title, and link on same line
+    // Header section with date, title, link, and thumbnail on same line
     const headerDiv = document.createElement('div');
     headerDiv.className = 'blog-post-header';
     
@@ -586,24 +588,8 @@ function renderBlogPosts() {
       headerDiv.appendChild(linkButton);
     }
     
-    contentDiv.appendChild(headerDiv);
-    
-    // Text content
-    if (post.text) {
-      const textP = document.createElement('p');
-      // Make sure all links within the text have target="_blank"
-      let textWithTargetBlank = post.text.replace(/<a\s+href=/gi, '<a target="_blank" href=');
-      textP.innerHTML = textWithTargetBlank;
-      contentDiv.appendChild(textP);
-    }
-    
-    postDiv.appendChild(contentDiv);
-    
-    // Right column - image (if exists)
+    // Thumbnail
     if (post.pictures) {
-      const imageContainer = document.createElement('div');
-      imageContainer.className = 'blog-post-image-container';
-      
       const thumbnail = document.createElement('img');
       thumbnail.src = post.pictures;
       thumbnail.alt = post.title;
@@ -617,9 +603,18 @@ function renderBlogPosts() {
         blogImageOverlay.appendChild(overlayImg);
         blogImageOverlay.style.display = 'flex';
       });
-      
-      imageContainer.appendChild(thumbnail);
-      postDiv.appendChild(imageContainer);
+      headerDiv.appendChild(thumbnail);
+    }
+    
+    postDiv.appendChild(headerDiv);
+    
+    // Text content
+    if (post.text) {
+      const textP = document.createElement('p');
+      // Make sure all links within the text have target="_blank"
+      let textWithTargetBlank = post.text.replace(/<a\s+href=/gi, '<a target="_blank" href=');
+      textP.innerHTML = textWithTargetBlank;
+      postDiv.appendChild(textP);
     }
     
     postsContainer.appendChild(postDiv);
@@ -629,6 +624,10 @@ function renderBlogPosts() {
     updateBlogItemCount();
   }
 }
+
+// ============================================================================
+// END OF PATCH
+// ============================================================================
   function renderFieldNotes() {
     const fieldNotesContainer = document.getElementById('fieldNotesSection');
     fieldNotesContainer.innerHTML = '';
