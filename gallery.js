@@ -134,62 +134,76 @@
   }
 
   function formatArticleDate(dateStr) {
-  if (!dateStr) return '';
-  
-  let cleanDate = dateStr.split(' ')[0].trim();
-  let date;
-  
-  // Handle MM/DD/YYYY format (month-day-year)
-  if (cleanDate.includes('/')) {
-    const parts = cleanDate.split('/');
-    if (parts.length === 3) {
-      // Check if it's MM/DD/YYYY format (month first)
-      if (parts[0].length <= 2 && parts[2].length === 4) {
-        const month = parts[0].padStart(2, '0');
-        const day = parts[1].padStart(2, '0');
-        const year = parts[2];
-        date = new Date(`${year}-${month}-${day}`);
+    if (!dateStr) return '';
+    
+    let cleanDate = dateStr.split(' ')[0].trim();
+    let date;
+    
+    // Handle MM/DD/YYYY format (month-day-year)
+    if (cleanDate.includes('/')) {
+      const parts = cleanDate.split('/');
+      if (parts.length === 3) {
+        // Check if it's MM/DD/YYYY format (month first)
+        if (parts[0].length <= 2 && parts[2].length === 4) {
+          const month = parts[0].padStart(2, '0');
+          const day = parts[1].padStart(2, '0');
+          const year = parts[2];
+          date = new Date(`${year}-${month}-${day}`);
+        }
+        // Or YYYY/MM/DD format (year first)
+        else if (parts[0].length === 4) {
+          date = new Date(`${parts[0]}-${parts[1]}-${parts[2]}`);
+        }
       }
-      // Or YYYY/MM/DD format (year first)
-      else if (parts[0].length === 4) {
+    }
+    // Handle YYYY-MM-DD format
+    else if (cleanDate.includes('-')) {
+      const parts = cleanDate.split('-');
+      if (parts.length === 3 && parts[0].length === 4) {
+        date = new Date(cleanDate);
+      }
+    }
+    // Handle YYYY.MM.DD format
+    else if (cleanDate.includes('.')) {
+      const parts = cleanDate.split('.');
+      if (parts.length === 3) {
         date = new Date(`${parts[0]}-${parts[1]}-${parts[2]}`);
       }
     }
-  }
-  // Handle YYYY-MM-DD format
-  else if (cleanDate.includes('-')) {
-    const parts = cleanDate.split('-');
-    if (parts.length === 3 && parts[0].length === 4) {
-      date = new Date(cleanDate);
+    
+    // If parsing failed, try native Date parsing
+    if (!date || isNaN(date.getTime())) {
+      date = new Date(dateStr);
     }
-  }
-  // Handle YYYY.MM.DD format
-  else if (cleanDate.includes('.')) {
-    const parts = cleanDate.split('.');
-    if (parts.length === 3) {
-      date = new Date(`${parts[0]}-${parts[1]}-${parts[2]}`);
+    
+    // If still invalid, return original string
+    if (isNaN(date.getTime())) {
+      return dateStr;
     }
+    
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                       'July', 'August', 'September', 'October', 'November', 'December'];
+    
+    const month = monthNames[date.getMonth()];
+    const day = date.getDate();
+    const year = date.getFullYear();
+    
+    return `${month} ${day}, ${year}`;
   }
-  
-  // If parsing failed, try native Date parsing
-  if (!date || isNaN(date.getTime())) {
-    date = new Date(dateStr);
+
+  function parseMonthYear(dateStr) {
+    if (!dateStr) return null;
+    
+    const parts = dateStr.split('.');
+    if (parts.length >= 2) {
+      const year = parts[0];
+      const month = parts[1];
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                         'July', 'August', 'September', 'October', 'November', 'December'];
+      return `${monthNames[parseInt(month) - 1]}, ${year}`;
+    }
+    return null;
   }
-  
-  // If still invalid, return original string
-  if (isNaN(date.getTime())) {
-    return dateStr;
-  }
-  
-  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                     'July', 'August', 'September', 'October', 'November', 'December'];
-  
-  const month = monthNames[date.getMonth()];
-  const day = date.getDate();
-  const year = date.getFullYear();
-  
-  return `${month} ${day}, ${year}`;
-}
 
   function parsePhotographerDate(dateStr) {
     if (!dateStr) return null;
@@ -375,114 +389,60 @@
     }
   }
 
-async function loadInspoPosts() {
-  try {
-    const response = await fetch(inspoPostsURL);
-    const text = await response.text();
-    const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
-    
-    inspoPostsData = parsed.data.map(row => ({
-      name: row.Name || row.name || '',
-      date: row.Date || row.date || '',
-      pictures: row.Pictures || row.pictures || '',
-      text: row.Text || row.text || '',
-      link: row.Link || row.link || ''
-    })).filter(post => post.name && post.link);
-    
-    renderInspoPosts();  // ✅ Call the render function
-  } catch (error) {
-    console.error('Error loading inspo posts:', error);
+  async function loadInspoPosts() {
+    try {
+      const response = await fetch(inspoPostsURL);
+      const text = await response.text();
+      const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
+      
+      inspoPostsData = parsed.data.map(row => ({
+        name: row.Name || row.name || '',
+        date: row.Date || row.date || '',
+        pictures: row.Pictures || row.pictures || '',
+        text: row.Text || row.text || '',
+        link: row.Link || row.link || ''
+      })).filter(post => post.name && post.link);
+      
+      renderInspoPosts();
+    } catch (error) {
+      console.error('Error loading inspo posts:', error);
+    }
   }
-}
 
-// ✅ CORRECT - function defined at the same level as other render functions
-function renderInspoPosts() {
-  const inspoContainer = document.getElementById('inspoSection');
-  inspoContainer.innerHTML = '';
-  
-  if (inspoPostsData.length === 0) {
-    inspoContainer.innerHTML = '<p style="font-size: 16px; color: #666;">No inspo posts found.</p>';
-    return;
-  }
-  
-  // Create image overlay if it doesn't exist
-  let inspoImageOverlay = document.getElementById('inspoImageOverlay');
-  if (!inspoImageOverlay) {
-    inspoImageOverlay = document.createElement('div');
-    inspoImageOverlay.id = 'inspoImageOverlay';
-    inspoImageOverlay.className = 'blog-image-overlay';
-    inspoImageOverlay.addEventListener('click', () => {
-      inspoImageOverlay.style.display = 'none';
-      inspoImageOverlay.innerHTML = '';
-    });
-    document.body.appendChild(inspoImageOverlay);
-  }
-  
-  inspoPostsData.forEach(post => {
-    const postDiv = document.createElement('div');
-    postDiv.className = 'blog-post';
-    
-    // Header section with date, name, link, and thumbnail all on same line
-    const headerDiv = document.createElement('div');
-    headerDiv.className = 'blog-post-header';
-    
-    // Date
-    const dateDiv = document.createElement('div');
-    dateDiv.className = 'date';
-    dateDiv.textContent = post.date;
-    headerDiv.appendChild(dateDiv);
-    
-    // Name
-    const nameH2 = document.createElement('h2');
-    nameH2.textContent = post.name;
-    headerDiv.appendChild(nameH2);
-    
-    // Link button
-    if (post.link) {
-      const linkButton = document.createElement('a');
-      linkButton.href = post.link;
-      linkButton.target = '_blank';
-      linkButton.className = 'blog-link-button';
-      linkButton.textContent = 'LINK';
-      headerDiv.appendChild(linkButton);
+  async function loadFieldNotes() {
+    try {
+      const response = await fetch(fieldNotesURL);
+      const text = await response.text();
+      const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
+      
+      fieldNotesData = parsed.data.map(row => ({
+        date: row.date || row.Date || row.A || '',
+        title: row.title || row.Title || row.B || '',
+        url: row.url || row.URL || row.D || '',
+        image: row.image || row.Image || row.G || '',
+        number: row.number || row.Number || row.M || ''
+      })).filter(post => post.title);
+      
+      renderFieldNotes();
+    } catch (error) {
+      console.error('Error loading field notes:', error);
     }
-    
-    // Thumbnail
-    if (post.pictures) {
-      const thumbnail = document.createElement('img');
-      thumbnail.src = post.pictures;
-      thumbnail.alt = post.name;
-      thumbnail.className = 'blog-post-thumbnail';
-      thumbnail.addEventListener('click', (e) => {
-        e.preventDefault();
-        const overlayImg = document.createElement('img');
-        overlayImg.src = post.pictures;
-        overlayImg.alt = post.name;
-        inspoImageOverlay.innerHTML = '';
-        inspoImageOverlay.appendChild(overlayImg);
-        inspoImageOverlay.style.display = 'flex';
-      });
-      headerDiv.appendChild(thumbnail);
-    }
-    
-    postDiv.appendChild(headerDiv);
-    
-    // Text content
-    if (post.text) {
-      const textP = document.createElement('p');
-      // Make sure all links within the text have target="_blank"
-      let textWithTargetBlank = post.text.replace(/<a\s+href=/gi, '<a target="_blank" href=');
-      textP.innerHTML = textWithTargetBlank;
-      postDiv.appendChild(textP);
-    }
-    
-    inspoContainer.appendChild(postDiv);
-  });
-  
-  if (currentMode === 'blog') {
-    updateBlogItemCount();
   }
-}
+
+  async function loadAllBlogData() {
+    if (blogDataLoaded) return;
+    
+    try {
+      if (blogPostsData.length === 0) await loadBlogPosts();
+      if (inspoPostsData.length === 0) await loadInspoPosts();
+      if (fieldNotesData.length === 0) await loadFieldNotes();
+      
+      blogDataLoaded = true;
+    } catch (error) {
+      console.error('Error loading blog data:', error);
+    }
+  }
+
   // ============================================================================
   // SORTING
   // ============================================================================
@@ -582,98 +542,172 @@ function renderInspoPosts() {
   // RENDERING FUNCTIONS
   // ============================================================================
   
-// ============================================================================
-// PATCH FOR AMERICANISMS GALLERY - BLOG POSTS RENDERING
-// ============================================================================
-
-// REPLACE THE EXISTING renderBlogPosts() FUNCTION WITH THIS VERSION:
-function renderBlogPosts() {
-  const postsContainer = document.getElementById('postsSection');
-  postsContainer.innerHTML = '';
-  
-  if (blogPostsData.length === 0) {
-    postsContainer.innerHTML = '<p style="font-size: 16px; color: #666;">No blog posts found.</p>';
-    return;
-  }
-  
-  // Create image overlay if it doesn't exist
-  let blogImageOverlay = document.getElementById('blogImageOverlay');
-  if (!blogImageOverlay) {
-    blogImageOverlay = document.createElement('div');
-    blogImageOverlay.id = 'blogImageOverlay';
-    blogImageOverlay.className = 'blog-image-overlay';
-    blogImageOverlay.addEventListener('click', () => {
-      blogImageOverlay.style.display = 'none';
-      blogImageOverlay.innerHTML = '';
-    });
-    document.body.appendChild(blogImageOverlay);
-  }
-  
-  blogPostsData.forEach(post => {
-    const postDiv = document.createElement('div');
-    postDiv.className = 'blog-post';
+  function renderBlogPosts() {
+    const postsContainer = document.getElementById('postsSection');
+    postsContainer.innerHTML = '';
     
-    // Header section with date, title, link, and thumbnail all on same line
-    const headerDiv = document.createElement('div');
-    headerDiv.className = 'blog-post-header';
-    
-    // Date
-    const dateDiv = document.createElement('div');
-    dateDiv.className = 'date';
-    dateDiv.textContent = post.date;
-    headerDiv.appendChild(dateDiv);
-    
-    // Title
-    const titleH2 = document.createElement('h2');
-    titleH2.textContent = post.title;
-    headerDiv.appendChild(titleH2);
-    
-    // Link button
-    if (post.link) {
-      const linkButton = document.createElement('a');
-      linkButton.href = post.link;
-      linkButton.target = '_blank';
-      linkButton.className = 'blog-link-button';
-      linkButton.textContent = 'LINK';
-      headerDiv.appendChild(linkButton);
+    if (blogPostsData.length === 0) {
+      postsContainer.innerHTML = '<p style="font-size: 16px; color: #666;">No blog posts found.</p>';
+      return;
     }
     
-    // Thumbnail
-    if (post.pictures) {
-      const thumbnail = document.createElement('img');
-      thumbnail.src = post.pictures;
-      thumbnail.alt = post.title;
-      thumbnail.className = 'blog-post-thumbnail';
-      thumbnail.addEventListener('click', (e) => {
-        e.preventDefault();
-        const overlayImg = document.createElement('img');
-        overlayImg.src = post.pictures;
-        overlayImg.alt = post.title;
+    // Create image overlay if it doesn't exist
+    let blogImageOverlay = document.getElementById('blogImageOverlay');
+    if (!blogImageOverlay) {
+      blogImageOverlay = document.createElement('div');
+      blogImageOverlay.id = 'blogImageOverlay';
+      blogImageOverlay.className = 'blog-image-overlay';
+      blogImageOverlay.addEventListener('click', () => {
+        blogImageOverlay.style.display = 'none';
         blogImageOverlay.innerHTML = '';
-        blogImageOverlay.appendChild(overlayImg);
-        blogImageOverlay.style.display = 'flex';
       });
-      headerDiv.appendChild(thumbnail);
+      document.body.appendChild(blogImageOverlay);
     }
     
-    postDiv.appendChild(headerDiv);
+    blogPostsData.forEach(post => {
+      const postDiv = document.createElement('div');
+      postDiv.className = 'blog-post';
+      
+      // Header section with date, title, link, and thumbnail all on same line
+      const headerDiv = document.createElement('div');
+      headerDiv.className = 'blog-post-header';
+      
+      // Date
+      const dateDiv = document.createElement('div');
+      dateDiv.className = 'date';
+      dateDiv.textContent = post.date;
+      headerDiv.appendChild(dateDiv);
+      
+      // Title
+      const titleH2 = document.createElement('h2');
+      titleH2.textContent = post.title;
+      headerDiv.appendChild(titleH2);
+      
+      // Link button
+      if (post.link) {
+        const linkButton = document.createElement('a');
+        linkButton.href = post.link;
+        linkButton.target = '_blank';
+        linkButton.className = 'blog-link-button';
+        linkButton.textContent = 'LINK';
+        headerDiv.appendChild(linkButton);
+      }
+      
+      // Thumbnail
+      if (post.pictures) {
+        const thumbnail = document.createElement('img');
+        thumbnail.src = post.pictures;
+        thumbnail.alt = post.title;
+        thumbnail.className = 'blog-post-thumbnail';
+        thumbnail.addEventListener('click', (e) => {
+          e.preventDefault();
+          const overlayImg = document.createElement('img');
+          overlayImg.src = post.pictures;
+          overlayImg.alt = post.title;
+          blogImageOverlay.innerHTML = '';
+          blogImageOverlay.appendChild(overlayImg);
+          blogImageOverlay.style.display = 'flex';
+        });
+        headerDiv.appendChild(thumbnail);
+      }
+      
+      postDiv.appendChild(headerDiv);
+      
+      // Text content
+      if (post.text) {
+        const textP = document.createElement('p');
+        // Make sure all links within the text have target="_blank"
+        let textWithTargetBlank = post.text.replace(/<a\s+href=/gi, '<a target="_blank" href=');
+        textP.innerHTML = textWithTargetBlank;
+        postDiv.appendChild(textP);
+      }
+      
+      postsContainer.appendChild(postDiv);
+    });
     
-    // Text content
-    if (post.text) {
-      const textP = document.createElement('p');
-      // Make sure all links within the text have target="_blank"
-      let textWithTargetBlank = post.text.replace(/<a\s+href=/gi, '<a target="_blank" href=');
-      textP.innerHTML = textWithTargetBlank;
-      postDiv.appendChild(textP);
+    if (currentMode === 'blog') {
+      updateBlogItemCount();
     }
-    
-    postsContainer.appendChild(postDiv);
-  });
-  
-  if (currentMode === 'blog') {
-    updateBlogItemCount();
   }
-}
+
+  function renderInspoPosts() {
+    const inspoContainer = document.getElementById('inspoSection');
+    inspoContainer.innerHTML = '';
+    
+    if (inspoPostsData.length === 0) {
+      inspoContainer.innerHTML = '<p style="font-size: 16px; color: #666;">No inspo posts found.</p>';
+      return;
+    }
+    
+    // Group by month-year
+    const groupedByMonth = {};
+    inspoPostsData.forEach(post => {
+      const monthYear = parseMonthYear(post.date) || 'No Date';
+      if (!groupedByMonth[monthYear]) {
+        groupedByMonth[monthYear] = [];
+      }
+      groupedByMonth[monthYear].push(post);
+    });
+    
+    // Sort month-year keys in reverse chronological order
+    const sortedMonths = Object.keys(groupedByMonth).sort((a, b) => {
+      if (a === 'No Date') return 1;
+      if (b === 'No Date') return -1;
+      return b.localeCompare(a);
+    });
+    
+    sortedMonths.forEach(monthYear => {
+      // Month header (collapsible)
+      const monthHeader = document.createElement('div');
+      monthHeader.className = 'inspo-month-header';
+      monthHeader.textContent = monthYear;
+      monthHeader.style.cursor = 'pointer';
+      monthHeader.style.fontWeight = 'bold';
+      monthHeader.style.fontSize = '18px';
+      monthHeader.style.marginTop = '20px';
+      monthHeader.style.marginBottom = '10px';
+      monthHeader.style.userSelect = 'none';
+      
+      // Links container
+      const linksContainer = document.createElement('div');
+      linksContainer.className = 'inspo-links-container';
+      linksContainer.style.display = 'none'; // Start collapsed
+      linksContainer.style.marginLeft = '20px';
+      
+      groupedByMonth[monthYear].forEach(post => {
+        const linkWrapper = document.createElement('div');
+        linkWrapper.style.marginBottom = '8px';
+        
+        const link = document.createElement('a');
+        link.href = post.link;
+        link.target = '_blank';
+        link.textContent = post.name;
+        link.style.fontSize = '16px';
+        link.style.textDecoration = 'underline';
+        link.style.color = '#000';
+        
+        linkWrapper.appendChild(link);
+        linksContainer.appendChild(linkWrapper);
+      });
+      
+      // Toggle functionality
+      monthHeader.addEventListener('click', () => {
+        if (linksContainer.style.display === 'none') {
+          linksContainer.style.display = 'block';
+        } else {
+          linksContainer.style.display = 'none';
+        }
+      });
+      
+      inspoContainer.appendChild(monthHeader);
+      inspoContainer.appendChild(linksContainer);
+    });
+    
+    if (currentMode === 'blog') {
+      updateBlogItemCount();
+    }
+  }
+
   function renderFieldNotes() {
     const fieldNotesContainer = document.getElementById('fieldNotesSection');
     fieldNotesContainer.innerHTML = '';
@@ -693,12 +727,20 @@ function renderBlogPosts() {
     fieldNotesData.forEach(note => {
       const noteDiv = document.createElement('div');
       noteDiv.className = 'field-note-item';
+      noteDiv.style.display = 'flex';
+      noteDiv.style.justifyContent = 'space-between';
+      noteDiv.style.alignItems = 'baseline';
+      noteDiv.style.marginBottom = '8px';
+      noteDiv.style.fontSize = '16px';
       
       const titleLink = document.createElement('a');
       titleLink.href = note.url || '#';
       titleLink.target = '_blank';
       titleLink.className = 'field-note-title';
       titleLink.textContent = note.number ? `${note.number} - ${note.title}` : note.title;
+      titleLink.style.textDecoration = 'underline';
+      titleLink.style.color = '#000';
+      titleLink.style.flex = '1';
       
       if (note.image) {
         titleLink.addEventListener('mouseenter', () => {
@@ -713,6 +755,10 @@ function renderBlogPosts() {
       const dateDiv = document.createElement('div');
       dateDiv.className = 'field-note-date';
       dateDiv.textContent = note.date;
+      dateDiv.style.fontSize = '14px';
+      dateDiv.style.color = '#666';
+      dateDiv.style.marginLeft = '20px';
+      dateDiv.style.whiteSpace = 'nowrap';
       
       noteDiv.appendChild(titleLink);
       noteDiv.appendChild(dateDiv);
