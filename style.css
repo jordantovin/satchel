@@ -936,26 +936,19 @@ a:active {
   padding-left: 20px;
   padding-right: 20px;
   border-bottom: 1px solid black;
-  display: flex;
-  gap: 20px;
 }
 
 .blog-post:last-child {
   border-bottom: none;
 }
 
-/* Left column with text content */
-.blog-post-content {
-  flex: 1;
-  min-width: 0;
-}
-
-/* Blog post header with date, title, and link on same line */
+/* Blog post header with title, link, and image on same line */
 .blog-post-header {
   display: flex;
   align-items: center;
   gap: 15px;
   margin-bottom: 10px;
+  flex-wrap: wrap;
 }
 
 .blog-post h2 {
@@ -971,6 +964,18 @@ a:active {
   color: #999;
   margin: 0;
   flex-shrink: 0;
+}
+
+.blog-post-thumbnail {
+  max-height: 60px;
+  width: auto;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  border-radius: 0;
+}
+
+.blog-post-thumbnail:hover {
+  opacity: 0.8;
 }
 
 .blog-post p {
@@ -1012,27 +1017,6 @@ a:active {
 .blog-link-button:hover {
   background-color: #000 !important;
   color: #fff !important;
-}
-
-/* Right column with image */
-.blog-post-image-container {
-  flex-shrink: 0;
-  width: 300px;
-  display: flex;
-  align-items: flex-start;
-}
-
-.blog-post-thumbnail {
-  width: 100%;
-  height: auto;
-  cursor: pointer;
-  transition: opacity 0.2s;
-  border-radius: 0;
-  border: 2px solid #000;
-}
-
-.blog-post-thumbnail:hover {
-  opacity: 0.8;
 }
 
 /* Image overlay for blog */
