@@ -637,83 +637,115 @@ allData.articles = articlesData.map(row => ({
     }
   }
 
-  function renderInspoPosts() {
-    const inspoContainer = document.getElementById('inspoSection');
-    inspoContainer.innerHTML = '';
-    
-    if (inspoPostsData.length === 0) {
-      inspoContainer.innerHTML = '<p style="font-size: 16px; color: #666;">No inspo posts found.</p>';
-      return;
-    }
-    
-    // Group by month-year
-    const groupedByMonth = {};
-    inspoPostsData.forEach(post => {
-      const monthYear = parseMonthYear(post.date) || 'No Date';
-      if (!groupedByMonth[monthYear]) {
-        groupedByMonth[monthYear] = [];
-      }
-      groupedByMonth[monthYear].push(post);
-    });
-    
-    // Sort month-year keys in reverse chronological order
-    const sortedMonths = Object.keys(groupedByMonth).sort((a, b) => {
-      if (a === 'No Date') return 1;
-      if (b === 'No Date') return -1;
-      return b.localeCompare(a);
-    });
-    
-    sortedMonths.forEach(monthYear => {
-      // Month header (collapsible)
-      const monthHeader = document.createElement('div');
-      monthHeader.className = 'inspo-month-header';
-      monthHeader.textContent = monthYear;
-      monthHeader.style.cursor = 'pointer';
-      monthHeader.style.fontWeight = 'bold';
-      monthHeader.style.fontSize = '18px';
-      monthHeader.style.marginTop = '20px';
-      monthHeader.style.marginBottom = '10px';
-      monthHeader.style.userSelect = 'none';
-      
-      // Links container
-      const linksContainer = document.createElement('div');
-      linksContainer.className = 'inspo-links-container';
-      linksContainer.style.display = 'none'; // Start collapsed
-      linksContainer.style.marginLeft = '20px';
-      
-      groupedByMonth[monthYear].forEach(post => {
-        const linkWrapper = document.createElement('div');
-        linkWrapper.style.marginBottom = '8px';
-        
-        const link = document.createElement('a');
-        link.href = post.link;
-        link.target = '_blank';
-        link.textContent = post.name;
-        link.style.fontSize = '16px';
-        link.style.textDecoration = 'underline';
-        link.style.color = '#000';
-        
-        linkWrapper.appendChild(link);
-        linksContainer.appendChild(linkWrapper);
-      });
-      
-      // Toggle functionality
-      monthHeader.addEventListener('click', () => {
-        if (linksContainer.style.display === 'none') {
-          linksContainer.style.display = 'block';
-        } else {
-          linksContainer.style.display = 'none';
-        }
-      });
-      
-      inspoContainer.appendChild(monthHeader);
-      inspoContainer.appendChild(linksContainer);
-    });
-    
-    if (currentMode === 'blog') {
-      updateBlogItemCount();
-    }
+ function renderInspoPosts() {
+  const inspoContainer = document.getElementById('inspoSection');
+  inspoContainer.innerHTML = '';
+  
+  if (inspoPostsData.length === 0) {
+    inspoContainer.innerHTML = '<p style="font-size: 16px; color: #666;">No inspo posts found.</p>';
+    return;
   }
+  
+  // Group by month-year
+  const groupedByMonth = {};
+  inspoPostsData.forEach(post => {
+    const monthYear = parseMonthYear(post.date) || 'No Date';
+    if (!groupedByMonth[monthYear]) {
+      groupedByMonth[monthYear] = [];
+    }
+    groupedByMonth[monthYear].push(post);
+  });
+  
+  // Sort month-year keys in reverse chronological order
+  const sortedMonths = Object.keys(groupedByMonth).sort((a, b) => {
+    if (a === 'No Date') return 1;
+    if (b === 'No Date') return -1;
+    return b.localeCompare(a);
+  });
+  
+  sortedMonths.forEach(monthYear => {
+    // Month header (collapsible) with arrow
+    const monthHeader = document.createElement('div');
+    monthHeader.className = 'inspo-month-header';
+    monthHeader.style.cssText = `
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 18px;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    `;
+    
+    // Arrow indicator
+    const arrow = document.createElement('span');
+    arrow.className = 'inspo-arrow';
+    arrow.textContent = '▶'; // Right arrow when collapsed
+    arrow.style.cssText = `
+      display: inline-block;
+      transition: transform 0.2s ease;
+      font-size: 14px;
+    `;
+    
+    const monthText = document.createElement('span');
+    monthText.textContent = monthYear;
+    
+    monthHeader.appendChild(arrow);
+    monthHeader.appendChild(monthText);
+    
+    // Links container (3 columns)
+    const linksContainer = document.createElement('div');
+    linksContainer.className = 'inspo-links-container';
+    linksContainer.style.cssText = `
+      display: none;
+      margin-left: 20px;
+      margin-bottom: 20px;
+      column-count: 3;
+      column-gap: 20px;
+    `;
+    
+    groupedByMonth[monthYear].forEach(post => {
+      const linkWrapper = document.createElement('div');
+      linkWrapper.style.cssText = `
+        margin-bottom: 8px;
+        break-inside: avoid;
+      `;
+      
+      const link = document.createElement('a');
+      link.href = post.link;
+      link.target = '_blank';
+      link.textContent = post.name;
+      link.style.cssText = `
+        font-size: 16px;
+        text-decoration: underline;
+        color: #000;
+      `;
+      
+      linkWrapper.appendChild(link);
+      linksContainer.appendChild(linkWrapper);
+    });
+    
+    // Toggle functionality
+    monthHeader.addEventListener('click', () => {
+      if (linksContainer.style.display === 'none') {
+        linksContainer.style.display = 'block';
+        arrow.style.transform = 'rotate(90deg)'; // Down arrow when expanded
+      } else {
+        linksContainer.style.display = 'none';
+        arrow.style.transform = 'rotate(0deg)'; // Right arrow when collapsed
+      }
+    });
+    
+    inspoContainer.appendChild(monthHeader);
+    inspoContainer.appendChild(linksContainer);
+  });
+  
+  if (currentMode === 'blog') {
+    updateBlogItemCount();
+  }
+}
 
   function renderFieldNotes() {
     const fieldNotesContainer = document.getElementById('fieldNotesSection');
