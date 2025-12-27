@@ -557,7 +557,11 @@ function renderBlogPosts() {
     const postDiv = document.createElement('div');
     postDiv.className = 'blog-post';
     
-    // Header section with date, title, link, and thumbnail on same line
+    // Left column - content
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'blog-post-content';
+    
+    // Header section with date, title, and link on same line
     const headerDiv = document.createElement('div');
     headerDiv.className = 'blog-post-header';
     
@@ -582,8 +586,24 @@ function renderBlogPosts() {
       headerDiv.appendChild(linkButton);
     }
     
-    // Thumbnail
+    contentDiv.appendChild(headerDiv);
+    
+    // Text content
+    if (post.text) {
+      const textP = document.createElement('p');
+      // Make sure all links within the text have target="_blank"
+      let textWithTargetBlank = post.text.replace(/<a\s+href=/gi, '<a target="_blank" href=');
+      textP.innerHTML = textWithTargetBlank;
+      contentDiv.appendChild(textP);
+    }
+    
+    postDiv.appendChild(contentDiv);
+    
+    // Right column - image (if exists)
     if (post.pictures) {
+      const imageContainer = document.createElement('div');
+      imageContainer.className = 'blog-post-image-container';
+      
       const thumbnail = document.createElement('img');
       thumbnail.src = post.pictures;
       thumbnail.alt = post.title;
@@ -597,18 +617,9 @@ function renderBlogPosts() {
         blogImageOverlay.appendChild(overlayImg);
         blogImageOverlay.style.display = 'flex';
       });
-      headerDiv.appendChild(thumbnail);
-    }
-    
-    postDiv.appendChild(headerDiv);
-    
-    // Text content
-    if (post.text) {
-      const textP = document.createElement('p');
-      // Make sure all links within the text have target="_blank"
-      let textWithTargetBlank = post.text.replace(/<a\s+href=/gi, '<a target="_blank" href=');
-      textP.innerHTML = textWithTargetBlank;
-      postDiv.appendChild(textP);
+      
+      imageContainer.appendChild(thumbnail);
+      postDiv.appendChild(imageContainer);
     }
     
     postsContainer.appendChild(postDiv);
@@ -618,71 +629,6 @@ function renderBlogPosts() {
     updateBlogItemCount();
   }
 }
-  
-  function renderInspoPosts() {
-    const inspoContainer = document.getElementById('inspoSection');
-    inspoContainer.innerHTML = '';
-    
-    if (inspoPostsData.length === 0) {
-      inspoContainer.innerHTML = '<p style="font-size: 16px; color: #666;">No inspo posts found.</p>';
-      return;
-    }
-    
-    const groupedByMonth = {};
-    inspoPostsData.forEach(post => {
-      const monthYear = parseMonthYear(post.date);
-      if (monthYear) {
-        if (!groupedByMonth[monthYear]) {
-          groupedByMonth[monthYear] = [];
-        }
-        groupedByMonth[monthYear].push(post);
-      }
-    });
-    
-    const sortedMonths = Object.keys(groupedByMonth).sort((a, b) => {
-      const [monthA, yearA] = a.split(', ');
-      const [monthB, yearB] = b.split(', ');
-      if (yearB !== yearA) return yearB - yearA;
-      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
-                         'July', 'August', 'September', 'October', 'November', 'December'];
-      return monthNames.indexOf(monthB) - monthNames.indexOf(monthA);
-    });
-    
-    sortedMonths.forEach(monthYear => {
-      const monthDiv = document.createElement('div');
-      monthDiv.style.marginBottom = '40px';
-      
-      const monthHeader = document.createElement('h2');
-      monthHeader.textContent = monthYear;
-      monthHeader.style.fontSize = '28px';
-      monthHeader.style.fontWeight = 'bold';
-      monthHeader.style.fontFamily = 'Helvetica';
-      monthHeader.style.marginBottom = '15px';
-      monthDiv.appendChild(monthHeader);
-      
-      const sortedPosts = groupedByMonth[monthYear].sort((a, b) => 
-        a.name.localeCompare(b.name)
-      );
-      
-      const linksP = document.createElement('p');
-      linksP.style.fontSize = '16px';
-      linksP.style.lineHeight = '1.0';
-      
-      const linkTexts = sortedPosts.map(post => 
-        `<a href="${post.link}" target="_blank" class="inspo-link">${post.name}</a>`
-      );
-      
-      linksP.innerHTML = linkTexts.join(', ');
-      monthDiv.appendChild(linksP);
-      
-      inspoContainer.appendChild(monthDiv);
-    });
-    
-    if (currentMode === 'blog') {
-      updateBlogItemCount();
-    }
-  }
-
   function renderFieldNotes() {
     const fieldNotesContainer = document.getElementById('fieldNotesSection');
     fieldNotesContainer.innerHTML = '';
