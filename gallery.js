@@ -821,71 +821,80 @@ allData.articles = articlesData.map(row => ({
   }
 
   function renderPlaces() {
-    const searchTerm = document.getElementById('placesSearch').value.toLowerCase();
-    
-    filteredPlaces = placesData.filter(place => {
-      const searchableText = [place.test, place.date, place.src].join(' ').toLowerCase();
-      return searchableText.includes(searchTerm);
-    });
-    
-    const list = document.getElementById('placesList');
-    list.innerHTML = '';
-    
-    if (filteredPlaces.length === 0) {
-      list.innerHTML = '<p style="font-size: 18px; color: #666;">No places found</p>';
-      updateImageCount(0);
-      return;
+  const searchTerm = document.getElementById('placesSearch').value.toLowerCase();
+  
+  filteredPlaces = placesData.filter(place => {
+    const searchableText = [place.test, place.date, place.src].join(' ').toLowerCase();
+    return searchableText.includes(searchTerm);
+  });
+  
+  const list = document.getElementById('placesList');
+  list.innerHTML = '';
+  
+  if (filteredPlaces.length === 0) {
+    list.innerHTML = '<p style="font-size: 18px; color: #666;">No places found</p>';
+    updateImageCount(0);
+    return;
+  }
+  
+  // Sort alphabetically by place name
+  filteredPlaces.sort((a, b) => a.test.localeCompare(b.test));
+  
+  // Group by first letter
+  const groupedByLetter = {};
+  filteredPlaces.forEach(place => {
+    const firstLetter = place.test[0].toUpperCase();
+    if (!groupedByLetter[firstLetter]) {
+      groupedByLetter[firstLetter] = [];
     }
+    groupedByLetter[firstLetter].push(place);
+  });
+  
+  const letters = Object.keys(groupedByLetter).sort();
+  
+  letters.forEach(letter => {
+    // Section divider
+    const divider = document.createElement('div');
+    divider.className = 'section-divider';
+    list.appendChild(divider);
     
-    // Sort alphabetically by place name
-    filteredPlaces.sort((a, b) => a.test.localeCompare(b.test));
+    // Letter header
+    const header = document.createElement('div');
+    header.className = 'letter-header';
+    header.textContent = letter;
+    list.appendChild(header);
     
-    // Group by first letter
-    const groupedByLetter = {};
-    filteredPlaces.forEach(place => {
-      const firstLetter = place.test[0].toUpperCase();
-      if (!groupedByLetter[firstLetter]) {
-        groupedByLetter[firstLetter] = [];
-      }
-      groupedByLetter[firstLetter].push(place);
-    });
+    // Two-column grid
+    const grid = document.createElement('div');
+    grid.className = 'two-column';
     
-    const letters = Object.keys(groupedByLetter).sort();
-    
-    letters.forEach(letter => {
-      // Section divider
-      const divider = document.createElement('div');
-      divider.className = 'section-divider';
-      list.appendChild(divider);
+    groupedByLetter[letter].forEach(place => {
+      const placeItem = document.createElement('div');
+      placeItem.className = 'place-item';
       
-      // Letter header
-      const header = document.createElement('div');
-      header.className = 'letter-header';
-      header.textContent = letter;
-      list.appendChild(header);
+      const link = document.createElement('a');
+      link.href = place.src;
+      link.target = '_blank';
+      link.textContent = place.test;
       
-      // Two-column grid
-      const grid = document.createElement('div');
-      grid.className = 'two-column';
-      
-      groupedByLetter[letter].forEach(place => {
-        const placeItem = document.createElement('div');
-        placeItem.className = 'place-item';
-        
-        const link = document.createElement('a');
-        link.href = place.src;
-        link.target = '_blank';
-        link.textContent = place.test;
-        
-        placeItem.appendChild(link);
-        grid.appendChild(placeItem);
+      // Prevent size change on hover
+      link.addEventListener('mouseenter', function() {
+        this.style.fontSize = '16px';
       });
       
-      list.appendChild(grid);
+      link.addEventListener('mouseleave', function() {
+        this.style.fontSize = '16px';
+      });
+      
+      placeItem.appendChild(link);
+      grid.appendChild(placeItem);
     });
     
-    updateImageCount(filteredPlaces.length);
-  }
+    list.appendChild(grid);
+  });
+  
+  updateImageCount(filteredPlaces.length);
+}
 
   function renderImages(imageArray) {
     const gallery = document.getElementById("gallery");
@@ -960,91 +969,100 @@ allData.articles = articlesData.map(row => ({
   }
 
   function renderPhotographers() {
-    const searchTerm = document.getElementById('photographersSearch').value.toLowerCase();
+  const searchTerm = document.getElementById('photographersSearch').value.toLowerCase();
+  
+  filteredPhotographers = photographersData.filter(p => {
+    const searchableFields = [
+      p.firstName,
+      p.lastName,
+      p.website,
+      p.className,
+      p.dateAdded
+    ];
     
-    filteredPhotographers = photographersData.filter(p => {
-      const searchableFields = [
-        p.firstName,
-        p.lastName,
-        p.website,
-        p.className,
-        p.dateAdded
-      ];
-      
-      if (p.allColumns) {
-        Object.values(p.allColumns).forEach(value => {
-          searchableFields.push(value);
-        });
-      }
-      
-      const searchableText = searchableFields.join(' ').toLowerCase();
-      return searchableText.includes(searchTerm);
-    });
-    
-    const list = document.getElementById('photographersList');
-    list.innerHTML = '';
-    
-    if (filteredPhotographers.length === 0) {
-      list.innerHTML = '<p style="font-size: 18px; color: #666;">No photographers found</p>';
-      document.getElementById('highlightCount').textContent = '0';
-      return;
+    if (p.allColumns) {
+      Object.values(p.allColumns).forEach(value => {
+        searchableFields.push(value);
+      });
     }
     
-    const groupedByLetter = {};
-    filteredPhotographers.forEach(p => {
-      const firstLetter = p.lastName[0].toUpperCase();
-      if (!groupedByLetter[firstLetter]) {
-        groupedByLetter[firstLetter] = [];
-      }
-      groupedByLetter[firstLetter].push(p);
-    });
+    const searchableText = searchableFields.join(' ').toLowerCase();
+    return searchableText.includes(searchTerm);
+  });
+  
+  const list = document.getElementById('photographersList');
+  list.innerHTML = '';
+  
+  if (filteredPhotographers.length === 0) {
+    list.innerHTML = '<p style="font-size: 18px; color: #666;">No photographers found</p>';
+    document.getElementById('highlightCount').textContent = '0';
+    return;
+  }
+  
+  const groupedByLetter = {};
+  filteredPhotographers.forEach(p => {
+    const firstLetter = p.lastName[0].toUpperCase();
+    if (!groupedByLetter[firstLetter]) {
+      groupedByLetter[firstLetter] = [];
+    }
+    groupedByLetter[firstLetter].push(p);
+  });
+  
+  const letters = Object.keys(groupedByLetter).sort();
+  const today = new Date();
+  
+  letters.forEach(letter => {
+    const divider = document.createElement('div');
+    divider.className = 'section-divider';
+    list.appendChild(divider);
     
-    const letters = Object.keys(groupedByLetter).sort();
-    const today = new Date();
+    const header = document.createElement('div');
+    header.className = 'letter-header';
+    header.textContent = letter;
+    list.appendChild(header);
     
-    letters.forEach(letter => {
-      const divider = document.createElement('div');
-      divider.className = 'section-divider';
-      list.appendChild(divider);
+    const grid = document.createElement('div');
+    grid.className = 'two-column';
+    
+    groupedByLetter[letter].forEach(photographer => {
+      const nameItem = document.createElement('div');
+      nameItem.className = 'name-item';
       
-      const header = document.createElement('div');
-      header.className = 'letter-header';
-      header.textContent = letter;
-      list.appendChild(header);
+      const link = document.createElement('a');
+      link.href = photographer.website;
+      link.target = '_blank';
+      link.textContent = `${photographer.firstName} ${photographer.lastName}`;
       
-      const grid = document.createElement('div');
-      grid.className = 'two-column';
-      
-      groupedByLetter[letter].forEach(photographer => {
-        const nameItem = document.createElement('div');
-        nameItem.className = 'name-item';
-        
-        const link = document.createElement('a');
-        link.href = photographer.website;
-        link.target = '_blank';
-        link.textContent = `${photographer.firstName} ${photographer.lastName}`;
-        
-        if (photographer.dateAdded) {
-          const addedDate = parsePhotographerDate(photographer.dateAdded);
-          if (addedDate) {
-            const diff = (today - addedDate) / (1000 * 60 * 60 * 24);
-            if (diff <= 7 && diff >= 0) {
-              link.style.backgroundColor = "#ffff66";
-              link.style.fontWeight = "bold";
-            }
-          }
-        }
-        
-        nameItem.appendChild(link);
-        grid.appendChild(nameItem);
+      // Prevent size change on hover
+      link.addEventListener('mouseenter', function() {
+        this.style.fontSize = '16px';
       });
       
-      list.appendChild(grid);
+      link.addEventListener('mouseleave', function() {
+        this.style.fontSize = '16px';
+      });
+      
+      if (photographer.dateAdded) {
+        const addedDate = parsePhotographerDate(photographer.dateAdded);
+        if (addedDate) {
+          const diff = (today - addedDate) / (1000 * 60 * 60 * 24);
+          if (diff <= 7 && diff >= 0) {
+            link.style.backgroundColor = "#ffff66";
+            link.style.fontWeight = "bold";
+          }
+        }
+      }
+      
+      nameItem.appendChild(link);
+      grid.appendChild(nameItem);
     });
     
-    document.getElementById('highlightCount').textContent = filteredPhotographers.length;
-    updateImageCount(filteredPhotographers.length);
-  }
+    list.appendChild(grid);
+  });
+  
+  document.getElementById('highlightCount').textContent = filteredPhotographers.length;
+  updateImageCount(filteredPhotographers.length);
+}
 
   // ============================================================================
   // UNIVERSAL SEARCH
