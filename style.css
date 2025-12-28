@@ -561,7 +561,7 @@ a:active {
 /* ===== UNIFIED LINK STYLING FOR NAMES, PLACES, AND INSPO ===== */
 .name-item {
   font-size: 24px;
-  line-height: 1.3;
+  line-height: 1.0;
 }
 
 .name-item a {
