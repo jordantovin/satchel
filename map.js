@@ -15,14 +15,6 @@
   let standardLayer = null;
   let satelliteLayer = null;
 
-  // Marker filter state
-  let showObjects = true;
-  let showStickers = true;
-  let markerLayers = {
-    objects: L.layerGroup(),
-    stickers: L.layerGroup()
-  };
-
   // ============================================================================
   // MAP INITIALIZATION
   // ============================================================================
@@ -59,10 +51,6 @@
     }, null, {
       position: 'topright'
     }).addTo(map);
-
-    // Add marker layers to map
-    markerLayers.objects.addTo(map);
-    markerLayers.stickers.addTo(map);
   }
 
   // ============================================================================
@@ -110,35 +98,15 @@
     const itemsArray = Array.isArray(items) ? items : [items];
     let currentIndex = 0;
 
-    // Determine marker color based on data source
-    // If mixed, use objects color (red)
-    const hasObjects = itemsArray.some(item => item.dataSource === 'secondary');
-    const hasStickers = itemsArray.some(item => item.dataSource === 'americanisms');
-    
-    let color;
-    let markerType;
-    
-    if (hasObjects && hasStickers) {
-      // Mixed - use purple
-      color = '#7b2d8e';
-      markerType = 'objects'; // Add to objects layer for filtering
-    } else if (hasObjects) {
-      // Objects - use red
-      color = '#d63e2a';
-      markerType = 'objects';
-    } else {
-      // Stickers - use blue
-      color = '#2a81d6';
-      markerType = 'stickers';
-    }
-
-    const marker = L.circleMarker([coords.lat, coords.lon], {
-      radius: 8,
-      fillColor: color,
-      color: color,
-      weight: 1,
-      opacity: 0.8,
-      fillOpacity: 0.9
+    const marker = L.marker([coords.lat, coords.lon], {
+      icon: L.icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-black.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      })
     });
 
     // Function to create and update popup content
@@ -156,6 +124,12 @@
           className: 'map-popup'
         });
       }
+      
+      // Attach event listeners after a brief delay to ensure DOM is ready
+      setTimeout(() => {
+        attachPopupEventListeners(itemsArray, currentIndex);
+        attachNavigationListeners();
+      }, 50);
     }
 
     // Function to attach navigation button listeners
@@ -170,12 +144,6 @@
             e.stopPropagation();
             currentIndex = (currentIndex - 1 + itemsArray.length) % itemsArray.length;
             updatePopup();
-            
-            // Reattach listeners after update
-            setTimeout(() => {
-              attachPopupEventListeners(itemsArray, currentIndex);
-              attachNavigationListeners();
-            }, 100);
           };
         }
         
@@ -185,12 +153,6 @@
             e.stopPropagation();
             currentIndex = (currentIndex + 1) % itemsArray.length;
             updatePopup();
-            
-            // Reattach listeners after update
-            setTimeout(() => {
-              attachPopupEventListeners(itemsArray, currentIndex);
-              attachNavigationListeners();
-            }, 100);
           };
         }
       }
@@ -199,21 +161,13 @@
     // Initialize popup
     updatePopup();
 
-    // Ensure popup opens properly and attach listeners when it does
-    marker.on('popupopen', function(e) {
-      // Update the popup content to ensure it's current
-      updatePopup();
-      
-      // Attach event listeners after DOM is ready
+    // Re-attach listeners when popup opens
+    marker.on('popupopen', function() {
       setTimeout(() => {
         attachPopupEventListeners(itemsArray, currentIndex);
         attachNavigationListeners();
-      }, 100);
+      }, 50);
     });
-
-    // Add marker to appropriate layer
-    marker.addTo(markerLayers[markerType]);
-    marker._markerType = markerType;
 
     return marker;
   }
@@ -223,9 +177,8 @@
     if (popupImg) {
       const item = itemsArray[currentIndex];
       
-      // Handle clicks for both data sources
+      // Only attach click handler for Americanisms items that have images
       if (item.dataSource === 'americanisms' && item.src) {
-        // For stickers - open in overlay
         const index = window.filteredImages ? window.filteredImages.findIndex(img => img.src === item.src) : -1;
         
         if (index !== -1) {
@@ -233,26 +186,12 @@
           popupImg.onclick = function(e) {
             e.preventDefault();
             e.stopPropagation();
-            
-            // Close the popup first
-            if (map) {
-              map.closePopup();
-            }
-            
-            // Open overlay
+            // Don't toggle map - keep it open in background
             if (typeof window.showOverlay === 'function') {
               window.showOverlay(index);
             }
           };
         }
-      } else if (item.dataSource === 'secondary' && item.E) {
-        // For objects - open image in new tab
-        popupImg.style.cursor = 'pointer';
-        popupImg.onclick = function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          window.open(item.E, '_blank');
-        };
       }
     }
   }
@@ -342,7 +281,15 @@
           object-fit: contain;
           margin-bottom: 12px;
           border: 2px solid #000;
+          cursor: pointer;
         `;
+        
+        // Make image clickable to open in new tab
+        img.onclick = function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          window.open(item.E, '_blank');
+        };
         
         div.appendChild(img);
       }
@@ -352,23 +299,20 @@
       metadata.style.cssText = `
         text-align: left;
         font-size: 14px;
-        line-height: 1.6;
+        line-height: 1.0;
         font-family: Helvetica, sans-serif;
-        padding: 8px;
-        background: #f9f9f9;
-        border: 1px solid #ddd;
       `;
 
       let metadataHTML = '';
       
       // Date found (Column A)
       if (item.A) {
-        metadataHTML += `<div style="margin-bottom: 6px;"><strong>Date Found:</strong> ${item.A}</div>`;
+        metadataHTML += `<strong>Date Found:</strong> ${item.A}<br>`;
       }
       
       // Object name (Column B)
       if (item.B) {
-        metadataHTML += `<div><strong>Object:</strong> ${item.B}</div>`;
+        metadataHTML += `<strong>Object:</strong> ${item.B}`;
       }
 
       metadata.innerHTML = metadataHTML;
@@ -404,29 +348,26 @@
       metadata.style.cssText = `
         text-align: left;
         font-size: 14px;
-        line-height: 1.6;
+        line-height: 1.4;
         font-family: Helvetica, sans-serif;
-        padding: 8px;
-        background: #f9f9f9;
-        border: 1px solid #ddd;
       `;
 
       let metadataHTML = '';
       
       if (item.date) {
-        metadataHTML += `<div style="margin-bottom: 6px;"><strong>Date:</strong> ${item.date}</div>`;
+        metadataHTML += `<strong>Date:</strong> ${item.date}<br>`;
       }
       
       if (item.location_card) {
-        metadataHTML += `<div style="margin-bottom: 6px;"><strong>Location:</strong><br>${item.location_card.replace(/\n/g, '<br>')}</div>`;
+        metadataHTML += `<strong>Location:</strong><br>${item.location_card.replace(/\n/g, '<br>')}<br>`;
       }
       
       if (item.medium) {
-        metadataHTML += `<div style="margin-bottom: 6px;"><strong>Medium:</strong> ${item.medium}</div>`;
+        metadataHTML += `<strong>Medium:</strong> ${item.medium}<br>`;
       }
       
       if (item.artist) {
-        metadataHTML += `<div><strong>Artist:</strong> ${item.artist}</div>`;
+        metadataHTML += `<strong>Artist:</strong> ${item.artist}`;
       }
 
       metadata.innerHTML = metadataHTML;
@@ -508,8 +449,6 @@
     // Clear existing markers
     markers.forEach(marker => marker.remove());
     markers = [];
-    markerLayers.objects.clearLayers();
-    markerLayers.stickers.clearLayers();
 
     // Group items by coordinates
     const locationGroups = {};
@@ -580,6 +519,7 @@
     // Create markers for each location (with potentially multiple items)
     Object.values(locationGroups).forEach(location => {
       const marker = createMarker(location.items, location.coords);
+      marker.addTo(map);
       markers.push(marker);
     });
 
@@ -595,28 +535,19 @@
   }
 
   // ============================================================================
-  // MAP TOGGLE & FILTER
+  // MAP TOGGLE
   // ============================================================================
 
   function toggleMap() {
     const mapContainer = document.getElementById('mapContainer');
     const mapToggleBtn = document.getElementById('mapToggleBtn');
     
-    if (!mapContainer) {
-      alert('Error: mapContainer element not found!');
-      return;
-    }
-    
-    if (!mapToggleBtn) {
-      alert('Error: mapToggleBtn element not found!');
-      return;
-    }
+    if (!mapContainer || !mapToggleBtn) return;
 
     mapVisible = !mapVisible;
 
     if (mapVisible) {
-      // Force display with !important via setAttribute
-      mapContainer.style.cssText = 'display: block !important; position: fixed; top: 60px; left: 0; right: 0; bottom: 0; z-index: 5000; background: white; border-top: 2px solid #000;';
+      mapContainer.style.display = 'block';
       mapToggleBtn.classList.add('active');
       
       // Initialize map if needed
@@ -631,71 +562,16 @@
               alert('No coordinates found in the data. Make sure column I contains coordinates in the format "latitude, longitude".');
             }
           });
-        } else {
-          alert('Warning: No data found to load on map');
         }
       }
       
       // Invalidate size to fix display issues
       setTimeout(() => {
-        if (map) {
-          map.invalidateSize();
-        } else {
-          alert('Warning: Map object not initialized');
-        }
+        if (map) map.invalidateSize();
       }, 100);
     } else {
       mapContainer.style.display = 'none';
       mapToggleBtn.classList.remove('active');
-    }
-  }
-
-  function toggleMarkerFilter(type) {
-    if (type === 'objects') {
-      showObjects = !showObjects;
-      if (showObjects) {
-        map.addLayer(markerLayers.objects);
-      } else {
-        map.removeLayer(markerLayers.objects);
-      }
-    } else if (type === 'stickers') {
-      showStickers = !showStickers;
-      if (showStickers) {
-        map.addLayer(markerLayers.stickers);
-      } else {
-        map.removeLayer(markerLayers.stickers);
-      }
-    }
-    
-    // Update button states
-    updateFilterButtons();
-  }
-
-  function updateFilterButtons() {
-    const objectsBtn = document.getElementById('filterObjectsBtn');
-    const stickersBtn = document.getElementById('filterStickersBtn');
-    
-    if (objectsBtn) {
-      if (showObjects) {
-        objectsBtn.classList.add('active');
-      } else {
-        objectsBtn.classList.remove('active');
-      }
-    }
-    
-    if (stickersBtn) {
-      if (showStickers) {
-        stickersBtn.classList.add('active');
-      } else {
-        stickersBtn.classList.remove('active');
-      }
-    }
-  }
-
-  function toggleMapKey() {
-    const keyPanel = document.getElementById('mapKeyPanel');
-    if (keyPanel) {
-      keyPanel.style.display = keyPanel.style.display === 'none' ? 'block' : 'none';
     }
   }
 
@@ -705,8 +581,6 @@
 
   window.toggleMap = toggleMap;
   window.loadMapData = loadMapData;
-  window.toggleMarkerFilter = toggleMarkerFilter;
-  window.toggleMapKey = toggleMapKey;
 
   // ============================================================================
   // INITIALIZATION
@@ -716,60 +590,10 @@
     // Map toggle button already exists in HTML
     const mapToggleBtn = document.getElementById('mapToggleBtn');
     if (mapToggleBtn) {
-      // Remove any existing listeners first
-      mapToggleBtn.replaceWith(mapToggleBtn.cloneNode(true));
-      const freshBtn = document.getElementById('mapToggleBtn');
-      
-      // Add click listener
-      freshBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        toggleMap();
-      });
-      
-      // Also add onclick as backup
-      freshBtn.onclick = function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        toggleMap();
-      };
-    } else {
-      console.error('mapToggleBtn not found in DOM!');
+      mapToggleBtn.addEventListener('click', toggleMap);
     }
 
-    // Create map key control button and panel
-    const mapContainer = document.getElementById('mapContainer');
-    if (mapContainer) {
-      // Create key toggle button (square icon button)
-      const keyToggleBtn = document.createElement('button');
-      keyToggleBtn.id = 'mapKeyToggleBtn';
-      keyToggleBtn.innerHTML = '🗝';
-      keyToggleBtn.onclick = toggleMapKey;
-      mapContainer.appendChild(keyToggleBtn);
-
-      // Create key panel
-      const keyPanel = document.createElement('div');
-      keyPanel.id = 'mapKeyPanel';
-      keyPanel.style.display = 'none';
-      keyPanel.innerHTML = `
-        <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: bold;">Map Legend</h3>
-        <div style="margin-bottom: 12px;">
-          <button id="filterObjectsBtn" class="map-filter-btn active" onclick="window.toggleMarkerFilter('objects')">
-            <span class="marker-dot" style="background: #d63e2a;"></span>
-            Objects
-          </button>
-        </div>
-        <div>
-          <button id="filterStickersBtn" class="map-filter-btn active" onclick="window.toggleMarkerFilter('stickers')">
-            <span class="marker-dot" style="background: #2a81d6;"></span>
-            Stickers
-          </button>
-        </div>
-      `;
-      mapContainer.appendChild(keyPanel);
-    }
-
-    // Add custom styles for map popup and key panel
+    // Add custom styles for map popup
     const style = document.createElement('style');
     style.textContent = `
       .leaflet-popup-content-wrapper {
@@ -791,84 +615,6 @@
       
       .map-popup-image:hover {
         opacity: 0.8;
-      }
-
-      #mapKeyToggleBtn {
-        position: absolute;
-        top: 50px;
-        right: 10px;
-        width: 34px;
-        height: 34px;
-        padding: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 18px;
-        font-weight: bold;
-        border-radius: 0;
-        border: 2px solid rgba(0,0,0,0.2);
-        background: white;
-        color: #000;
-        cursor: pointer;
-        font-family: Helvetica, sans-serif;
-        transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-        z-index: 1000;
-        box-shadow: none;
-      }
-
-      #mapKeyToggleBtn:hover {
-        background-color: #f4f4f4;
-        border-color: rgba(0,0,0,0.3);
-      }
-
-      #mapKeyPanel {
-        position: absolute;
-        top: 94px;
-        right: 10px;
-        background: white;
-        border: 2px solid rgba(0,0,0,0.2);
-        padding: 16px;
-        font-family: Helvetica, sans-serif;
-        z-index: 1000;
-        box-shadow: 0 1px 5px rgba(0,0,0,0.2);
-        min-width: 200px;
-      }
-
-      .map-filter-btn {
-        width: 100%;
-        padding: 8px 12px;
-        font-size: 14px;
-        border-radius: 0;
-        border: 2px solid #000;
-        background: white;
-        color: #000;
-        cursor: pointer;
-        font-family: Helvetica, sans-serif;
-        transition: background-color 0.2s, color 0.2s;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .map-filter-btn:hover {
-        background-color: #f5f5f5;
-      }
-
-      .map-filter-btn.active {
-        background-color: #000;
-        color: white;
-      }
-
-      .marker-dot {
-        display: inline-block;
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        border: 2px solid #000;
-      }
-
-      .map-filter-btn.active .marker-dot {
-        border-color: white;
       }
     `;
     document.head.appendChild(style);
