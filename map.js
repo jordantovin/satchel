@@ -599,20 +599,12 @@
   // ============================================================================
 
   function toggleMap() {
-    console.log('toggleMap called');
     const mapContainer = document.getElementById('mapContainer');
     const mapToggleBtn = document.getElementById('mapToggleBtn');
     
-    console.log('mapContainer:', mapContainer);
-    console.log('mapToggleBtn:', mapToggleBtn);
-    
-    if (!mapContainer || !mapToggleBtn) {
-      console.log('Missing mapContainer or mapToggleBtn');
-      return;
-    }
+    if (!mapContainer || !mapToggleBtn) return;
 
     mapVisible = !mapVisible;
-    console.log('mapVisible:', mapVisible);
 
     if (mapVisible) {
       mapContainer.style.display = 'block';
@@ -620,7 +612,6 @@
       
       // Initialize map if needed
       if (!map) {
-        console.log('Initializing map...');
         initMap();
         
         // Load data from global allData if available
@@ -707,15 +698,10 @@
   // ============================================================================
 
   function initMapModule() {
-    console.log('initMapModule called');
-    
     // Map toggle button already exists in HTML
     const mapToggleBtn = document.getElementById('mapToggleBtn');
-    console.log('Found mapToggleBtn:', mapToggleBtn);
-    
     if (mapToggleBtn) {
       mapToggleBtn.addEventListener('click', toggleMap);
-      console.log('Added click listener to mapToggleBtn');
     }
 
     // Create map key control button and panel
