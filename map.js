@@ -115,32 +115,30 @@
     const hasObjects = itemsArray.some(item => item.dataSource === 'secondary');
     const hasStickers = itemsArray.some(item => item.dataSource === 'americanisms');
     
-    let iconUrl;
+    let color;
     let markerType;
     
     if (hasObjects && hasStickers) {
       // Mixed - use purple
-      iconUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png';
+      color = '#7b2d8e';
       markerType = 'objects'; // Add to objects layer for filtering
     } else if (hasObjects) {
       // Objects - use red
-      iconUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png';
+      color = '#d63e2a';
       markerType = 'objects';
     } else {
       // Stickers - use blue
-      iconUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png';
+      color = '#2a81d6';
       markerType = 'stickers';
     }
 
-    const marker = L.marker([coords.lat, coords.lon], {
-      icon: L.icon({
-        iconUrl: iconUrl,
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
-      })
+    const marker = L.circleMarker([coords.lat, coords.lon], {
+      radius: 8,
+      fillColor: color,
+      color: '#000',
+      weight: 2,
+      opacity: 1,
+      fillOpacity: 1
     });
 
     // Function to create and update popup content
@@ -689,13 +687,21 @@
       mapToggleBtn.addEventListener('click', toggleMap);
     }
 
-    // Create map key panel and button
+    // Create map key control button and panel
     const mapContainer = document.getElementById('mapContainer');
     if (mapContainer) {
-      // Create key toggle button
+      // Create key toggle button (square icon button)
       const keyToggleBtn = document.createElement('button');
       keyToggleBtn.id = 'mapKeyToggleBtn';
-      keyToggleBtn.innerHTML = 'KEY';
+      keyToggleBtn.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <circle cx="6" cy="12" r="2"/>
+          <circle cx="18" cy="12" r="2"/>
+          <line x1="8" y1="12" x2="10" y2="12"/>
+          <line x1="14" y1="12" x2="16" y2="12"/>
+        </svg>
+      `;
       keyToggleBtn.onclick = toggleMapKey;
       mapContainer.appendChild(keyToggleBtn);
 
@@ -747,37 +753,42 @@
 
       #mapKeyToggleBtn {
         position: absolute;
-        bottom: 20px;
-        left: 20px;
-        padding: 8px 16px;
+        top: 10px;
+        right: 10px;
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         font-size: 14px;
         font-weight: bold;
         border-radius: 0;
-        border: 2px solid #000;
+        border: 2px solid rgba(0,0,0,0.2);
         background: white;
         color: #000;
         cursor: pointer;
         font-family: Helvetica, sans-serif;
-        transition: background-color 0.2s, color 0.2s;
+        transition: background-color 0.2s, color 0.2s, border-color 0.2s;
         z-index: 1000;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        box-shadow: none;
       }
 
       #mapKeyToggleBtn:hover {
-        background-color: #000;
-        color: white;
+        background-color: #f4f4f4;
+        border-color: rgba(0,0,0,0.3);
       }
 
       #mapKeyPanel {
         position: absolute;
-        bottom: 70px;
-        left: 20px;
+        top: 54px;
+        right: 10px;
         background: white;
-        border: 2px solid #000;
+        border: 2px solid rgba(0,0,0,0.2);
         padding: 16px;
         font-family: Helvetica, sans-serif;
         z-index: 1000;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        box-shadow: 0 1px 5px rgba(0,0,0,0.2);
         min-width: 200px;
       }
 
