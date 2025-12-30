@@ -1,5 +1,5 @@
 // ============================================================================
-// AMERICANISMS GALLERY - MAP MODULE (FIXED)
+// AMERICANISMS GALLERY - MAP MODULE
 // Interactive map with clickable markers showing images and metadata
 // ============================================================================
 
@@ -28,60 +28,41 @@
   // ============================================================================
 
   function initMap() {
-    console.log('Initializing map...');
-    
-    if (map) {
-      console.log('Map already initialized');
-      return; // Already initialized
-    }
+    if (map) return; // Already initialized
 
-    const mapElement = document.getElementById('map');
-    if (!mapElement) {
-      console.error('Map element not found!');
-      return;
-    }
+    // Create map centered on Washington DC
+    map = L.map('map', {
+      center: [38.9072, -77.0369], // Washington DC coordinates
+      zoom: 12,
+      zoomControl: true
+    });
 
-    try {
-      // Create map centered on Washington DC
-      map = L.map('map', {
-        center: [38.9072, -77.0369], // Washington DC coordinates
-        zoom: 12,
-        zoomControl: true
-      });
+    // Standard OpenStreetMap layer
+    standardLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+      maxZoom: 19
+    });
 
-      console.log('Map object created:', map);
+    // Satellite layer (ESRI World Imagery)
+    satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Tiles © Esri',
+      maxZoom: 19
+    });
 
-      // Standard OpenStreetMap layer
-      standardLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 19
-      });
+    // Add standard layer by default
+    standardLayer.addTo(map);
 
-      // Satellite layer (ESRI World Imagery)
-      satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles © Esri',
-        maxZoom: 19
-      });
+    // Add layer control in top-right
+    const layerControl = L.control.layers({
+      'Standard': standardLayer,
+      'Satellite': satelliteLayer
+    }, null, {
+      position: 'topright'
+    }).addTo(map);
 
-      // Add standard layer by default
-      standardLayer.addTo(map);
-
-      // Add layer control in top-right
-      const layerControl = L.control.layers({
-        'Standard': standardLayer,
-        'Satellite': satelliteLayer
-      }, null, {
-        position: 'topright'
-      }).addTo(map);
-
-      // Add marker layers to map
-      markerLayers.objects.addTo(map);
-      markerLayers.stickers.addTo(map);
-
-      console.log('Map initialized successfully');
-    } catch (error) {
-      console.error('Error initializing map:', error);
-    }
+    // Add marker layers to map
+    markerLayers.objects.addTo(map);
+    markerLayers.stickers.addTo(map);
   }
 
   // ============================================================================
@@ -522,12 +503,7 @@
   }
 
   async function loadMapData(americanismsData) {
-    console.log('Loading map data...');
-    
-    if (!map) {
-      console.log('Map not initialized, initializing now...');
-      initMap();
-    }
+    if (!map) initMap();
 
     // Clear existing markers
     markers.forEach(marker => marker.remove());
@@ -623,80 +599,54 @@
   // ============================================================================
 
   function toggleMap() {
-    console.log('toggleMap called, current mapVisible:', mapVisible);
-    
     const mapContainer = document.getElementById('mapContainer');
     const mapToggleBtn = document.getElementById('mapToggleBtn');
     
     if (!mapContainer) {
-      console.error('Error: mapContainer element not found!');
       alert('Error: mapContainer element not found!');
       return;
     }
     
     if (!mapToggleBtn) {
-      console.error('Error: mapToggleBtn element not found!');
       alert('Error: mapToggleBtn element not found!');
       return;
     }
 
     mapVisible = !mapVisible;
-    console.log('New mapVisible state:', mapVisible);
 
     if (mapVisible) {
-      // Show the map container
-      mapContainer.style.display = 'block';
-      mapContainer.style.position = 'fixed';
-      mapContainer.style.top = '60px';
-      mapContainer.style.left = '0';
-      mapContainer.style.right = '0';
-      mapContainer.style.bottom = '0';
-      mapContainer.style.zIndex = '5000';
-      mapContainer.style.background = 'white';
-      mapContainer.style.borderTop = '2px solid #000';
-      
+      // Force display with !important via setAttribute
+      mapContainer.style.cssText = 'display: block !important; position: fixed; top: 60px; left: 0; right: 0; bottom: 0; z-index: 5000; background: white; border-top: 2px solid #000;';
       mapToggleBtn.classList.add('active');
-      
-      console.log('Map container display set to block');
       
       // Initialize map if needed
       if (!map) {
-        console.log('Initializing map for first time...');
         initMap();
         
-        // Wait a bit for map to initialize
-        setTimeout(() => {
-          // Load data from global allData if available
-          if (window.allData && window.allData.objects) {
-            console.log('Loading data from window.allData');
-            const americanismsItems = window.allData.objects.filter(item => item.source === 'Americanisms');
-            console.log('Found', americanismsItems.length, 'Americanisms items');
-            loadMapData(americanismsItems).then(count => {
-              console.log('Loaded', count, 'items with coordinates');
-              if (count === 0) {
-                alert('No coordinates found in the data. Make sure column I contains coordinates in the format "latitude, longitude".');
-              }
-            });
-          } else {
-            console.warn('Warning: No data found to load on map');
-            console.log('window.allData:', window.allData);
-          }
-        }, 500);
+        // Load data from global allData if available
+        if (window.allData && window.allData.objects) {
+          const americanismsItems = window.allData.objects.filter(item => item.source === 'Americanisms');
+          loadMapData(americanismsItems).then(count => {
+            if (count === 0) {
+              alert('No coordinates found in the data. Make sure column I contains coordinates in the format "latitude, longitude".');
+            }
+          });
+        } else {
+          alert('Warning: No data found to load on map');
+        }
       }
       
       // Invalidate size to fix display issues
       setTimeout(() => {
         if (map) {
-          console.log('Invalidating map size');
           map.invalidateSize();
         } else {
-          console.error('Warning: Map object not initialized');
+          alert('Warning: Map object not initialized');
         }
       }, 100);
     } else {
       mapContainer.style.display = 'none';
       mapToggleBtn.classList.remove('active');
-      console.log('Map hidden');
     }
   }
 
@@ -763,24 +713,26 @@
   // ============================================================================
 
   function initMapModule() {
-    console.log('Initializing map module...');
-    
     // Map toggle button already exists in HTML
     const mapToggleBtn = document.getElementById('mapToggleBtn');
     if (mapToggleBtn) {
-      console.log('Found mapToggleBtn, attaching click handler');
-      
       // Remove any existing listeners first
-      const freshBtn = mapToggleBtn.cloneNode(true);
-      mapToggleBtn.parentNode.replaceChild(freshBtn, mapToggleBtn);
+      mapToggleBtn.replaceWith(mapToggleBtn.cloneNode(true));
+      const freshBtn = document.getElementById('mapToggleBtn');
       
       // Add click listener
       freshBtn.addEventListener('click', function(e) {
-        console.log('Map toggle button clicked!');
         e.preventDefault();
         e.stopPropagation();
         toggleMap();
       });
+      
+      // Also add onclick as backup
+      freshBtn.onclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleMap();
+      };
     } else {
       console.error('mapToggleBtn not found in DOM!');
     }
@@ -788,8 +740,6 @@
     // Create map key control button and panel
     const mapContainer = document.getElementById('mapContainer');
     if (mapContainer) {
-      console.log('Found mapContainer, creating key controls');
-      
       // Create key toggle button (square icon button)
       const keyToggleBtn = document.createElement('button');
       keyToggleBtn.id = 'mapKeyToggleBtn';
@@ -817,28 +767,118 @@
         </div>
       `;
       mapContainer.appendChild(keyPanel);
-    } else {
-      console.error('mapContainer not found!');
     }
 
-    console.log('Map module initialization complete');
+    // Add custom styles for map popup and key panel
+    const style = document.createElement('style');
+    style.textContent = `
+      .leaflet-popup-content-wrapper {
+        border-radius: 0 !important;
+        border: 2px solid #000 !important;
+      }
+      
+      .leaflet-popup-tip {
+        border: 2px solid #000 !important;
+      }
+      
+      .map-popup-content {
+        padding: 8px;
+      }
+      
+      .map-popup-image {
+        transition: opacity 0.2s;
+      }
+      
+      .map-popup-image:hover {
+        opacity: 0.8;
+      }
+
+      #mapKeyToggleBtn {
+        position: absolute;
+        top: 50px;
+        right: 10px;
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        font-weight: bold;
+        border-radius: 0;
+        border: 2px solid rgba(0,0,0,0.2);
+        background: white;
+        color: #000;
+        cursor: pointer;
+        font-family: Helvetica, sans-serif;
+        transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+        z-index: 1000;
+        box-shadow: none;
+      }
+
+      #mapKeyToggleBtn:hover {
+        background-color: #f4f4f4;
+        border-color: rgba(0,0,0,0.3);
+      }
+
+      #mapKeyPanel {
+        position: absolute;
+        top: 94px;
+        right: 10px;
+        background: white;
+        border: 2px solid rgba(0,0,0,0.2);
+        padding: 16px;
+        font-family: Helvetica, sans-serif;
+        z-index: 1000;
+        box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+        min-width: 200px;
+      }
+
+      .map-filter-btn {
+        width: 100%;
+        padding: 8px 12px;
+        font-size: 14px;
+        border-radius: 0;
+        border: 2px solid #000;
+        background: white;
+        color: #000;
+        cursor: pointer;
+        font-family: Helvetica, sans-serif;
+        transition: background-color 0.2s, color 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .map-filter-btn:hover {
+        background-color: #f5f5f5;
+      }
+
+      .map-filter-btn.active {
+        background-color: #000;
+        color: white;
+      }
+
+      .marker-dot {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 2px solid #000;
+      }
+
+      .map-filter-btn.active .marker-dot {
+        border-color: white;
+      }
+    `;
+    document.head.appendChild(style);
   }
 
-  // Wait for both DOM and Leaflet to be ready
-  function checkLeafletAndInit() {
-    if (typeof L !== 'undefined') {
-      console.log('Leaflet is loaded, initializing map module');
-      initMapModule();
-    } else {
-      console.log('Waiting for Leaflet to load...');
-      setTimeout(checkLeafletAndInit, 100);
-    }
-  }
-
+  // Wait for DOM to be ready
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', checkLeafletAndInit);
+    document.addEventListener('DOMContentLoaded', initMapModule);
   } else {
-    checkLeafletAndInit();
+    initMapModule();
   }
 
 })();
