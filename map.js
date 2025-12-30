@@ -811,16 +811,16 @@
       keyPanel.id = 'mapKeyPanel';
       keyPanel.style.display = 'none';
       keyPanel.innerHTML = `
-        <h3 style="margin: 0 0 16px 0; font-size: 16px; font-weight: bold;">Map Legend</h3>
+        <h3 style="margin: 0 0 16px 0; font-size: 16px; font-weight: bold; font-family: Helvetica, sans-serif;">Map Legend</h3>
         <label class="map-filter-label">
           <input type="checkbox" id="filterObjectsCheckbox" class="map-filter-checkbox" checked onchange="window.toggleMarkerFilter('objects')">
+          <span style="flex: 1; font-family: Helvetica, sans-serif;">Objects</span>
           <span class="marker-dot" style="background: #d63e2a;"></span>
-          <span>Objects</span>
         </label>
         <label class="map-filter-label">
           <input type="checkbox" id="filterStickersCheckbox" class="map-filter-checkbox" checked onchange="window.toggleMarkerFilter('stickers')">
+          <span style="flex: 1; font-family: Helvetica, sans-serif;">Stickers</span>
           <span class="marker-dot" style="background: #2a81d6;"></span>
-          <span>Stickers</span>
         </label>
       `;
       mapContainer.appendChild(keyPanel);
@@ -994,14 +994,15 @@
         cursor: pointer;
         margin: 0;
         accent-color: #000;
+        flex-shrink: 0;
       }
 
       .marker-dot {
         display: inline-block;
-        width: 12px;
-        height: 12px;
+        width: 14px;
+        height: 14px;
         border-radius: 50%;
-        border: 2px solid #000;
+        flex-shrink: 0;
       }
     `;
     document.head.appendChild(style);
