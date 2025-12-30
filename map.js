@@ -602,12 +602,21 @@
     const mapContainer = document.getElementById('mapContainer');
     const mapToggleBtn = document.getElementById('mapToggleBtn');
     
-    if (!mapContainer || !mapToggleBtn) return;
+    if (!mapContainer) {
+      alert('Error: mapContainer element not found!');
+      return;
+    }
+    
+    if (!mapToggleBtn) {
+      alert('Error: mapToggleBtn element not found!');
+      return;
+    }
 
     mapVisible = !mapVisible;
 
     if (mapVisible) {
-      mapContainer.style.display = 'block';
+      // Force display with !important via setAttribute
+      mapContainer.style.cssText = 'display: block !important; position: fixed; top: 60px; left: 0; right: 0; bottom: 0; z-index: 5000; background: white; border-top: 2px solid #000;';
       mapToggleBtn.classList.add('active');
       
       // Initialize map if needed
@@ -622,12 +631,18 @@
               alert('No coordinates found in the data. Make sure column I contains coordinates in the format "latitude, longitude".');
             }
           });
+        } else {
+          alert('Warning: No data found to load on map');
         }
       }
       
       // Invalidate size to fix display issues
       setTimeout(() => {
-        if (map) map.invalidateSize();
+        if (map) {
+          map.invalidateSize();
+        } else {
+          alert('Warning: Map object not initialized');
+        }
       }, 100);
     } else {
       mapContainer.style.display = 'none';
@@ -701,7 +716,25 @@
     // Map toggle button already exists in HTML
     const mapToggleBtn = document.getElementById('mapToggleBtn');
     if (mapToggleBtn) {
-      mapToggleBtn.addEventListener('click', toggleMap);
+      // Remove any existing listeners first
+      mapToggleBtn.replaceWith(mapToggleBtn.cloneNode(true));
+      const freshBtn = document.getElementById('mapToggleBtn');
+      
+      // Add click listener
+      freshBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleMap();
+      });
+      
+      // Also add onclick as backup
+      freshBtn.onclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleMap();
+      };
+    } else {
+      console.error('mapToggleBtn not found in DOM!');
     }
 
     // Create map key control button and panel
