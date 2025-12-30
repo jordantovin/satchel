@@ -749,7 +749,12 @@
       // Create key toggle button (square icon button)
       const keyToggleBtn = document.createElement('button');
       keyToggleBtn.id = 'mapKeyToggleBtn';
-      keyToggleBtn.innerHTML = '🗝';
+      keyToggleBtn.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="7" cy="7" r="3" stroke="currentColor" stroke-width="2" fill="none"/>
+          <path d="M9 9L20 20M17 20V17M20 17H17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      `;
       keyToggleBtn.onclick = toggleMapKey;
       mapContainer.appendChild(keyToggleBtn);
 
@@ -799,12 +804,37 @@
         opacity: 0.8;
       }
 
+      /* Leaflet control styling */
+      .leaflet-control-layers {
+        border: 2px solid #000 !important;
+        border-radius: 0 !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+      }
+
+      .leaflet-control-zoom {
+        border: 2px solid #000 !important;
+        border-radius: 0 !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+      }
+
+      .leaflet-control-zoom a {
+        border-radius: 0 !important;
+        border-bottom: 1px solid #000 !important;
+        color: #000 !important;
+        background: white !important;
+      }
+
+      .leaflet-control-zoom a:hover {
+        background: #000 !important;
+        color: white !important;
+      }
+
       #mapKeyToggleBtn {
         position: absolute;
-        top: 50px;
+        top: 10px;
         right: 10px;
-        width: 34px;
-        height: 34px;
+        width: 40px;
+        height: 40px;
         padding: 0;
         display: flex;
         align-items: center;
@@ -812,31 +842,35 @@
         font-size: 18px;
         font-weight: bold;
         border-radius: 0;
-        border: 2px solid rgba(0,0,0,0.2);
+        border: 2px solid #000;
         background: white;
         color: #000;
         cursor: pointer;
         font-family: Helvetica, sans-serif;
-        transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+        transition: background-color 0.2s, color 0.2s;
         z-index: 1000;
-        box-shadow: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
       }
 
       #mapKeyToggleBtn:hover {
-        background-color: #f4f4f4;
-        border-color: rgba(0,0,0,0.3);
+        background-color: #000;
+        color: white;
+      }
+
+      #mapKeyToggleBtn svg {
+        display: block;
       }
 
       #mapKeyPanel {
         position: absolute;
-        top: 94px;
+        top: 60px;
         right: 10px;
         background: white;
-        border: 2px solid rgba(0,0,0,0.2);
+        border: 2px solid #000;
         padding: 16px;
         font-family: Helvetica, sans-serif;
         z-index: 1000;
-        box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         min-width: 200px;
       }
 
