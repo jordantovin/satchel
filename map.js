@@ -612,6 +612,8 @@
     const mapContainer = document.getElementById('mapContainer');
     const mapToggleBtn = document.getElementById('mapToggleBtn');
     
+    console.log('toggleMap called', { mapContainer: !!mapContainer, mapToggleBtn: !!mapToggleBtn, mapVisible });
+    
     if (!mapContainer) {
       console.error('mapContainer element not found');
       return;
@@ -623,36 +625,50 @@
     }
 
     mapVisible = !mapVisible;
+    console.log('Map visibility toggled to:', mapVisible);
 
     if (mapVisible) {
-      // Force display with !important via setAttribute
+      // Force display
       mapContainer.style.cssText = 'display: block !important; position: fixed; top: 60px; left: 0; right: 0; bottom: 0; z-index: 5000; background: white; border-top: 2px solid #000;';
       mapToggleBtn.classList.add('active');
       
       // Initialize map if needed
       if (!map) {
-        initMap();
-        
-        // Load data from global allData if available
-        if (window.allData && window.allData.objects) {
-          const americanismsItems = window.allData.objects.filter(item => item.source === 'Americanisms');
-          loadMapData(americanismsItems).then(count => {
-            console.log(`Map initialized with ${count} items`);
-          }).catch(error => {
-            console.error('Error loading map data:', error);
-          });
-        } else {
-          console.warn('No data found to load on map');
+        console.log('Initializing map for first time...');
+        try {
+          initMap();
+          
+          // Load data from global allData if available
+          if (window.allData && window.allData.objects) {
+            const americanismsItems = window.allData.objects.filter(item => item.source === 'Americanisms');
+            console.log('Loading', americanismsItems.length, 'items onto map');
+            
+            loadMapData(americanismsItems).then(count => {
+              console.log(`Map initialized with ${count} items`);
+            }).catch(error => {
+              console.error('Error loading map data:', error);
+            });
+          } else {
+            console.warn('No data found to load on map');
+          }
+        } catch (error) {
+          console.error('Error initializing map:', error);
+          mapVisible = false;
+          mapContainer.style.display = 'none';
+          mapToggleBtn.classList.remove('active');
+          return;
         }
       }
       
       // Invalidate size to fix display issues
       setTimeout(() => {
         if (map) {
+          console.log('Invalidating map size...');
           map.invalidateSize();
         }
       }, 100);
     } else {
+      console.log('Hiding map');
       mapContainer.style.display = 'none';
       mapToggleBtn.classList.remove('active');
     }
@@ -732,13 +748,18 @@
       const freshBtn = mapToggleBtn.cloneNode(true);
       mapToggleBtn.parentNode.replaceChild(freshBtn, mapToggleBtn);
       
+      // Get the fresh button reference
+      const btn = document.getElementById('mapToggleBtn');
+      
       // Add click listener
-      freshBtn.addEventListener('click', function(e) {
-        console.log('Map button clicked!');
+      btn.addEventListener('click', function(e) {
+        console.log('Map button clicked via addEventListener!');
         e.preventDefault();
         e.stopPropagation();
         toggleMap();
       });
+      
+      console.log('Map button listener attached successfully');
     } else {
       console.error('mapToggleBtn not found in DOM!');
     }
@@ -746,15 +767,10 @@
     // Create map key control button and panel
     const mapContainer = document.getElementById('mapContainer');
     if (mapContainer) {
-      // Create key toggle button (square icon button)
+      // Create key toggle button (rectangular text button under layer control)
       const keyToggleBtn = document.createElement('button');
       keyToggleBtn.id = 'mapKeyToggleBtn';
-      keyToggleBtn.innerHTML = `
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="7" cy="7" r="3" stroke="currentColor" stroke-width="2" fill="none"/>
-          <path d="M9 9L20 20M17 20V17M20 17H17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      `;
+      keyToggleBtn.textContent = 'KEY';
       keyToggleBtn.onclick = toggleMapKey;
       mapContainer.appendChild(keyToggleBtn);
 
@@ -831,16 +847,18 @@
 
       #mapKeyToggleBtn {
         position: absolute;
-        top: 10px;
+        top: 90px;
         right: 10px;
-        width: 40px;
-        height: 40px;
-        padding: 0;
+        width: auto;
+        min-width: 80px;
+        height: 30px;
+        padding: 0 16px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 18px;
+        font-size: 13px;
         font-weight: bold;
+        letter-spacing: 0.5px;
         border-radius: 0;
         border: 2px solid #000;
         background: white;
@@ -857,13 +875,9 @@
         color: white;
       }
 
-      #mapKeyToggleBtn svg {
-        display: block;
-      }
-
       #mapKeyPanel {
         position: absolute;
-        top: 60px;
+        top: 130px;
         right: 10px;
         background: white;
         border: 2px solid #000;
