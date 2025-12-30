@@ -824,11 +824,21 @@
     console.log('Map module initialization complete');
   }
 
-  // Wait for DOM to be ready
+  // Wait for both DOM and Leaflet to be ready
+  function checkLeafletAndInit() {
+    if (typeof L !== 'undefined') {
+      console.log('Leaflet is loaded, initializing map module');
+      initMapModule();
+    } else {
+      console.log('Waiting for Leaflet to load...');
+      setTimeout(checkLeafletAndInit, 100);
+    }
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initMapModule);
+    document.addEventListener('DOMContentLoaded', checkLeafletAndInit);
   } else {
-    initMapModule();
+    checkLeafletAndInit();
   }
 
 })();
