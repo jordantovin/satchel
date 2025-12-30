@@ -131,8 +131,9 @@ function performUniversalSearch(query) {
     photographersData.forEach(item => {
       const fullName = `${item.firstName} ${item.lastName}`.toLowerCase();
       const website = (item.website || '').toLowerCase();
+      const classField = (item.class || '').toLowerCase();
       
-      if (fullName.includes(lowerQuery) || website.includes(lowerQuery)) {
+      if (fullName.includes(lowerQuery) || website.includes(lowerQuery) || classField.includes(lowerQuery)) {
         universalSearchResults.push({
           type: 'photographer',
           data: item,
@@ -409,6 +410,12 @@ function renderPictureSearchCard(card, data) {
 }
 
 function renderPhotographerSearchCard(card, data) {
+  // Update the source badge to show the actual class
+  const sourceBadge = card.querySelector('div');
+  if (data.class) {
+    sourceBadge.textContent = data.class.toUpperCase();
+  }
+  
   const name = document.createElement('div');
   name.textContent = `${data.firstName} ${data.lastName}`;
   name.style.cssText = 'font-weight: bold; font-size: 18px; margin-bottom: 8px;';
@@ -568,18 +575,3 @@ function clearUniversalSearch() {
     }
   }
 }
-
-// ============================================================================
-// INITIALIZATION INSTRUCTIONS
-// ============================================================================
-// 1. Add this code to the END of your script.js file
-// 
-// 2. At the END of loadAllData() function, add:
-//    initUniversalSearch();
-//
-// 3. At the START of switchMode() function, add:
-//    if (universalSearchActive) return;
-//
-// 4. At the START of switchIndex() function, add:
-//    if (universalSearchActive) return;
-// ============================================================================
