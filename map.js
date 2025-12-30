@@ -57,7 +57,8 @@
       'Standard': standardLayer,
       'Satellite': satelliteLayer
     }, null, {
-      position: 'topright'
+      position: 'topright',
+      collapsed: true
     }).addTo(map);
 
     // Add marker layers to map
@@ -826,6 +827,7 @@
         border-radius: 0 !important;
         box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
         width: 45px !important;
+        margin-right: -5px !important;
       }
 
       .leaflet-control-layers a {
@@ -853,6 +855,20 @@
         background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNiIgaGVpZ2h0PSIyNiIgdmlld0JveD0iMCAwIDI2IDI2Ij48cGF0aCBkPSJNIDEzIDEuMTg4IEwgMi4wOTQgNi42ODggTCAxMyAxMi4yMTkgTCAyMy45MDYgNi42ODggWiBNIDEzIDE0LjgxMyBMIDIuMDk0IDkuMzEzIEwgMiAxOS42ODggTCAxMyAyNS4yMTkgTCAyNCAxOS42ODggTCAyMy45MDYgOS4zMTMgWiIgZmlsbD0iIzAwMCIvPjwvc3ZnPg==') !important;
         background-size: contain;
         background-repeat: no-repeat;
+      }
+
+      .leaflet-control-layers.leaflet-control-layers-expanded {
+        width: auto !important;
+        padding: 10px !important;
+      }
+
+      .leaflet-control-layers-list {
+        display: block !important;
+      }
+
+      .leaflet-control-layers label {
+        font-family: Helvetica, sans-serif !important;
+        font-size: 14px !important;
       }
 
       .leaflet-control-zoom {
