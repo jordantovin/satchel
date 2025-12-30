@@ -280,12 +280,7 @@
       indicator.innerHTML = '?';
       indicator.title = 'Keyboard shortcuts';
       indicator.style.cssText = `
-        width: 45px;
-        height: 45px;
-        padding: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        padding: 8px 12px;
         font-size: 18px;
         font-weight: bold;
         border: 2px solid #000;
@@ -294,15 +289,12 @@
         cursor: pointer;
         border-radius: 0;
         transition: background-color 0.2s;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
       `;
       indicator.addEventListener('mouseenter', () => {
-        indicator.style.backgroundColor = '#000';
-        indicator.style.color = 'white';
+        indicator.style.backgroundColor = '#f5f5f5';
       });
       indicator.addEventListener('mouseleave', () => {
         indicator.style.backgroundColor = 'white';
-        indicator.style.color = '#000';
       });
       indicator.addEventListener('click', window.showKeyboardHelp);
       rightNav.appendChild(indicator);
