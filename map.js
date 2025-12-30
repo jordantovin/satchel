@@ -832,6 +832,14 @@
         width: 45px !important;
       }
 
+      .leaflet-control-layers.leaflet-control-layers-expanded {
+        width: auto !important;
+        padding: 10px !important;
+        right: 55px !important;
+        top: 10px !important;
+        position: absolute !important;
+      }
+
       .leaflet-control-layers a {
         border-bottom: none !important;
         text-decoration: none !important;
@@ -844,6 +852,10 @@
         height: 45px !important;
         border-bottom: none !important;
         outline: none !important;
+        position: absolute !important;
+        right: 0 !important;
+        top: 0 !important;
+        z-index: 1000 !important;
       }
 
       .leaflet-control-layers-toggle::after {
@@ -857,6 +869,17 @@
         background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNiIgaGVpZ2h0PSIyNiIgdmlld0JveD0iMCAwIDI2IDI2Ij48cGF0aCBkPSJNIDEzIDEuMTg4IEwgMi4wOTQgNi42ODggTCAxMyAxMi4yMTkgTCAyMy45MDYgNi42ODggWiBNIDEzIDE0LjgxMyBMIDIuMDk0IDkuMzEzIEwgMiAxOS42ODggTCAxMyAyNS4yMTkgTCAyNCAxOS42ODggTCAyMy45MDYgOS4zMTMgWiIgZmlsbD0iIzAwMCIvPjwvc3ZnPg==') !important;
         background-size: contain;
         background-repeat: no-repeat;
+      }
+
+      .leaflet-control-layers-list {
+        display: block !important;
+      }
+
+      .leaflet-control-layers label {
+        font-family: Helvetica, sans-serif !important;
+        font-size: 14px !important;
+        display: block !important;
+        margin: 5px 0 !important;
       }
 
       .leaflet-control-zoom {
