@@ -721,26 +721,24 @@
   // ============================================================================
 
   function initMapModule() {
+    console.log('Initializing map module...');
+    
     // Map toggle button already exists in HTML
     const mapToggleBtn = document.getElementById('mapToggleBtn');
     if (mapToggleBtn) {
+      console.log('Map toggle button found, attaching listeners...');
+      
       // Remove any existing listeners first
-      mapToggleBtn.replaceWith(mapToggleBtn.cloneNode(true));
-      const freshBtn = document.getElementById('mapToggleBtn');
+      const freshBtn = mapToggleBtn.cloneNode(true);
+      mapToggleBtn.parentNode.replaceChild(freshBtn, mapToggleBtn);
       
       // Add click listener
       freshBtn.addEventListener('click', function(e) {
+        console.log('Map button clicked!');
         e.preventDefault();
         e.stopPropagation();
         toggleMap();
       });
-      
-      // Also add onclick as backup
-      freshBtn.onclick = function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        toggleMap();
-      };
     } else {
       console.error('mapToggleBtn not found in DOM!');
     }
