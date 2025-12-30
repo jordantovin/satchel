@@ -324,7 +324,7 @@ async function loadAllData() {
           firstName: (row['First Name'] || '').trim(),
           lastName: (row['Last Name'] || '').trim(),
           website: (row['Website'] || '').trim(),
-          className: (row['Class'] || '').trim(),
+          Class: (row['Class'] || '').trim(),
           dateAdded: (row['Date Added'] || '').trim(),
           allColumns: {}
         };
@@ -337,7 +337,7 @@ async function loadAllData() {
       });
 
     photographersData = allPeople.filter(person => {
-      return person.className && person.className.trim() !== '';
+      return person.Class && person.Class.trim() !== '';
     });
     
     photographersData.sort((a, b) => a.lastName.localeCompare(b.lastName));
@@ -952,7 +952,7 @@ function renderInspoPosts() {
         p.firstName,
         p.lastName,
         p.website,
-        p.className,
+        p.Class,
         p.dateAdded
       ];
       
@@ -1091,7 +1091,7 @@ function renderInspoPosts() {
         item.firstName,
         item.lastName,
         item.website,
-        item.className,
+        item.Class,
         item.dateAdded
       ];
       
@@ -1191,7 +1191,14 @@ function renderInspoPosts() {
     
     const badge = document.createElement('div');
     badge.style.cssText = 'font-size: 11px; font-weight: bold; text-transform: uppercase; color: #666;';
-    badge.textContent = result.type.toUpperCase();
+    
+    // Set badge text based on type - for photographers, use their Class field
+    if (result.type === 'photographer' && result.data.Class) {
+      badge.textContent = result.data.Class.toUpperCase();
+    } else {
+      badge.textContent = result.type.toUpperCase();
+    }
+    
     card.appendChild(badge);
     
     switch(result.type) {
@@ -1251,6 +1258,13 @@ function renderInspoPosts() {
         name.style.cssText = 'font-weight: bold; font-size: 18px;';
         name.textContent = `${result.data.firstName} ${result.data.lastName}`;
         card.appendChild(name);
+        
+        if (result.data.website) {
+          const website = document.createElement('div');
+          website.textContent = result.data.website;
+          website.style.cssText = 'font-size: 12px; color: #0066cc; text-decoration: underline; word-break: break-all;';
+          card.appendChild(website);
+        }
         
         card.onclick = () => window.open(result.data.website, '_blank');
         break;
