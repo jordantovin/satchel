@@ -547,7 +547,7 @@ async function loadAllData() {
   // RENDERING FUNCTIONS
   // ============================================================================
   
- function renderBlogPosts() {
+function renderBlogPosts() {
   const postsContainer = document.getElementById('postsSection');
   postsContainer.innerHTML = '';
   
@@ -572,7 +572,7 @@ async function loadAllData() {
     const postDiv = document.createElement('div');
     postDiv.className = 'blog-post';
     
-    // Header section with date, title, link, and thumbnail all on same line (left-aligned)
+    // Header section with date, title, link, and thumbnail(s) all on same line (left-aligned)
     const headerDiv = document.createElement('div');
     headerDiv.className = 'blog-post-header';
     headerDiv.style.justifyContent = 'flex-start';
@@ -600,22 +600,26 @@ async function loadAllData() {
       headerDiv.appendChild(linkButton);
     }
     
-    // Thumbnail (right next to link)
+    // Thumbnails (support multiple images separated by commas)
     if (post.pictures) {
-      const thumbnail = document.createElement('img');
-      thumbnail.src = post.pictures;
-      thumbnail.alt = post.title;
-      thumbnail.className = 'blog-post-thumbnail';
-      thumbnail.addEventListener('click', (e) => {
-        e.preventDefault();
-        const overlayImg = document.createElement('img');
-        overlayImg.src = post.pictures;
-        overlayImg.alt = post.title;
-        blogImageOverlay.innerHTML = '';
-        blogImageOverlay.appendChild(overlayImg);
-        blogImageOverlay.style.display = 'flex';
+      const imageUrls = post.pictures.split(',').map(url => url.trim()).filter(url => url);
+      
+      imageUrls.forEach(imageUrl => {
+        const thumbnail = document.createElement('img');
+        thumbnail.src = imageUrl;
+        thumbnail.alt = post.title;
+        thumbnail.className = 'blog-post-thumbnail';
+        thumbnail.addEventListener('click', (e) => {
+          e.preventDefault();
+          const overlayImg = document.createElement('img');
+          overlayImg.src = imageUrl;
+          overlayImg.alt = post.title;
+          blogImageOverlay.innerHTML = '';
+          blogImageOverlay.appendChild(overlayImg);
+          blogImageOverlay.style.display = 'flex';
+        });
+        headerDiv.appendChild(thumbnail);
       });
-      headerDiv.appendChild(thumbnail);
     }
     
     postDiv.appendChild(headerDiv);
