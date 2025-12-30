@@ -135,10 +135,10 @@
     const marker = L.circleMarker([coords.lat, coords.lon], {
       radius: 8,
       fillColor: color,
-      color: '#000',
-      weight: 2,
-      opacity: 1,
-      fillOpacity: 1
+      color: color,
+      weight: 1,
+      opacity: 0.8,
+      fillOpacity: 0.9
     });
 
     // Function to create and update popup content
@@ -213,8 +213,9 @@
     if (popupImg) {
       const item = itemsArray[currentIndex];
       
-      // Only attach click handler for Americanisms items that have images
+      // Handle clicks for both data sources
       if (item.dataSource === 'americanisms' && item.src) {
+        // For stickers - open in overlay
         const index = window.filteredImages ? window.filteredImages.findIndex(img => img.src === item.src) : -1;
         
         if (index !== -1) {
@@ -222,12 +223,26 @@
           popupImg.onclick = function(e) {
             e.preventDefault();
             e.stopPropagation();
-            // Don't toggle map - keep it open in background
+            
+            // Close the popup first
+            if (map) {
+              map.closePopup();
+            }
+            
+            // Open overlay
             if (typeof window.showOverlay === 'function') {
               window.showOverlay(index);
             }
           };
         }
+      } else if (item.dataSource === 'secondary' && item.E) {
+        // For objects - open image in new tab
+        popupImg.style.cursor = 'pointer';
+        popupImg.onclick = function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          window.open(item.E, '_blank');
+        };
       }
     }
   }
@@ -317,15 +332,7 @@
           object-fit: contain;
           margin-bottom: 12px;
           border: 2px solid #000;
-          cursor: pointer;
         `;
-        
-        // Make image clickable to open in new tab
-        img.onclick = function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          window.open(item.E, '_blank');
-        };
         
         div.appendChild(img);
       }
@@ -693,15 +700,7 @@
       // Create key toggle button (square icon button)
       const keyToggleBtn = document.createElement('button');
       keyToggleBtn.id = 'mapKeyToggleBtn';
-      keyToggleBtn.innerHTML = `
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="3"/>
-          <circle cx="6" cy="12" r="2"/>
-          <circle cx="18" cy="12" r="2"/>
-          <line x1="8" y1="12" x2="10" y2="12"/>
-          <line x1="14" y1="12" x2="16" y2="12"/>
-        </svg>
-      `;
+      keyToggleBtn.innerHTML = '🗝';
       keyToggleBtn.onclick = toggleMapKey;
       mapContainer.appendChild(keyToggleBtn);
 
@@ -753,7 +752,7 @@
 
       #mapKeyToggleBtn {
         position: absolute;
-        top: 10px;
+        top: 50px;
         right: 10px;
         width: 34px;
         height: 34px;
@@ -761,7 +760,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 14px;
+        font-size: 18px;
         font-weight: bold;
         border-radius: 0;
         border: 2px solid rgba(0,0,0,0.2);
@@ -781,7 +780,7 @@
 
       #mapKeyPanel {
         position: absolute;
-        top: 54px;
+        top: 94px;
         right: 10px;
         background: white;
         border: 2px solid rgba(0,0,0,0.2);
