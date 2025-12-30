@@ -880,8 +880,8 @@
 
       #mapKeyToggleBtn {
         position: absolute;
-        top: 10px;
-        right: 10px;
+        top: 65px;
+        right: 20px;
         width: 45px;
         height: 45px;
         padding: 0;
@@ -909,7 +909,16 @@
 
       #mapKeyPanel {
         position: absolute;
-        top: 60px;
+        top: 120px;
+        right: 20px;
+        background: white;
+        border: 2px solid #000;
+        padding: 16px;
+        font-family: Helvetica, sans-serif;
+        z-index: 1000;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        min-width: 200px;
+      }
         right: 10px;
         background: white;
         border: 2px solid #000;
