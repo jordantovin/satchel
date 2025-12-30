@@ -824,14 +824,22 @@
       .leaflet-control-layers {
         border: 2px solid #000 !important;
         border-radius: 0 !important;
-        box-shadow: none !important;
-        border-bottom: 2px solid #000 !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+        width: 80px !important;
+      }
+
+      .leaflet-control-layers a {
+        border-bottom: none !important;
+        text-decoration: none !important;
+        background-image: none !important;
       }
 
       .leaflet-control-layers-toggle {
         background-image: none !important;
-        width: 36px !important;
-        height: 36px !important;
+        width: 80px !important;
+        height: 80px !important;
+        border-bottom: none !important;
+        outline: none !important;
       }
 
       .leaflet-control-layers-toggle::after {
@@ -840,8 +848,8 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 26px;
-        height: 26px;
+        width: 40px;
+        height: 40px;
         background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNiIgaGVpZ2h0PSIyNiIgdmlld0JveD0iMCAwIDI2IDI2Ij48cGF0aCBkPSJNIDEzIDEuMTg4IEwgMi4wOTQgNi42ODggTCAxMyAxMi4yMTkgTCAyMy45MDYgNi42ODggWiBNIDEzIDE0LjgxMyBMIDIuMDk0IDkuMzEzIEwgMiAxOS42ODggTCAxMyAyNS4yMTkgTCAyNCAxOS42ODggTCAyMy45MDYgOS4zMTMgWiIgZmlsbD0iIzAwMCIvPjwvc3ZnPg==') !important;
         background-size: contain;
         background-repeat: no-repeat;
@@ -851,6 +859,7 @@
         border: 2px solid #000 !important;
         border-radius: 0 !important;
         box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+        width: 80px !important;
       }
 
       .leaflet-control-zoom a {
@@ -858,6 +867,10 @@
         border-bottom: 1px solid #000 !important;
         color: #000 !important;
         background: white !important;
+        width: 80px !important;
+        height: 40px !important;
+        line-height: 40px !important;
+        font-size: 18px !important;
       }
 
       .leaflet-control-zoom a:hover {
@@ -867,26 +880,25 @@
 
       #mapKeyToggleBtn {
         position: absolute;
-        top: 80px;
+        top: 10px;
         right: 10px;
-        width: 36px;
-        height: 26px;
+        width: 80px;
+        height: 40px;
         padding: 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 11px;
+        font-size: 13px;
         font-weight: bold;
         letter-spacing: 0.5px;
         border-radius: 0;
         border: 2px solid #000;
-        border-top: none;
         background: white;
         color: #000;
         cursor: pointer;
         font-family: Helvetica, sans-serif;
         transition: background-color 0.2s, color 0.2s;
-        z-index: 1000;
+        z-index: 1001;
         box-shadow: 0 2px 8px rgba(0,0,0,0.2);
       }
 
@@ -897,7 +909,16 @@
 
       #mapKeyPanel {
         position: absolute;
-        top: 130px;
+        top: 60px;
+        right: 10px;
+        background: white;
+        border: 2px solid #000;
+        padding: 16px;
+        font-family: Helvetica, sans-serif;
+        z-index: 1000;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        min-width: 200px;
+      }
         right: 10px;
         background: white;
         border: 2px solid #000;
