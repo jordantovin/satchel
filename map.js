@@ -825,7 +825,7 @@
         border: 2px solid #000 !important;
         border-radius: 0 !important;
         box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
-        width: 80px !important;
+        width: 45px !important;
       }
 
       .leaflet-control-layers a {
@@ -836,8 +836,8 @@
 
       .leaflet-control-layers-toggle {
         background-image: none !important;
-        width: 80px !important;
-        height: 80px !important;
+        width: 45px !important;
+        height: 45px !important;
         border-bottom: none !important;
         outline: none !important;
       }
@@ -848,8 +848,8 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 40px;
-        height: 40px;
+        width: 26px;
+        height: 26px;
         background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNiIgaGVpZ2h0PSIyNiIgdmlld0JveD0iMCAwIDI2IDI2Ij48cGF0aCBkPSJNIDEzIDEuMTg4IEwgMi4wOTQgNi42ODggTCAxMyAxMi4yMTkgTCAyMy45MDYgNi42ODggWiBNIDEzIDE0LjgxMyBMIDIuMDk0IDkuMzEzIEwgMiAxOS42ODggTCAxMyAyNS4yMTkgTCAyNCAxOS42ODggTCAyMy45MDYgOS4zMTMgWiIgZmlsbD0iIzAwMCIvPjwvc3ZnPg==') !important;
         background-size: contain;
         background-repeat: no-repeat;
@@ -859,7 +859,7 @@
         border: 2px solid #000 !important;
         border-radius: 0 !important;
         box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
-        width: 80px !important;
+        width: 45px !important;
       }
 
       .leaflet-control-zoom a {
@@ -867,9 +867,9 @@
         border-bottom: 1px solid #000 !important;
         color: #000 !important;
         background: white !important;
-        width: 80px !important;
-        height: 40px !important;
-        line-height: 40px !important;
+        width: 45px !important;
+        height: 45px !important;
+        line-height: 45px !important;
         font-size: 18px !important;
       }
 
@@ -882,13 +882,13 @@
         position: absolute;
         top: 10px;
         right: 10px;
-        width: 80px;
-        height: 40px;
+        width: 45px;
+        height: 45px;
         padding: 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 13px;
+        font-size: 12px;
         font-weight: bold;
         letter-spacing: 0.5px;
         border-radius: 0;
