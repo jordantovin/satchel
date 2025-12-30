@@ -156,12 +156,6 @@
           className: 'map-popup'
         });
       }
-      
-      // Attach event listeners after a brief delay to ensure DOM is ready
-      setTimeout(() => {
-        attachPopupEventListeners(itemsArray, currentIndex);
-        attachNavigationListeners();
-      }, 50);
     }
 
     // Function to attach navigation button listeners
@@ -176,6 +170,12 @@
             e.stopPropagation();
             currentIndex = (currentIndex - 1 + itemsArray.length) % itemsArray.length;
             updatePopup();
+            
+            // Reattach listeners after update
+            setTimeout(() => {
+              attachPopupEventListeners(itemsArray, currentIndex);
+              attachNavigationListeners();
+            }, 100);
           };
         }
         
@@ -185,6 +185,12 @@
             e.stopPropagation();
             currentIndex = (currentIndex + 1) % itemsArray.length;
             updatePopup();
+            
+            // Reattach listeners after update
+            setTimeout(() => {
+              attachPopupEventListeners(itemsArray, currentIndex);
+              attachNavigationListeners();
+            }, 100);
           };
         }
       }
@@ -193,12 +199,16 @@
     // Initialize popup
     updatePopup();
 
-    // Re-attach listeners when popup opens
-    marker.on('popupopen', function() {
+    // Ensure popup opens properly and attach listeners when it does
+    marker.on('popupopen', function(e) {
+      // Update the popup content to ensure it's current
+      updatePopup();
+      
+      // Attach event listeners after DOM is ready
       setTimeout(() => {
         attachPopupEventListeners(itemsArray, currentIndex);
         attachNavigationListeners();
-      }, 50);
+      }, 100);
     });
 
     // Add marker to appropriate layer
