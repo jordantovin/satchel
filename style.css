@@ -963,7 +963,7 @@ a:active {
 /* Map Key Toggle Button */
 #mapKeyToggleBtn {
   position: absolute;
-  top: 10px;
+  top: 50px;
   right: 10px;
   width: 34px;
   height: 34px;
@@ -971,7 +971,7 @@ a:active {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 18px;
   font-weight: bold;
   border-radius: 0;
   border: 2px solid rgba(0,0,0,0.2);
@@ -982,6 +982,7 @@ a:active {
   transition: background-color 0.2s, color 0.2s, border-color 0.2s;
   z-index: 1000;
   box-shadow: none;
+  line-height: 1;
 }
 
 #mapKeyToggleBtn:hover {
@@ -989,14 +990,10 @@ a:active {
   border-color: rgba(0,0,0,0.3);
 }
 
-#mapKeyToggleBtn svg {
-  display: block;
-}
-
 /* Map Key Panel */
 #mapKeyPanel {
   position: absolute;
-  top: 54px;
+  top: 94px;
   right: 10px;
   background: white;
   border: 2px solid rgba(0,0,0,0.2);
@@ -1125,17 +1122,14 @@ a:active {
   }
   
   #mapKeyToggleBtn {
+    top: 50px;
     width: 30px;
     height: 30px;
-  }
-  
-  #mapKeyToggleBtn svg {
-    width: 16px;
-    height: 16px;
+    font-size: 16px;
   }
   
   #mapKeyPanel {
-    top: 50px;
+    top: 90px;
     min-width: 180px;
   }
 }
@@ -1175,19 +1169,15 @@ a:active {
   }
   
   #mapKeyToggleBtn {
-    top: 10px;
+    top: 50px;
     right: 10px;
     width: 28px;
     height: 28px;
-  }
-  
-  #mapKeyToggleBtn svg {
-    width: 14px;
-    height: 14px;
+    font-size: 14px;
   }
   
   #mapKeyPanel {
-    top: 48px;
+    top: 88px;
     right: 10px;
     min-width: 150px;
     padding: 12px;
