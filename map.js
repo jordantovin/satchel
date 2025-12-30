@@ -52,13 +52,13 @@
     // Add standard layer by default
     standardLayer.addTo(map);
 
-    // Add layer control in top-right - always expanded
+    // Add layer control in top-right - collapsed by default (click to open)
     const layerControl = L.control.layers({
       'Standard': standardLayer,
       'Satellite': satelliteLayer
     }, null, {
       position: 'topright',
-      collapsed: false
+      collapsed: true
     }).addTo(map);
 
     // Add marker layers to map
