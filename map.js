@@ -824,8 +824,27 @@
       .leaflet-control-layers {
         border: 2px solid #000 !important;
         border-radius: 0 !important;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
-        border-bottom: none !important;
+        box-shadow: none !important;
+        border-bottom: 2px solid #000 !important;
+      }
+
+      .leaflet-control-layers-toggle {
+        background-image: none !important;
+        width: 36px !important;
+        height: 36px !important;
+      }
+
+      .leaflet-control-layers-toggle::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 26px;
+        height: 26px;
+        background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNiIgaGVpZ2h0PSIyNiIgdmlld0JveD0iMCAwIDI2IDI2Ij48cGF0aCBkPSJNIDEzIDEuMTg4IEwgMi4wOTQgNi42ODggTCAxMyAxMi4yMTkgTCAyMy45MDYgNi42ODggWiBNIDEzIDE0LjgxMyBMIDIuMDk0IDkuMzEzIEwgMiAxOS42ODggTCAxMyAyNS4yMTkgTCAyNCAxOS42ODggTCAyMy45MDYgOS4zMTMgWiIgZmlsbD0iIzAwMCIvPjwvc3ZnPg==') !important;
+        background-size: contain;
+        background-repeat: no-repeat;
       }
 
       .leaflet-control-zoom {
@@ -848,15 +867,15 @@
 
       #mapKeyToggleBtn {
         position: absolute;
-        top: 82px;
+        top: 80px;
         right: 10px;
-        width: 77px;
-        height: 30px;
+        width: 36px;
+        height: 26px;
         padding: 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 13px;
+        font-size: 11px;
         font-weight: bold;
         letter-spacing: 0.5px;
         border-radius: 0;
