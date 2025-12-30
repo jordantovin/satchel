@@ -720,28 +720,20 @@
       }
     }
     
-    // Update button states
-    updateFilterButtons();
+    // Update checkbox states
+    updateFilterCheckboxes();
   }
 
-  function updateFilterButtons() {
-    const objectsBtn = document.getElementById('filterObjectsBtn');
-    const stickersBtn = document.getElementById('filterStickersBtn');
+  function updateFilterCheckboxes() {
+    const objectsCheckbox = document.getElementById('filterObjectsCheckbox');
+    const stickersCheckbox = document.getElementById('filterStickersCheckbox');
     
-    if (objectsBtn) {
-      if (showObjects) {
-        objectsBtn.classList.add('active');
-      } else {
-        objectsBtn.classList.remove('active');
-      }
+    if (objectsCheckbox) {
+      objectsCheckbox.checked = showObjects;
     }
     
-    if (stickersBtn) {
-      if (showStickers) {
-        stickersBtn.classList.add('active');
-      } else {
-        stickersBtn.classList.remove('active');
-      }
+    if (stickersCheckbox) {
+      stickersCheckbox.checked = showStickers;
     }
   }
 
@@ -819,19 +811,17 @@
       keyPanel.id = 'mapKeyPanel';
       keyPanel.style.display = 'none';
       keyPanel.innerHTML = `
-        <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: bold;">Map Legend</h3>
-        <div style="margin-bottom: 12px;">
-          <button id="filterObjectsBtn" class="map-filter-btn active" onclick="window.toggleMarkerFilter('objects')">
-            <span class="marker-dot" style="background: #d63e2a;"></span>
-            Objects
-          </button>
-        </div>
-        <div>
-          <button id="filterStickersBtn" class="map-filter-btn active" onclick="window.toggleMarkerFilter('stickers')">
-            <span class="marker-dot" style="background: #2a81d6;"></span>
-            Stickers
-          </button>
-        </div>
+        <h3 style="margin: 0 0 16px 0; font-size: 16px; font-weight: bold;">Map Legend</h3>
+        <label class="map-filter-label">
+          <input type="checkbox" id="filterObjectsCheckbox" class="map-filter-checkbox" checked onchange="window.toggleMarkerFilter('objects')">
+          <span class="marker-dot" style="background: #d63e2a;"></span>
+          <span>Objects</span>
+        </label>
+        <label class="map-filter-label">
+          <input type="checkbox" id="filterStickersCheckbox" class="map-filter-checkbox" checked onchange="window.toggleMarkerFilter('stickers')">
+          <span class="marker-dot" style="background: #2a81d6;"></span>
+          <span>Stickers</span>
+        </label>
       `;
       mapContainer.appendChild(keyPanel);
     }
@@ -983,29 +973,27 @@
         min-width: 200px;
       }
 
-      .map-filter-btn {
-        width: 100%;
-        padding: 8px 12px;
-        font-size: 14px;
-        border-radius: 0;
-        border: 2px solid #000;
-        background: white;
-        color: #000;
-        cursor: pointer;
-        font-family: Helvetica, sans-serif;
-        transition: background-color 0.2s, color 0.2s;
+      .map-filter-label {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
+        padding: 10px 0;
+        cursor: pointer;
+        font-family: Helvetica, sans-serif;
+        font-size: 14px;
+        user-select: none;
       }
 
-      .map-filter-btn:hover {
-        background-color: #f5f5f5;
+      .map-filter-label:hover {
+        opacity: 0.7;
       }
 
-      .map-filter-btn.active {
-        background-color: #000;
-        color: white;
+      .map-filter-checkbox {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        margin: 0;
+        accent-color: #000;
       }
 
       .marker-dot {
@@ -1014,10 +1002,6 @@
         height: 12px;
         border-radius: 50%;
         border: 2px solid #000;
-      }
-
-      .map-filter-btn.active .marker-dot {
-        border-color: white;
       }
     `;
     document.head.appendChild(style);
