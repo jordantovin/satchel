@@ -131,13 +131,13 @@ function performUniversalSearch(query) {
     photographersData.forEach(item => {
       const fullName = `${item.firstName} ${item.lastName}`.toLowerCase();
       const website = (item.website || '').toLowerCase();
-      const classField = (item.class || '').toLowerCase();
+      const classField = (item.Class || item.class || '').toLowerCase();
       
       if (fullName.includes(lowerQuery) || website.includes(lowerQuery) || classField.includes(lowerQuery)) {
         universalSearchResults.push({
           type: 'photographer',
           data: item,
-          source: item.class || 'Photographers'  // USE THE ACTUAL CLASS HERE
+          source: item.Class || item.class || 'Names'
         });
       }
     });
