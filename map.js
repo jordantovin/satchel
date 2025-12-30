@@ -854,6 +854,10 @@
         height: 45px !important;
         border-bottom: none !important;
         outline: none !important;
+        position: absolute !important;
+        right: 0 !important;
+        top: 0 !important;
+        z-index: 10 !important;
       }
 
       .leaflet-control-layers-toggle::after {
