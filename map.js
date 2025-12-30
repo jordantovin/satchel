@@ -953,35 +953,24 @@
         z-index: 1000;
         box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         min-width: 200px;
-      }
-        right: 10px;
-        background: white;
-        border: 2px solid #000;
-        padding: 16px;
-        font-family: Helvetica, sans-serif;
-        z-index: 1000;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        min-width: 200px;
-      }
-        right: 10px;
-        background: white;
-        border: 2px solid #000;
-        padding: 16px;
-        font-family: Helvetica, sans-serif;
-        z-index: 1000;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        min-width: 200px;
+        display: flex;
+        flex-direction: column;
       }
 
       .map-filter-label {
         display: flex;
         align-items: center;
         gap: 10px;
-        padding: 10px 0;
+        padding: 8px 0;
         cursor: pointer;
         font-family: Helvetica, sans-serif;
         font-size: 14px;
         user-select: none;
+        width: 100%;
+      }
+
+      .map-filter-label:first-of-type {
+        padding-top: 0;
       }
 
       .map-filter-label:hover {
