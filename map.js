@@ -52,12 +52,13 @@
     // Add standard layer by default
     standardLayer.addTo(map);
 
-    // Add layer control in top-right
+    // Add layer control in top-right - always expanded
     const layerControl = L.control.layers({
       'Standard': standardLayer,
       'Satellite': satelliteLayer
     }, null, {
-      position: 'topright'
+      position: 'topright',
+      collapsed: false
     }).addTo(map);
 
     // Add marker layers to map
@@ -830,14 +831,15 @@
         border-radius: 0 !important;
         box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
         width: 45px !important;
+        height: 45px !important;
       }
 
       .leaflet-control-layers.leaflet-control-layers-expanded {
         width: auto !important;
-        padding: 10px !important;
-        right: 55px !important;
-        top: 10px !important;
-        position: absolute !important;
+        height: auto !important;
+        min-width: 150px !important;
+        padding: 15px !important;
+        transform: translateX(-105px) !important;
       }
 
       .leaflet-control-layers a {
@@ -852,10 +854,6 @@
         height: 45px !important;
         border-bottom: none !important;
         outline: none !important;
-        position: absolute !important;
-        right: 0 !important;
-        top: 0 !important;
-        z-index: 1000 !important;
       }
 
       .leaflet-control-layers-toggle::after {
@@ -879,7 +877,22 @@
         font-family: Helvetica, sans-serif !important;
         font-size: 14px !important;
         display: block !important;
+        margin: 8px 0 !important;
+        white-space: nowrap !important;
+      }
+
+      .leaflet-control-layers input {
+        margin-right: 8px !important;
+      }
+        font-family: Helvetica, sans-serif !important;
+        font-size: 14px !important;
+        display: block !important;
         margin: 5px 0 !important;
+        white-space: nowrap !important;
+      }
+
+      .leaflet-control-layers input {
+        margin-right: 5px !important;
       }
 
       .leaflet-control-zoom {
