@@ -1862,20 +1862,30 @@ function renderInspoPosts() {
     }
   }
 
-  async function toggleFullscreen() {
-    const overlay = document.getElementById("overlay");
-    
-    try {
-      if (!document.fullscreenElement) {
-        await overlay.requestFullscreen();
-      } else {
-        await document.exitFullscreen();
-      }
-    } catch (err) {
-      console.log('Fullscreen error:', err);
-      alert('Fullscreen failed. Try pressing F11 or use the F key.');
+async function toggleFullscreen() {
+  const overlay = document.getElementById("overlay");
+  
+  try {
+    if (!document.fullscreenElement) {
+      await overlay.requestFullscreen();
+      overlay.classList.add('fullscreen');
+    } else {
+      await document.exitFullscreen();
+      overlay.classList.remove('fullscreen');
     }
+  } catch (err) {
+    console.log('Fullscreen error:', err);
+    alert('Fullscreen failed. Try pressing F11 or use the F key.');
   }
+}
+
+// Add this listener in your initEventListeners() function or at the end of your init()
+document.addEventListener('fullscreenchange', () => {
+  const overlay = document.getElementById("overlay");
+  if (!document.fullscreenElement) {
+    overlay.classList.remove('fullscreen');
+  }
+});
 
   // ============================================================================
   // EVENT LISTENERS
