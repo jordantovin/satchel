@@ -14,6 +14,7 @@
   // Map layers
   let standardLayer = null;
   let satelliteLayer = null;
+  let currentMapLayer = 'standard'; // Track current layer
 
   // Marker filter state
   let showObjects = true;
@@ -22,6 +23,40 @@
     objects: L.layerGroup(),
     stickers: L.layerGroup()
   };
+
+  // ============================================================================
+  // LAYER TOGGLE
+  // ============================================================================
+
+  function toggleMapLayer() {
+    if (currentMapLayer === 'standard') {
+      // Switch to satellite
+      map.removeLayer(standardLayer);
+      satelliteLayer.addTo(map);
+      currentMapLayer = 'satellite';
+      
+      // Update button
+      const layerBtn = document.getElementById('mapLayerBtn');
+      if (layerBtn) {
+        layerBtn.textContent = 'SAT';
+      }
+    } else {
+      // Switch to standard
+      map.removeLayer(satelliteLayer);
+      standardLayer.addTo(map);
+      currentMapLayer = 'standard';
+      
+      // Update button
+      const layerBtn = document.getElementById('mapLayerBtn');
+      if (layerBtn) {
+        layerBtn.innerHTML = `
+          <svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 13 1.188 L 2.094 6.688 L 13 12.219 L 23.906 6.688 Z M 13 14.813 L 2.094 9.313 L 2 19.688 L 13 25.219 L 24 19.688 L 23.906 9.313 Z" fill="currentColor"/>
+          </svg>
+        `;
+      }
+    }
+  }
 
   // ============================================================================
   // MAP INITIALIZATION
@@ -52,14 +87,7 @@
     // Add standard layer by default
     standardLayer.addTo(map);
 
-    // Add layer control in top-right - collapsed by default (click to open)
-    const layerControl = L.control.layers({
-      'Standard': standardLayer,
-      'Satellite': satelliteLayer
-    }, null, {
-      position: 'topright',
-      collapsed: true
-    }).addTo(map);
+    // Don't add Leaflet's layer control - we'll handle it ourselves
 
     // Add marker layers to map
     markerLayers.objects.addTo(map);
@@ -768,6 +796,17 @@
     // Create map key control button and panel
     const mapContainer = document.getElementById('mapContainer');
     if (mapContainer) {
+      // Create layer toggle button (shows layers icon, switches to SAT text when satellite)
+      const layerBtn = document.createElement('button');
+      layerBtn.id = 'mapLayerBtn';
+      layerBtn.innerHTML = `
+        <svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 13 1.188 L 2.094 6.688 L 13 12.219 L 23.906 6.688 Z M 13 14.813 L 2.094 9.313 L 2 19.688 L 13 25.219 L 24 19.688 L 23.906 9.313 Z" fill="currentColor"/>
+        </svg>
+      `;
+      layerBtn.onclick = toggleMapLayer;
+      mapContainer.appendChild(layerBtn);
+
       // Create key toggle button (rectangular text button under layer control)
       const keyToggleBtn = document.createElement('button');
       keyToggleBtn.id = 'mapKeyToggleBtn';
@@ -821,80 +860,62 @@
         opacity: 0.8;
       }
 
-      /* Leaflet control styling */
-      .leaflet-right {
-        right: 23px !important;
-      }
-
-      .leaflet-control-layers {
-        border: 2px solid #000 !important;
-        border-radius: 0 !important;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
-      }
-
-      .leaflet-control-layers a {
-        border-bottom: none !important;
-        text-decoration: none !important;
-        background-image: none !important;
-      }
-
-      .leaflet-control-layers-toggle {
-        background-image: none !important;
-        width: 45px !important;
-        height: 45px !important;
-        border-bottom: none !important;
-        outline: none !important;
-      }
-
-      .leaflet-control-layers-toggle::after {
-        content: '';
+      /* Custom layer button */
+      #mapLayerBtn {
         position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 26px;
-        height: 26px;
-        background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNiIgaGVpZ2h0PSIyNiIgdmlld0JveD0iMCAwIDI2IDI2Ij48cGF0aCBkPSJNIDEzIDEuMTg4IEwgMi4wOTQgNi42ODggTCAxMyAxMi4yMTkgTCAyMy45MDYgNi42ODggWiBNIDEzIDE0LjgxMyBMIDIuMDk0IDkuMzEzIEwgMiAxOS42ODggTCAxMyAyNS4yMTkgTCAyNCAxOS42ODggTCAyMy45MDYgOS4zMTMgWiIgZmlsbD0iIzAwMCIvPjwvc3ZnPg==') !important;
-        background-size: contain;
-        background-repeat: no-repeat;
+        top: 10px;
+        right: 20px;
+        width: 45px;
+        height: 45px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+        border-radius: 0;
+        border: 2px solid #000;
+        background: white;
+        color: #000;
+        cursor: pointer;
+        font-family: Helvetica, sans-serif;
+        transition: background-color 0.2s, color 0.2s;
+        z-index: 1001;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
       }
 
-      .leaflet-control-layers-expanded {
-        padding: 10px !important;
+      #mapLayerBtn:hover {
+        background-color: #000;
+        color: white;
       }
 
-      .leaflet-control-layers label {
-        font-family: Helvetica, sans-serif !important;
-        font-size: 14px !important;
-        margin: 5px 0 !important;
-      }
-        font-family: Helvetica, sans-serif !important;
-        font-size: 14px !important;
-        display: block !important;
-        margin: 5px 0 !important;
-        white-space: nowrap !important;
+      #mapLayerBtn svg {
+        display: block;
       }
 
-      .leaflet-control-layers input {
-        margin-right: 5px !important;
-      }
-
+      /* Zoom controls */
       .leaflet-control-zoom {
         border: 2px solid #000 !important;
         border-radius: 0 !important;
         box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
-        width: 45px !important;
       }
 
       .leaflet-control-zoom a {
         border-radius: 0 !important;
         border-bottom: 1px solid #000 !important;
+        border-left: none !important;
+        border-right: none !important;
+        border-top: none !important;
         color: #000 !important;
         background: white !important;
         width: 45px !important;
         height: 45px !important;
         line-height: 45px !important;
         font-size: 18px !important;
+      }
+
+      .leaflet-control-zoom a:last-child {
+        border-bottom: none !important;
       }
 
       .leaflet-control-zoom a:hover {
