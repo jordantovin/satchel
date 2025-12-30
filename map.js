@@ -825,6 +825,7 @@
         border: 2px solid #000 !important;
         border-radius: 0 !important;
         box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+        border-bottom: none !important;
       }
 
       .leaflet-control-zoom {
@@ -847,12 +848,11 @@
 
       #mapKeyToggleBtn {
         position: absolute;
-        top: 90px;
+        top: 82px;
         right: 10px;
-        width: auto;
-        min-width: 80px;
+        width: 77px;
         height: 30px;
-        padding: 0 16px;
+        padding: 0;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -861,6 +861,7 @@
         letter-spacing: 0.5px;
         border-radius: 0;
         border: 2px solid #000;
+        border-top: none;
         background: white;
         color: #000;
         cursor: pointer;
