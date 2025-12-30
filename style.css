@@ -2,6 +2,13 @@
    AMERICANISMS GALLERY - STYLES
    ============================================================================ */
 
+/* Z-INDEX HIERARCHY:
+   10000+ = Overlays (image viewer, blog image overlay)
+   5000-5999 = Map container and controls
+   1000-1999 = Navigation, sidebars, content wrapper
+   1-999 = Gallery content
+*/
+
 /* ===== BASE STYLES ===== */
 body {
   margin: 0;
@@ -906,7 +913,7 @@ a:active {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 9998;
+  z-index: 5000;
   background: white;
   border-top: 2px solid #000;
 }
@@ -933,7 +940,7 @@ a:active {
   cursor: pointer;
   font-family: Helvetica, sans-serif;
   transition: background-color 0.2s, color 0.2s;
-  z-index: 9999;
+  z-index: 5001;
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   display: flex;
   align-items: center;
