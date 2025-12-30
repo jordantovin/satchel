@@ -137,7 +137,7 @@ function performUniversalSearch(query) {
         universalSearchResults.push({
           type: 'photographer',
           data: item,
-          source: 'Photographers'
+          source: item.class || 'Photographers'  // USE THE ACTUAL CLASS HERE
         });
       }
     });
@@ -410,12 +410,6 @@ function renderPictureSearchCard(card, data) {
 }
 
 function renderPhotographerSearchCard(card, data) {
-  // Update the source badge to show the actual class
-  const sourceBadge = card.querySelector('div');
-  if (data.class) {
-    sourceBadge.textContent = data.class.toUpperCase();
-  }
-  
   const name = document.createElement('div');
   name.textContent = `${data.firstName} ${data.lastName}`;
   name.style.cssText = 'font-weight: bold; font-size: 18px; margin-bottom: 8px;';
