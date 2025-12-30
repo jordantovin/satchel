@@ -2,6 +2,13 @@
    AMERICANISMS GALLERY - STYLES
    ============================================================================ */
 
+/* Z-INDEX HIERARCHY:
+   10000+ = Overlays (image viewer, blog image overlay)
+   5000-5999 = Map container and controls
+   1000-1999 = Navigation, sidebars, content wrapper
+   1-999 = Gallery content
+*/
+
 /* ===== BASE STYLES ===== */
 body {
   margin: 0;
@@ -906,7 +913,7 @@ a:active {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 9998;
+  z-index: 5000;
   background: white;
   border-top: 2px solid #000;
 }
@@ -916,6 +923,7 @@ a:active {
   height: 100%;
 }
 
+/* Map Toggle Button */
 #mapToggleBtn {
   position: fixed;
   bottom: 20px;
@@ -932,7 +940,7 @@ a:active {
   cursor: pointer;
   font-family: Helvetica, sans-serif;
   transition: background-color 0.2s, color 0.2s;
-  z-index: 9999;
+  z-index: 5001;
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   display: flex;
   align-items: center;
@@ -957,6 +965,111 @@ a:active {
 #mapToggleBtn.active {
   background-color: #000;
   color: white;
+}
+
+/* Map Key Toggle Button */
+#mapKeyToggleBtn {
+  position: absolute;
+  top: 50px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 0;
+  border: 2px solid rgba(0,0,0,0.2);
+  background: white;
+  color: #000;
+  cursor: pointer;
+  font-family: Helvetica, sans-serif;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  z-index: 1000;
+  box-shadow: none;
+  line-height: 1;
+}
+
+#mapKeyToggleBtn:hover {
+  background-color: #f4f4f4;
+  border-color: rgba(0,0,0,0.3);
+}
+
+/* Map Key Panel */
+#mapKeyPanel {
+  position: absolute;
+  top: 94px;
+  right: 10px;
+  background: white;
+  border: 2px solid rgba(0,0,0,0.2);
+  padding: 16px;
+  font-family: Helvetica, sans-serif;
+  z-index: 1000;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+  min-width: 200px;
+}
+
+/* Map Filter Buttons */
+.map-filter-btn {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 14px;
+  border-radius: 0;
+  border: 2px solid #000;
+  background: white;
+  color: #000;
+  cursor: pointer;
+  font-family: Helvetica, sans-serif;
+  transition: background-color 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.map-filter-btn:hover {
+  background-color: #f5f5f5;
+}
+
+.map-filter-btn.active {
+  background-color: #000;
+  color: white;
+}
+
+.marker-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #000;
+}
+
+.map-filter-btn.active .marker-dot {
+  border-color: white;
+}
+
+/* Leaflet Popup Overrides */
+.leaflet-popup-content-wrapper {
+  border-radius: 0 !important;
+  border: 2px solid #000 !important;
+  font-family: Helvetica, sans-serif;
+}
+
+.leaflet-popup-tip {
+  border: 2px solid #000 !important;
+}
+
+.map-popup-content {
+  padding: 0;
+}
+
+.map-popup-image {
+  transition: opacity 0.2s;
+}
+
+.map-popup-image:hover {
+  opacity: 0.8;
 }
 
 /* ===== MOBILE STYLES ===== */
@@ -1014,6 +1127,18 @@ a:active {
     width: 18px;
     height: 18px;
   }
+  
+  #mapKeyToggleBtn {
+    top: 50px;
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+  }
+  
+  #mapKeyPanel {
+    top: 90px;
+    min-width: 180px;
+  }
 }
 
 @media (max-width: 600px) {
@@ -1048,5 +1173,25 @@ a:active {
   #mapToggleBtn svg {
     width: 16px;
     height: 16px;
+  }
+  
+  #mapKeyToggleBtn {
+    top: 50px;
+    right: 10px;
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+  
+  #mapKeyPanel {
+    top: 88px;
+    right: 10px;
+    min-width: 150px;
+    padding: 12px;
+  }
+  
+  .map-filter-btn {
+    font-size: 12px;
+    padding: 6px 10px;
   }
 }
