@@ -939,20 +939,20 @@ function renderInspoPosts() {
         });
         
         const metadata = document.createElement("div");
-        metadata.className = "metadata";
-        
-        let metadataHTML = `<strong>Date:</strong> ${img.date}<br>`;
-        
-        if (img.source === "Americanisms") {
-          metadataHTML += `<strong>Location:</strong><br>${img.location_card.replace(/\n/g, "<br>")}<br>`;
-          metadataHTML += `<strong>Medium:</strong> ${img.medium}`;
-        } else if (img.source === "Objects") {
-          metadataHTML += `<strong>Title:</strong> ${img.title}<br>`;
-          if (img.note) metadataHTML += `<strong>Note:</strong> ${img.note}`;
-        } else if (img.type === "pictures") {
-          metadataHTML += `<strong>Photographer:</strong> ${img.photographer}<br>`;
-          if (img.note) metadataHTML += `<strong>Note:</strong> ${img.note}`;
-        }
+metadata.className = "metadata";
+
+let metadataHTML = `<strong>Date:</strong> ${img.date}<br>`;
+
+if (img.source === "Americanisms") {
+  metadataHTML += `<strong>Location:</strong><br>${img.location_card.replace(/\n/g, "<br>")}<br>`;
+  metadataHTML += `<strong>Medium:</strong> ${img.medium}`;
+} else if (img.source === "Objects") {
+  metadataHTML += `<strong>Title:</strong> ${img.title}<br>`;
+  if (img.note) metadataHTML += `<strong>Note:</strong> ${img.note}`;
+} else if (img.type === "pictures") {
+  metadataHTML += `<strong>Photographer:</strong> ${img.photographer}<br>`;
+  if (img.note) metadataHTML += `<strong>Note:</strong> ${img.note}`;
+}
         
         metadata.innerHTML = metadataHTML;
         card.appendChild(imageEl);
