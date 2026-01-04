@@ -1398,15 +1398,19 @@ function renderInspoPosts() {
   // NAVIGATION & MODE SWITCHING
   // ============================================================================
   
-  window.navigateTo = function(mode, section) {
-    document.querySelectorAll('.nav-link').forEach(link => {
-      link.classList.remove('active');
-    });
-    
-    const activeLink = document.querySelector(`[data-section="${mode}-${section}"]`);
-    if (activeLink) {
-      activeLink.classList.add('active');
-    }
+window.navigateTo = function(mode, section) {
+  // Save current state to localStorage
+  localStorage.setItem('satchel_mode', mode);
+  localStorage.setItem('satchel_section', section);
+  
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.classList.remove('active');
+  });
+  
+  const activeLink = document.querySelector(`[data-section="${mode}-${section}"]`);
+  if (activeLink) {
+    activeLink.classList.add('active');
+  }
     
     document.getElementById('modeSelector').value = mode;
     
@@ -2027,22 +2031,24 @@ document.addEventListener('fullscreenchange', () => {
   // INITIALIZATION
   // ============================================================================
   
-  function init() {
-    initEventListeners();
-    updateSortButtonVisibility();
-    updateMapButtonVisibility();
-    loadAllData();
-    
+function init() {
+  initEventListeners();
+  updateSortButtonVisibility();
+  updateMapButtonVisibility();
+  loadAllData();
+  
+  // Check for saved state in localStorage
+  const savedMode = localStorage.getItem('satchel_mode');
+  const savedSection = localStorage.getItem('satchel_section');
+  
+  if (savedMode && savedSection) {
+    // Restore saved state
+    navigateTo(savedMode, savedSection);
+  } else {
+    // Default to objects
     const defaultLink = document.querySelector('[data-section="archive-objects"]');
     if (defaultLink) {
       defaultLink.classList.add('active');
     }
   }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
-
-})();
+}
