@@ -1913,19 +1913,20 @@ function renderInspoPosts() {
     document.getElementById("overlayImg").src = img.src;
     document.getElementById("overlay").style.display = "flex";
     
-    let overlayHTML = `<strong>Date:</strong> ${img.date}<br>`;
-    
-    if (img.source === "Americanisms") {
-      overlayHTML += `<strong>Location:</strong><br>${img.location_overlay.replace(/\n/g, "<br>")}<br>`;
-      overlayHTML += `<strong>Medium:</strong> ${img.medium}<br>`;
-      if (img.artist) overlayHTML += `<strong>Artist:</strong> ${img.artist}`;
-    } else if (img.source === "Objects") {
-      overlayHTML += `<strong>Title:</strong> ${img.title}<br>`;
-      if (img.note) overlayHTML += `<strong>Note:</strong> ${img.note}`;
-    } else if (img.type === "pictures") {
-      overlayHTML += `<strong>Photographer:</strong> ${img.photographer}<br>`;
-      if (img.note) overlayHTML += `<strong>Note:</strong> ${img.note}`;
-    }
+   let dateLabel = img.type === "pictures" ? "Date Added:" : "Date:";
+let overlayHTML = `<strong>${dateLabel}</strong> ${img.date}<br>`;
+
+if (img.source === "Americanisms") {
+  overlayHTML += `<strong>Location:</strong><br>${img.location_overlay.replace(/\n/g, "<br>")}<br>`;
+  overlayHTML += `<strong>Medium:</strong> ${img.medium}<br>`;
+  if (img.artist) overlayHTML += `<strong>Artist:</strong> ${img.artist}`;
+} else if (img.source === "Objects") {
+  overlayHTML += `<strong>Title:</strong> ${img.title}<br>`;
+  if (img.note) overlayHTML += `<strong>Note:</strong> ${img.note}`;
+} else if (img.type === "pictures") {
+  overlayHTML += `<strong>Photographer:</strong> ${img.photographer}<br>`;
+  if (img.note) overlayHTML += `<strong>Note:</strong> ${img.note}`;
+}
     
     document.getElementById("overlayMetadata").innerHTML = overlayHTML;
   }
