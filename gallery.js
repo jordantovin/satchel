@@ -11,7 +11,7 @@
   // ============================================================================
   
   let currentMode = 'archive';
-  let currentSortMode = 'NEWEST'; // 'NEWEST', 'OLDEST', 'alphabetical'
+  let currentSortMode = 'NEWEST'; // 'NEWEST', 'OLDEST', 'alphabetical', 'RANDOM'
   let blogPostsData = [];
   let inspoPostsData = [];
   let fieldNotesData = [];
@@ -479,6 +479,12 @@ async function loadAllData() {
         
         return aKey.localeCompare(bKey);
       });
+    } else if (currentSortMode === 'RANDOM') {
+      // Random shuffle using Fisher-Yates algorithm
+      for (let i = sorted.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [sorted[i], sorted[j]] = [sorted[j], sorted[i]];
+      }
     }
     
     return sorted;
@@ -487,7 +493,7 @@ async function loadAllData() {
   window.cycleSortMode = function() {
     if (currentIndex === 'photographers' || currentIndex === 'places' || currentMode === 'blog') return;
     
-    const modes = ['NEWEST', 'OLDEST', 'alphabetical'];
+    const modes = ['NEWEST', 'OLDEST', 'alphabetical', 'RANDOM'];
     const currentIdx = modes.indexOf(currentSortMode);
     currentSortMode = modes[(currentIdx + 1) % modes.length];
     
@@ -496,7 +502,8 @@ async function loadAllData() {
       const labels = {
         'NEWEST': 'NEWEST',
         'OLDEST': 'OLDEST',
-        'alphabetical': 'A-Z'
+        'alphabetical': 'A-Z',
+        'RANDOM': 'RANDOM'
       };
       sortBtn.textContent = labels[currentSortMode];
     }
@@ -1430,6 +1437,25 @@ function renderInspoPosts() {
       currentMode = 'archive';
       currentIndex = section;
       
+      // Set sort mode to RANDOM for pictures, NEWEST for everything else
+      if (section === 'pictures') {
+        currentSortMode = 'RANDOM';
+      } else {
+        currentSortMode = 'NEWEST';
+      }
+      
+      // Update sort button text
+      const sortBtn = document.getElementById('sortButton');
+      if (sortBtn) {
+        const labels = {
+          'NEWEST': 'NEWEST',
+          'OLDEST': 'OLDEST',
+          'alphabetical': 'A-Z',
+          'RANDOM': 'RANDOM'
+        };
+        sortBtn.textContent = labels[currentSortMode];
+      }
+      
       document.getElementById('blogContent').classList.remove('active');
       
       if (section === 'photographers') {
@@ -1494,6 +1520,25 @@ function renderInspoPosts() {
     if (universalSearchMode) return;
     
     currentIndex = document.getElementById('indexSelector').value;
+    
+    // Set sort mode to RANDOM for pictures, NEWEST for everything else
+    if (currentIndex === 'pictures') {
+      currentSortMode = 'RANDOM';
+    } else {
+      currentSortMode = 'NEWEST';
+    }
+    
+    // Update sort button text
+    const sortBtn = document.getElementById('sortButton');
+    if (sortBtn) {
+      const labels = {
+        'NEWEST': 'NEWEST',
+        'OLDEST': 'OLDEST',
+        'alphabetical': 'A-Z',
+        'RANDOM': 'RANDOM'
+      };
+      sortBtn.textContent = labels[currentSortMode];
+    }
     
     if (currentIndex === 'photographers') {
       document.getElementById('photographersContent').classList.add('active');
@@ -1815,9 +1860,25 @@ function renderInspoPosts() {
     document.getElementById('dateFrom').value = '';
     document.getElementById('dateTo').value = '';
     document.querySelectorAll('.checkbox-group input').forEach(cb => cb.checked = true);
-    currentSortMode = 'NEWEST';
+    
+    // Reset to default sort mode based on current index
+    if (currentIndex === 'pictures') {
+      currentSortMode = 'RANDOM';
+    } else {
+      currentSortMode = 'NEWEST';
+    }
+    
     const sortBtn = document.getElementById('sortButton');
-    if (sortBtn) sortBtn.textContent = 'NEWEST';
+    if (sortBtn) {
+      const labels = {
+        'NEWEST': 'NEWEST',
+        'OLDEST': 'OLDEST',
+        'alphabetical': 'A-Z',
+        'RANDOM': 'RANDOM'
+      };
+      sortBtn.textContent = labels[currentSortMode];
+    }
+    
     universalSearchMode = false;
     applyFilters();
   };
