@@ -938,10 +938,11 @@ function renderInspoPosts() {
           imageEl.classList.add('loaded');
         });
         
-        const metadata = document.createElement("div");
+const metadata = document.createElement("div");
 metadata.className = "metadata";
 
-let metadataHTML = `<strong>Date:</strong> ${img.date}<br>`;
+let dateLabel = img.type === "pictures" ? "Date Added:" : "Date:";
+let metadataHTML = `<strong>${dateLabel}</strong> ${img.date}<br>`;
 
 if (img.source === "Americanisms") {
   metadataHTML += `<strong>Location:</strong><br>${img.location_card.replace(/\n/g, "<br>")}<br>`;
