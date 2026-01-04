@@ -352,7 +352,16 @@ async function loadAllData() {
     window.allData = allData;
 
     initUniversalSearch();
-    switchIndex();
+    
+    // Check for saved state and restore it, otherwise use default
+    const savedMode = localStorage.getItem('satchel_mode');
+    const savedSection = localStorage.getItem('satchel_section');
+    
+    if (savedMode && savedSection) {
+      navigateTo(savedMode, savedSection);
+    } else {
+      switchIndex();
+    }
   } catch (error) {
     console.error('Error loading data:', error);
   }
@@ -1398,19 +1407,19 @@ function renderInspoPosts() {
   // NAVIGATION & MODE SWITCHING
   // ============================================================================
   
-window.navigateTo = function(mode, section) {
-  // Save current state to localStorage
-  localStorage.setItem('satchel_mode', mode);
-  localStorage.setItem('satchel_section', section);
-  
-  document.querySelectorAll('.nav-link').forEach(link => {
-    link.classList.remove('active');
-  });
-  
-  const activeLink = document.querySelector(`[data-section="${mode}-${section}"]`);
-  if (activeLink) {
-    activeLink.classList.add('active');
-  }
+  window.navigateTo = function(mode, section) {
+    // Save current state to localStorage
+    localStorage.setItem('satchel_mode', mode);
+    localStorage.setItem('satchel_section', section);
+    
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.classList.remove('active');
+    });
+    
+    const activeLink = document.querySelector(`[data-section="${mode}-${section}"]`);
+    if (activeLink) {
+      activeLink.classList.add('active');
+    }
     
     document.getElementById('modeSelector').value = mode;
     
@@ -1931,30 +1940,29 @@ window.navigateTo = function(mode, section) {
     }
   }
 
-async function toggleFullscreen() {
-  const overlay = document.getElementById("overlay");
-  
-  try {
+  async function toggleFullscreen() {
+    const overlay = document.getElementById("overlay");
+    
+    try {
+      if (!document.fullscreenElement) {
+        await overlay.requestFullscreen();
+        overlay.classList.add('fullscreen');
+      } else {
+        await document.exitFullscreen();
+        overlay.classList.remove('fullscreen');
+      }
+    } catch (err) {
+      console.log('Fullscreen error:', err);
+      alert('Fullscreen failed. Try pressing F11 or use the F key.');
+    }
+  }
+
+  document.addEventListener('fullscreenchange', () => {
+    const overlay = document.getElementById("overlay");
     if (!document.fullscreenElement) {
-      await overlay.requestFullscreen();
-      overlay.classList.add('fullscreen');
-    } else {
-      await document.exitFullscreen();
       overlay.classList.remove('fullscreen');
     }
-  } catch (err) {
-    console.log('Fullscreen error:', err);
-    alert('Fullscreen failed. Try pressing F11 or use the F key.');
-  }
-}
-
-// Add this listener in your initEventListeners() function or at the end of your init()
-document.addEventListener('fullscreenchange', () => {
-  const overlay = document.getElementById("overlay");
-  if (!document.fullscreenElement) {
-    overlay.classList.remove('fullscreen');
-  }
-});
+  });
 
   // ============================================================================
   // EVENT LISTENERS
@@ -2031,24 +2039,23 @@ document.addEventListener('fullscreenchange', () => {
   // INITIALIZATION
   // ============================================================================
   
-function init() {
-  initEventListeners();
-  updateSortButtonVisibility();
-  updateMapButtonVisibility();
-  loadAllData();
-  
-  // Check for saved state in localStorage
-  const savedMode = localStorage.getItem('satchel_mode');
-  const savedSection = localStorage.getItem('satchel_section');
-  
-  if (savedMode && savedSection) {
-    // Restore saved state
-    navigateTo(savedMode, savedSection);
-  } else {
-    // Default to objects
+  function init() {
+    initEventListeners();
+    updateSortButtonVisibility();
+    updateMapButtonVisibility();
+    loadAllData();
+    
+    // Set default active link
     const defaultLink = document.querySelector('[data-section="archive-objects"]');
     if (defaultLink) {
       defaultLink.classList.add('active');
     }
   }
-}
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
