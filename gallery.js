@@ -580,6 +580,8 @@ function renderBlogPosts() {
     blogImageOverlay.addEventListener('click', () => {
       blogImageOverlay.style.display = 'none';
       blogImageOverlay.innerHTML = '';
+      blogImageOverlay.currentImages = null;
+      blogImageOverlay.currentIndex = -1;
     });
     document.body.appendChild(blogImageOverlay);
   }
@@ -620,13 +622,15 @@ function renderBlogPosts() {
     if (post.pictures) {
       const imageUrls = post.pictures.split(',').map(url => url.trim()).filter(url => url);
       
-      imageUrls.forEach(imageUrl => {
+      imageUrls.forEach((imageUrl, imgIndex) => {
         const thumbnail = document.createElement('img');
         thumbnail.src = imageUrl;
         thumbnail.alt = post.title;
         thumbnail.className = 'blog-post-thumbnail';
         thumbnail.addEventListener('click', (e) => {
           e.preventDefault();
+          blogImageOverlay.currentImages = imageUrls;
+          blogImageOverlay.currentIndex = imgIndex;
           const overlayImg = document.createElement('img');
           overlayImg.src = imageUrl;
           overlayImg.alt = post.title;
@@ -1988,7 +1992,30 @@ if (img.source === "Americanisms") {
     });
     
     document.addEventListener('keydown', (e) => {
-      if (document.getElementById("overlay").style.display === "flex") {
+      const blogImageOverlay = document.getElementById('blogImageOverlay');
+      
+      if (blogImageOverlay && blogImageOverlay.style.display === 'flex' && blogImageOverlay.currentImages) {
+        if (e.key === 'ArrowLeft' && blogImageOverlay.currentIndex > 0) {
+          blogImageOverlay.currentIndex--;
+          const newImg = document.createElement('img');
+          newImg.src = blogImageOverlay.currentImages[blogImageOverlay.currentIndex];
+          newImg.alt = 'Blog image';
+          blogImageOverlay.innerHTML = '';
+          blogImageOverlay.appendChild(newImg);
+        } else if (e.key === 'ArrowRight' && blogImageOverlay.currentIndex < blogImageOverlay.currentImages.length - 1) {
+          blogImageOverlay.currentIndex++;
+          const newImg = document.createElement('img');
+          newImg.src = blogImageOverlay.currentImages[blogImageOverlay.currentIndex];
+          newImg.alt = 'Blog image';
+          blogImageOverlay.innerHTML = '';
+          blogImageOverlay.appendChild(newImg);
+        } else if (e.key === 'Escape') {
+          blogImageOverlay.style.display = 'none';
+          blogImageOverlay.innerHTML = '';
+          blogImageOverlay.currentImages = null;
+          blogImageOverlay.currentIndex = -1;
+        }
+      } else if (document.getElementById("overlay").style.display === "flex") {
         if (e.key === "ArrowLeft" && currentImageIndex > 0) {
           showOverlay(currentImageIndex - 1);
         } else if (e.key === "ArrowRight" && currentImageIndex < filteredImages.length - 1) {
