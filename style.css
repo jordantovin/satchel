@@ -289,7 +289,7 @@ a:active {
 #gallery {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 16px;
+  gap: 5px;
   padding: 10px;
 }
 
