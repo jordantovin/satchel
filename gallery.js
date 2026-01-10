@@ -1,6 +1,7 @@
 // ============================================================================
 // AMERICANISMS GALLERY - MAIN SCRIPT
 // Consolidated functionality for gallery, blog, photographers, places, and search
+// WITH PHOTO CAROUSEL SUPPORT
 // ============================================================================
 
 (function() {
@@ -46,6 +47,101 @@
   // Expose to window for map module
   window.allData = allData;
   window.filteredImages = filteredImages;
+
+  // ============================================================================
+  // PHOTO CAROUSEL FUNCTIONALITY
+  // ============================================================================
+  
+  function createPhotoCarousel(imageUrls) {
+    if (!imageUrls || imageUrls.length === 0) return '';
+    
+    // Split comma-separated URLs if provided as single string
+    const images = Array.isArray(imageUrls) 
+      ? imageUrls 
+      : imageUrls.split(',').map(url => url.trim()).filter(url => url);
+    
+    if (images.length === 0) return '';
+    
+    if (images.length === 1) {
+      return `<img src="${images[0]}" alt="Blog post image" class="blog-single-image">`;
+    }
+    
+    const carouselId = 'carousel-' + Math.random().toString(36).substr(2, 9);
+    
+    return `
+      <div class="photo-carousel" id="${carouselId}">
+        <div class="carousel-images">
+          ${images.map((url, i) => `
+            <img src="${url}" 
+                 class="carousel-image ${i === 0 ? 'active' : ''}" 
+                 alt="Image ${i + 1}">
+          `).join('')}
+        </div>
+        
+        ${images.length > 1 ? `
+          <button class="carousel-btn prev" onclick="carouselNav('${carouselId}', -1)">‹</button>
+          <button class="carousel-btn next" onclick="carouselNav('${carouselId}', 1)">›</button>
+          
+          <div class="carousel-dots">
+            ${images.map((_, i) => `
+              <span class="dot ${i === 0 ? 'active' : ''}" 
+                    onclick="carouselGoTo('${carouselId}', ${i})"></span>
+            `).join('')}
+          </div>
+          
+          <div class="carousel-counter">
+            <span class="current">1</span> / ${images.length}
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }
+  
+  window.carouselNav = function(carouselId, direction) {
+    const carousel = document.getElementById(carouselId);
+    if (!carousel) return;
+    
+    const images = carousel.querySelectorAll('.carousel-image');
+    const dots = carousel.querySelectorAll('.dot');
+    const counter = carousel.querySelector('.current');
+    
+    let currentIndex = Array.from(images).findIndex(img => img.classList.contains('active'));
+    let newIndex = currentIndex + direction;
+    
+    // Loop around
+    if (newIndex < 0) newIndex = images.length - 1;
+    if (newIndex >= images.length) newIndex = 0;
+    
+    // Update images
+    images[currentIndex].classList.remove('active');
+    images[newIndex].classList.add('active');
+    
+    // Update dots
+    dots[currentIndex].classList.remove('active');
+    dots[newIndex].classList.add('active');
+    
+    // Update counter
+    if (counter) counter.textContent = newIndex + 1;
+  };
+  
+  window.carouselGoTo = function(carouselId, index) {
+    const carousel = document.getElementById(carouselId);
+    if (!carousel) return;
+    
+    const images = carousel.querySelectorAll('.carousel-image');
+    const dots = carousel.querySelectorAll('.dot');
+    const counter = carousel.querySelector('.current');
+    
+    const currentIndex = Array.from(images).findIndex(img => img.classList.contains('active'));
+    
+    images[currentIndex].classList.remove('active');
+    images[index].classList.add('active');
+    
+    dots[currentIndex].classList.remove('active');
+    dots[index].classList.add('active');
+    
+    if (counter) counter.textContent = index + 1;
+  };
 
   // ============================================================================
   // DATE PARSING UTILITIES
@@ -588,7 +684,7 @@ function renderBlogPosts() {
     const postDiv = document.createElement('div');
     postDiv.className = 'blog-post';
     
-    // Header section with date, title, link, and thumbnail(s) all on same line (left-aligned)
+    // Header section with date, title, and link
     const headerDiv = document.createElement('div');
     headerDiv.className = 'blog-post-header';
     headerDiv.style.justifyContent = 'flex-start';
@@ -616,29 +712,15 @@ function renderBlogPosts() {
       headerDiv.appendChild(linkButton);
     }
     
-    // Thumbnails (support multiple images separated by commas)
-    if (post.pictures) {
-      const imageUrls = post.pictures.split(',').map(url => url.trim()).filter(url => url);
-      
-      imageUrls.forEach(imageUrl => {
-        const thumbnail = document.createElement('img');
-        thumbnail.src = imageUrl;
-        thumbnail.alt = post.title;
-        thumbnail.className = 'blog-post-thumbnail';
-        thumbnail.addEventListener('click', (e) => {
-          e.preventDefault();
-          const overlayImg = document.createElement('img');
-          overlayImg.src = imageUrl;
-          overlayImg.alt = post.title;
-          blogImageOverlay.innerHTML = '';
-          blogImageOverlay.appendChild(overlayImg);
-          blogImageOverlay.style.display = 'flex';
-        });
-        headerDiv.appendChild(thumbnail);
-      });
-    }
-    
     postDiv.appendChild(headerDiv);
+    
+    // Photo carousel (if images exist)
+    if (post.pictures) {
+      const carouselContainer = document.createElement('div');
+      carouselContainer.className = 'blog-carousel-container';
+      carouselContainer.innerHTML = createPhotoCarousel(post.pictures);
+      postDiv.appendChild(carouselContainer);
+    }
     
     // Text content
     if (post.text) {
